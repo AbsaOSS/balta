@@ -15,6 +15,7 @@
  */
 
 import Dependencies._
+import com.github.sbt.jacoco.report.JacocoReportSettings
 
 ThisBuild / organization := "za.co.absa.balta"
 
@@ -26,10 +27,19 @@ lazy val supportedScalaVersions: Seq[String] = Seq(scala211, scala212 , scala213
 
 ThisBuild / scalaVersion := scala212
 
+lazy val commonJacocoReportSettings: JacocoReportSettings = JacocoReportSettings(
+  formats = Seq(JacocoReportFormats.HTML, JacocoReportFormats.XML)
+)
+
+lazy val commonJacocoExcludes: Seq[String] = Seq()
+
 lazy val balta = (project in file("balta"))
   .settings(
     name := "balta",
     crossScalaVersions := supportedScalaVersions,
 
     libraryDependencies ++= libDependencies
+  ).settings(
+    jacocoReportSettings := commonJacocoReportSettings.withTitle(s"balta - scala:${scalaVersion.value}"),
+    jacocoExcludes := commonJacocoExcludes
   )
