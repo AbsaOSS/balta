@@ -28,7 +28,7 @@ import java.sql.DriverManager
 import java.time.OffsetDateTime
 import java.util.Properties
 
-abstract class DBTestSuite extends AnyFunSuite{
+abstract class DBTestSuite extends AnyFunSuite {
 
   protected lazy implicit val dbConnection: DBConnection = {
     createConnection(
