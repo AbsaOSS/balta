@@ -30,16 +30,16 @@ ThisBuild / developers := List(
     url   = url("https://github.com/benedeki")
   ),
   Developer(
-    id = "miroslavpojer",
-    name = "Miroslav Pojer",
+    id    = "miroslavpojer",
+    name  = "Miroslav Pojer",
     email = "miroslav.pojer@absa.africa",
-    url = url("https://github.com/miroslavpojer")
+    url   = url("https://github.com/miroslavpojer")
   ),
   Developer(
-    id = "lsulak",
-    name = "Ladislav Sulak",
+    id    = "lsulak",
+    name  = "Ladislav Sulak",
     email = "ladislav.sulak@absa.africa",
-    url = url("https://github.com/lsulak")
+    url   = url("https://github.com/lsulak")
   )
 )
 
