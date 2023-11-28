@@ -16,13 +16,12 @@
 
 package za.co.absa.balta.classes.setter
 
+import org.postgresql.util.PGobject
 import za.co.absa.balta.classes.JsonBString
 
-import java.sql.{Date, PreparedStatement, Time, Timestamp, Types => SqlTypes}
+import java.sql.{Date, PreparedStatement, Time, Types => SqlTypes}
+import java.time._
 import java.util.UUID
-import org.postgresql.util.PGobject
-
-import java.time.{Instant, LocalDate, LocalTime, OffsetDateTime, ZoneId, ZoneOffset}
 abstract class SetterFnc extends ((PreparedStatement, Int) => Unit) {
   def sqlEntry: String = "?"
 }
