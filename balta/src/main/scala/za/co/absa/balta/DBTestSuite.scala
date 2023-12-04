@@ -28,8 +28,17 @@ import java.sql.DriverManager
 import java.time.OffsetDateTime
 import java.util.Properties
 
+/**
+ * This is a base class for all DB tests. It inherits from AnyFunSuite and provides the following:
+ * * automatic creation and provision of a DB connection
+ * * an enhanced test function that automatically rolls back the transaction after the test is finished
+ * * easy access to DB tables and functions
+ * * the now() function that returns the current transaction time in the DB
+ */
 abstract class DBTestSuite extends AnyFunSuite {
 
+  /* the DB connection is ``lazy`, so it actually can be created only when needed and therefore the credentials
+  overridden in the successor */
   protected lazy implicit val dbConnection: DBConnection = {
     createConnection(
       connectionInfo.dbUrl,
@@ -38,8 +47,18 @@ abstract class DBTestSuite extends AnyFunSuite {
     )
   }
 
+  /**
+   * This is the connection info for the DB. It can be overridden in the derived classes to provide specific credentials
+   */
   protected lazy val connectionInfo: ConnectionInfo = readConnectionInfoFromConfig
 
+  /**
+   * This is an enhanced test function that automatically rolls back the transaction after the test is finished
+   *
+   * @param testName – the name of the test
+   * @param testTags – the optional list of tags for this test
+   * @param testFun – the test function
+   */
   override protected def test(testName: String, testTags: Tag*)
                       (testFun: => Any /* Assertion */)
                       (implicit pos: source.Position): Unit = {
@@ -58,14 +77,29 @@ abstract class DBTestSuite extends AnyFunSuite {
     super.test(testName, testTags: _*)(dbTestFun)
   }
 
+  /**
+   * This is a helper function that allows to easily access a DB table
+   * @param tableName - the name of the table
+   * @return          - the DBTable object
+   */
   protected def table(tableName: String): DBTable = {
     DBTable(tableName)
   }
 
+  /**
+   * This is a helper function that allows to easily access a DB function
+   * @param functionName - the name of the function
+   * @return             - the DBFunction object
+   */
   protected def function(functionName: String): DBFunctionWithPositionedParamsOnly = {
     DBFunction(functionName)
   }
 
+  /**
+   * This is a helper function that allows to easily get the DB current time
+   * @param connection  - the DB connection
+   * @return            - the current transaction time
+   */
   protected def now()(implicit connection: DBConnection): OffsetDateTime = {
     val preparedStatement = connection.connection.prepareStatement("SELECT now() AS now")
     val prep = preparedStatement.executeQuery()
@@ -74,18 +108,45 @@ abstract class DBTestSuite extends AnyFunSuite {
     result
   }
 
+  /**
+   * This is a helper function that allows to easily create parameter for table and function queries
+   *
+   * @param paramName - the name of the parameter
+   * @param value     - the value of the parameter
+   * @tparam T        - the type of the parameter value
+   * @return          - a list parameters to be used in an SQL prepared statement
+   */
   protected def add[T: AllowedParamTypes](paramName: String, value: T): NamedParams = {
     Params.add(paramName, value)
   }
 
+  /**
+   * This is a helper function that allows to easily create parameter of value NULL for table and function queries
+   *
+   * @param paramName - the name of the parameter
+   * @return          - a list parameters to be used in an SQL prepared statement
+   */
   protected def addNull(paramName: String): NamedParams = {
     Params.addNull(paramName)
   }
 
+  /**
+   * This is a helper function that allows to easily create a positioned parameter for table and function queries
+   *
+   * @param value - the value of the parameter
+   * @tparam T    - the type of the parameter value
+   * @return      - a list parameters to be used in an SQL prepared statement
+   */
   protected def add[T: AllowedParamTypes](value: T): OrderedParams = {
     Params.add(value)
   }
 
+  /**
+   * This is a helper function that allows to easily create a positioned parameter of value NULL for table and function queries
+   *
+   * @tparam T - the type of the parameter value
+   * @return   - a list parameters to be used in an SQL prepared statement
+   */
   protected def addNull[T: AllowedParamTypes](): OrderedParams = {
     Params.addNull()
   }

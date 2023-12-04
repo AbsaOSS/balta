@@ -16,4 +16,10 @@
 
 package za.co.absa.balta.classes.setter
 
+/**
+ * This is a case class representing a custom DB type.
+ *
+ * @param valueAsString - the value of the custom DB type as a string
+ * @param dbType        - the DB type name
+ */
 case class CustomDBType(valueAsString: String, dbType: String)

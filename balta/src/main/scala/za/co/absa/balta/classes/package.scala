@@ -23,6 +23,15 @@ package object classes {
 
   class DBConnection(val connection: Connection) extends AnyVal
 
+  /**
+   * This is a function that sets a parameter of a prepared statement.
+   *
+   * @param dbUrl       - the JDBC URL of the database
+   * @param username    - the username to use when connecting to the database
+   * @param password    - the password to use when connecting to the database
+   * @param persistData - whether to persist the data to the database (usually false for tests, set to true for
+   *                    debugging purposes)
+   */
   case class ConnectionInfo(
                              dbUrl: String,
                              username: String,

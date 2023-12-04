@@ -18,6 +18,9 @@ package za.co.absa.balta.classes
 
 import za.co.absa.balta.classes.setter.SetterFnc
 
+/**
+ * This is a based trait providing the ability to run an SQL query and verify the result via a provided function.
+ */
 trait DBQuerySupport {
 
   protected def runQuery[R](sql: String, setters: List[SetterFnc])

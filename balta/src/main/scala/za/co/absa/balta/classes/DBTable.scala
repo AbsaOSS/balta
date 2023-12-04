@@ -19,8 +19,20 @@ package za.co.absa.balta.classes
 import za.co.absa.balta.classes.setter.{AllowedParamTypes, Params, SetterFnc}
 import za.co.absa.balta.classes.setter.Params.NamedParams
 
+/**
+  * This class represents a database table. It allows to perform INSERT, SELECT and COUNT operations on the table easily.
+  *
+  * @param tableName  The name of the table
+  */
 case class DBTable(tableName: String) extends DBQuerySupport{
 
+  /**
+    * Inserts a new row into the table.
+    *
+    * @param values     - a map of column names and values to be inserted.
+    * @param connection - a database connection used for the INSERT operation.
+    * @return           - the inserted row.
+    */
   def insert(values: Params)(implicit connection: DBConnection): QueryResultRow = {
     val columns = values.keys.map {keys =>
       val keysString = keys.mkString(",") // TODO https://github.com/AbsaOSS/balta/issues/2
@@ -31,6 +43,18 @@ case class DBTable(tableName: String) extends DBQuerySupport{
     runQuery(sql, values.setters){_.next()}
   }
 
+  /**
+   * Returns a value of a field of a row selected by a key.
+   *
+   * @param keyName     - the name of the key column
+   * @param keyValue    - the value of the key column
+   * @param fieldName   - the name of the field to be returned
+   * @param connection  - a database connection used for the SELECT operation.
+   * @tparam K          - the type of the key value
+   * @tparam T          - the type of the returned field value
+   * @return            - the value of the field, if the value is NULL, then `Some(None)` is returned; if no row is found,
+   *                    then `None` is returned.
+   */
   def fieldValue[K: AllowedParamTypes, T](keyName: String, keyValue: K, fieldName: String)
                                          (implicit connection: DBConnection): Option[Option[T]] = {
     where(Params.add(keyName, keyValue)){resultSet =>
@@ -42,38 +66,106 @@ case class DBTable(tableName: String) extends DBQuerySupport{
     }
   }
 
+  /**
+   * Selects the rows from the table based on the provided parameters and verifies the result via the verify function.
+   * @param params      - the parameters used for the WHERE clause
+   * @param verify      - the function that verifies the result
+   * @param connection  - a database connection used for the SELECT operation.
+   * @tparam R          - the type of the result that is returned by the verify function
+   * @return            - the result of the verify function
+   */
   def where[R](params: NamedParams)(verify: QueryResult => R)(implicit connection: DBConnection): R = {
     composeSelectAndRun(strToOption(paramsToWhereCondition(params)), None, params.setters)(verify)
   }
 
+  /**
+   * Selects the rows from the table based on the provided parameters and verifies the result via the verify function.
+   * @param params      - the parameters used for the WHERE clause
+   * @param orderBy     - the clause how to order the result
+   * @param verify      - the function that verifies the result
+   * @param connection  - a database connection used for the SELECT operation.
+   * @tparam R          - the type of the result that is returned by the verify function
+   * @return            - the result of the verify function
+   */
   def where[R](params: NamedParams, orderBy: String)(verify: QueryResult => R)(implicit connection: DBConnection): R = {
     composeSelectAndRun(strToOption(paramsToWhereCondition(params)), strToOption(orderBy), params.setters)(verify)
   }
 
+  /**
+   * Selects the rows from the table based on the provided condition and verifies the result via the verify function.
+   * @param condition   - the condition used for the WHERE clause
+   * @param verify      - the function that verifies the result
+   * @param connection  - a database connection used for the SELECT operation.
+   * @tparam R          - the type of the result that is returned by the verify function
+   * @return            - the result of the verify function
+   */
   def where[R](condition: String)(verify: QueryResult => R)(implicit connection: DBConnection): R = {
     composeSelectAndRun(strToOption(condition), None)(verify)
   }
 
+  /**
+   * Selects the rows from the table based on the provided condition and verifies the result via the verify function.
+   * @param condition   - the condition used for the WHERE clause
+   * @param orderBy     - the clause how to order the result
+   * @param verify      - the function that verifies the result
+   * @param connection  - a database connection used for the SELECT operation.
+   * @tparam R          - the type of the result that is returned by the verify function
+   * @return            - the result of the verify function
+   */
   def where[R](condition: String, orderBy: String)(verify: QueryResult => R)(implicit connection: DBConnection): R = {
     composeSelectAndRun(strToOption(condition), strToOption(orderBy))(verify)
   }
 
+  /**
+   * Returns all rows from the table and verifies the result via the verify function.
+   *
+   * @param verify      - the function that verifies the result
+   * @param connection  - a database connection used for the SELECT operation.
+   * @tparam R          - the type of the result that is returned by the verify function
+   * @return            - the result of the verify function
+   */
   def all[R]()(verify: QueryResult => R)(implicit connection: DBConnection): R = {
     composeSelectAndRun(None, None)(verify)
   }
 
+  /**
+   * Returns all rows from the table and verifies the result via the verify function.
+   *
+   * @param orderBy     - the clause how to order the result
+   * @param verify      - the function that verifies the result
+   * @param connection  - a database connection used for the SELECT operation.
+   * @tparam R          - the type of the result that is returned by the verify function
+   * @return            - the result of the verify function
+   */
   def all[R](orderBy: String)(verify: QueryResult => R)(implicit connection: DBConnection): R = {
     composeSelectAndRun(None, strToOption(orderBy))(verify)
   }
 
+  /**
+   * Counts the rows in the table.
+   * @param connection  - a database connection used for the SELECT operation.
+   * @return            - the number of rows
+   */
   def count()(implicit connection: DBConnection): Long = {
     composeCountAndRun(None)
   }
 
+  /**
+   * Counts the rows in the table based on the provided parameters.
+   * @param params      - the parameters used for the WHERE clause
+   * @param connection  - a database connection used for the SELECT operation.
+   * @return            - the number of rows
+   */
   def count(params: NamedParams)(implicit connection: DBConnection): Long = {
     composeCountAndRun(strToOption(paramsToWhereCondition(params)), params.setters)
   }
 
+  /**
+   * Counts the rows in the table based on the provided condition.
+   * @param condition   - the condition used for the WHERE clause
+   * @param connection  - a database connection used for the SELECT operation.
+   * @return            - the number of rows
+   */
   def count(condition: String)(implicit connection: DBConnection): Long = {
     composeCountAndRun(strToOption(condition))
   }
