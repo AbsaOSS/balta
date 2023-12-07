@@ -21,8 +21,15 @@ import za.co.absa.balta.classes.JsonBString
 import java.time.{Instant, OffsetDateTime, LocalTime, LocalDate}
 import java.util.UUID
 
+/**
+ * This is a function th
+ */
 sealed trait AllowedParamTypes[T]
 
+/**
+ * This object contains implicit instances of `AllowedParamTypes` for all supported types.
+ * It is used to restrict the types of parameters that can be passed to the `SetterFnc` function.
+ */
 object AllowedParamTypes {
   // where new type is added remember to add an appropriate `SetterFnc`
   implicit object BooleanParamType extends AllowedParamTypes[Boolean]

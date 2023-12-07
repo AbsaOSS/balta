@@ -22,6 +22,11 @@ import java.sql.{Date, ResultSet, Time}
 import java.time.{Instant, OffsetDateTime}
 import java.util.UUID
 
+/**
+ * This is a row of a query result. It allows to safely extract values from the row by column name.
+ *
+ * @param resultSet - the JDBC result of a query
+ */
 class QueryResultRow private[classes](val resultSet: ResultSet) extends AnyVal {
   // this is not stable as resultSet mutates, but good enough for now
   private def safe[T](fnc: => T): Option[T] = {

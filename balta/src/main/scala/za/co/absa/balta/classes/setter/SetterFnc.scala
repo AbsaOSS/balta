@@ -22,12 +22,24 @@ import za.co.absa.balta.classes.JsonBString
 import java.sql.{Date, PreparedStatement, Time, Types => SqlTypes}
 import java.time._
 import java.util.UUID
+import java.time.{Instant, LocalDate, LocalTime, OffsetDateTime, ZoneId, ZoneOffset}
 
+/**
+ * This is a trait representing a function that sets a value in a prepared statement.
+ */
 abstract class SetterFnc extends ((PreparedStatement, Int) => Unit) {
   def sqlEntry: String = "?"
 }
 
 object SetterFnc {
+
+  /**
+   * This method creates a `SetterFnc` for a given value.
+   *
+   * @param value - the value to be set
+   * @tparam T    - the type of the value
+   * @return      - a function that sets the given value in a prepared statement
+   */
   def createSetterFnc[T: AllowedParamTypes](value: T): SetterFnc = {
     value match {
       case b: Boolean                  => (prep: PreparedStatement, position: Int) => {prep.setBoolean(position, b)}

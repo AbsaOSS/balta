@@ -18,6 +18,11 @@ package za.co.absa.balta.classes
 
 import java.sql.ResultSet
 
+/**
+ *  This is an iterator over the result of a query.
+ *
+ * @param resultSet - the JDBC result of a query
+ */
 class QueryResult(resultSet: ResultSet) extends Iterator[QueryResultRow] {
   private [this] var resultSetHasNext: Option[Boolean] = Some(resultSet.next())
 
