@@ -19,16 +19,27 @@ object Dependencies {
 
   object Versions {
     val scalatest = "3.2.15"
+    val scalamock = "5.2.0"
+    val mockito = "4.11.0"
+    val scalatestplusMockito = "1.0.0-M2"
 
     val postgresql = "42.6.0"
   }
 
   def libDependencies: Seq[ModuleID] = {
-    lazy val scalaTest  = "org.scalatest"  %% "scalatest"  % Versions.scalatest
-    lazy val postgresql = "org.postgresql" %  "postgresql" % Versions.postgresql
+    lazy val scalaTest  = "org.scalatest"  %% "scalatest"     % Versions.scalatest
+    lazy val postgresql = "org.postgresql" %  "postgresql"    % Versions.postgresql
+
+    lazy val mockito    = "org.mockito"       %  "mockito-core"  % Versions.mockito    % Test
+    lazy val scalatestplusMockito = "org.scalatestplus" %%  "scalatestplus-mockito"  % Versions.scalatestplusMockito    % Test
+    lazy val scalamock = "org.scalamock"     %%  "scalamock"     % Versions.scalamock  % Test
+
     Seq(
       scalaTest,
       postgresql,
+      mockito,
+      scalatestplusMockito,
+      scalamock
     )
   }
 }
