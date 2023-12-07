@@ -22,6 +22,7 @@ import za.co.absa.balta.classes.JsonBString
 import java.sql.{Date, PreparedStatement, Time, Types => SqlTypes}
 import java.time._
 import java.util.UUID
+
 abstract class SetterFnc extends ((PreparedStatement, Int) => Unit) {
   def sqlEntry: String = "?"
 }
