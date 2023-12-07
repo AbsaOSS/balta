@@ -42,26 +42,30 @@ object SetterFnc {
    */
   def createSetterFnc[T: AllowedParamTypes](value: T): SetterFnc = {
     value match {
-      case b: Boolean                  => (prep: PreparedStatement, position: Int) => {prep.setBoolean(position, b)}
-      case i: Int                      => (prep: PreparedStatement, position: Int) => {prep.setInt(position, i)}
-      case l: Long                     => (prep: PreparedStatement, position: Int) => {prep.setLong(position, l)}
-      case d: Double                   => (prep: PreparedStatement, position: Int) => {prep.setDouble(position, d)}
-      case f: Float                    => (prep: PreparedStatement, position: Int) => {prep.setFloat(position, f)}
-      case bd: BigDecimal              => (prep: PreparedStatement, position: Int) => {prep.setBigDecimal(position, bd.bigDecimal)}
-      case ch: Char                    => (prep: PreparedStatement, position: Int) => {prep.setString(position, ch.toString)}
-      case s: String                   => (prep: PreparedStatement, position: Int) => {prep.setString(position, s)}
+      case b: Boolean                  => simple((prep: PreparedStatement, position: Int) => {prep.setBoolean(position, b)})
+      case i: Int                      => simple((prep: PreparedStatement, position: Int) => {prep.setInt(position, i)})
+      case l: Long                     => simple((prep: PreparedStatement, position: Int) => {prep.setLong(position, l)})
+      case d: Double                   => simple((prep: PreparedStatement, position: Int) => {prep.setDouble(position, d)})
+      case f: Float                    => simple((prep: PreparedStatement, position: Int) => {prep.setFloat(position, f)})
+      case bd: BigDecimal              => simple((prep: PreparedStatement, position: Int) => {prep.setBigDecimal(position, bd.bigDecimal)})
+      case ch: Char                    => simple((prep: PreparedStatement, position: Int) => {prep.setString(position, ch.toString)})
+      case s: String                   => simple((prep: PreparedStatement, position: Int) => {prep.setString(position, s)})
       case u: UUID                     => new UuidSetterFnc(u)
       case js: JsonBString             => new JsonBSetterFnc(js)
-      case i: Instant                  => (prep: PreparedStatement, position: Int) => {prep.setObject(position, OffsetDateTime.ofInstant(i, ZoneOffset.UTC))}
-      case ts: OffsetDateTime          => (prep: PreparedStatement, position: Int) => {prep.setObject(position, ts)}
-      case lt: LocalTime               => (prep: PreparedStatement, position: Int) => {prep.setTime(position, Time.valueOf(lt))}
-      case ld: LocalDate               => (prep: PreparedStatement, position: Int) => {prep.setDate(position, Date.valueOf(ld))}
+      case i: Instant                  => simple((prep: PreparedStatement, position: Int) => {prep.setObject(position, OffsetDateTime.ofInstant(i, ZoneOffset.UTC))})
+      case ts: OffsetDateTime          => simple((prep: PreparedStatement, position: Int) => {prep.setObject(position, ts)})
+      case lt: LocalTime               => simple((prep: PreparedStatement, position: Int) => {prep.setTime(position, Time.valueOf(lt))})
+      case ld: LocalDate               => simple((prep: PreparedStatement, position: Int) => {prep.setDate(position, Date.valueOf(ld))})
       case CustomDBType(value, dbType) => new CustomDBTypeSetterFnc(value, dbType)
     }
   }
 
-  val nullSetterFnc: SetterFnc = (prep: PreparedStatement, position: Int) => {
-    prep.setNull(position, SqlTypes.NULL)
+  val nullSetterFnc: SetterFnc = simple((prep: PreparedStatement, position: Int) => prep.setNull(position, SqlTypes.NULL))
+
+  private [this] def simple(body: (PreparedStatement, Int) => Unit): SetterFnc = {
+    new SetterFnc {
+      override def apply(prep: PreparedStatement, position: Int): Unit = body(prep, position)
+    }
   }
 
   private class UuidSetterFnc(value: UUID) extends SetterFnc {
