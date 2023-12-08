@@ -23,6 +23,9 @@ import scala.language.implicitConversions
 
 package object implicits {
 
-  implicit def tableOwnerConnection(in: DBConnection): Connection = in.connection
+  /**
+   * This implicit conversion allows to use a DBConnection at any place where as a JDBC Connection is required.
+   */
+  implicit def dbConnectionToJdbcConnection(in: DBConnection): Connection = in.connection
 
 }
