@@ -15,6 +15,7 @@
  */
 
 import Dependencies._
+import com.github.sbt.jacoco.report.JacocoReportSettings
 
 ThisBuild / organization := "za.co.absa.balta"
 
