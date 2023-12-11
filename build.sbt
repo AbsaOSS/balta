@@ -16,7 +16,6 @@
 
 import Dependencies._
 
-ThisBuild / name := "balta"
 ThisBuild / organization := "za.co.absa"
 
 lazy val scala211 = "2.11.12"
