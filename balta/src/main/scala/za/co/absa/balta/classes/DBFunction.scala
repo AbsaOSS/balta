@@ -16,7 +16,7 @@
 
 package za.co.absa.balta.classes
 
-import za.co.absa.balta.classes.DBFunction.{DBFunctionWithNamedParamsToo, DBFunctionWithPositionedParamsOnly}
+import za.co.absa.balta.classes.DBFunction.{DBFunctionWithNamedParamsToo, DBFunctionWithPositionedParamsOnly, ParamsMap}
 import za.co.absa.balta.classes.setter.{AllowedParamTypes, SetterFnc}
 
 import scala.collection.immutable.ListMap
@@ -32,7 +32,7 @@ import scala.collection.immutable.ListMap
  * @param params        - the list of parameters
  */
 sealed abstract class DBFunction private(functionName: String,
-                                         params: ListMap[Either[Int, String], SetterFnc]) extends DBQuerySupport {
+                                         params: ParamsMap) extends DBQuerySupport {
 
   private def sql(orderBy: String): String = {
     val paramEntries = params.map{case(key, setterFnc) =>
@@ -82,7 +82,7 @@ sealed abstract class DBFunction private(functionName: String,
   def setParam[T: AllowedParamTypes](paramName: String, value: T): DBFunctionWithNamedParamsToo = {
     val key = Right(paramName) // TODO normalization TODO https://github.com/AbsaOSS/balta/issues/1
     val fnc = SetterFnc.createSetterFnc(value)
-    DBFunctionWithNamedParamsToo(functionName, params + (key, fnc))
+    DBFunctionWithNamedParamsToo(functionName, params + (key -> fnc))
   }
 
   /**
@@ -95,7 +95,7 @@ sealed abstract class DBFunction private(functionName: String,
   def setParamNull(paramName: String): DBFunctionWithPositionedParamsOnly = {
     val key = Right(paramName) // TODO normalization TODO https://github.com/AbsaOSS/balta/issues/1
     val fnc = SetterFnc.nullSetterFnc
-    DBFunctionWithPositionedParamsOnly(functionName, params + (key, fnc))
+    DBFunctionWithPositionedParamsOnly(functionName, params + (key -> fnc))
   }
 
   /**
@@ -143,7 +143,7 @@ object DBFunction {
     def setParam[T: AllowedParamTypes](value: T): DBFunctionWithPositionedParamsOnly = {
       val key = Left(params.size + 1)
       val fnc = SetterFnc.createSetterFnc(value)
-      DBFunctionWithPositionedParamsOnly(functionName, params + (key, fnc))
+      DBFunctionWithPositionedParamsOnly(functionName, params + (key -> fnc))
     }
 
     /**
@@ -155,7 +155,7 @@ object DBFunction {
     def setParamNull(): DBFunctionWithPositionedParamsOnly = {
       val key = Left(params.size + 1)
       val fnc = SetterFnc.nullSetterFnc
-      DBFunctionWithPositionedParamsOnly(functionName, params + (key, fnc))
+      DBFunctionWithPositionedParamsOnly(functionName, params + (key -> fnc))
     }
 
   }

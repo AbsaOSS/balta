@@ -100,7 +100,7 @@ object Params {
      */
     def add[T: AllowedParamTypes](paramName: String, value: T): NamedParams = {
       val setter = SetterFnc.createSetterFnc(value)
-      new NamedParams(items + (paramName, setter)) // TODO https://github.com/AbsaOSS/balta/issues/1
+      new NamedParams(items + (paramName -> setter)) // TODO https://github.com/AbsaOSS/balta/issues/1
     }
 
     /**
@@ -112,7 +112,7 @@ object Params {
      */
     def addNull(paramName: String): NamedParams = {
       val setter = SetterFnc.nullSetterFnc
-      new NamedParams(items + (paramName, setter)) // TODO https://github.com/AbsaOSS/balta/issues/1
+      new NamedParams(items + (paramName -> setter)) // TODO https://github.com/AbsaOSS/balta/issues/1
     }
 
     def pairs: List[(String, SetterFnc)] = items.toList
@@ -136,7 +136,7 @@ object Params {
     def add[T: AllowedParamTypes](value: T): OrderedParams = {
       val key = items.size.toString
       val setter = SetterFnc.createSetterFnc(value)
-      new OrderedParams(items + (key, setter))
+      new OrderedParams(items + (key -> setter))
     }
 
     /**
@@ -149,7 +149,7 @@ object Params {
     def addNull[T: AllowedParamTypes](): OrderedParams = {
       val key = items.size.toString
       val setter = SetterFnc.nullSetterFnc
-      new OrderedParams(items + (key, setter))
+      new OrderedParams(items + (key -> setter))
     }
 
     override val keys: Option[List[String]] = None
