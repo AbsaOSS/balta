@@ -16,7 +16,7 @@
 
 import Dependencies._
 
-ThisBuild / organization := "za.co.absa.balta"
+ThisBuild / organization := "za.co.absa"
 
 lazy val scala211 = "2.11.12"
 lazy val scala212 = "2.12.18"
@@ -25,6 +25,8 @@ lazy val scala213 = "2.13.11"
 lazy val supportedScalaVersions: Seq[String] = Seq(scala211, scala212 , scala213)
 
 ThisBuild / scalaVersion := scala212
+
+ThisBuild / versionScheme := Some("early-semver")
 
 lazy val balta = (project in file("balta"))
   .settings(
