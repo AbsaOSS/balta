@@ -1,3 +1,5 @@
+lazy val sbtCiReleaseVersion = "1.5.10"
+
 lazy val ow2Version = "9.5"
 lazy val jacocoVersion = "0.8.10-absa.1"
 val sbtJacocoVersion = "3.4.1-absa.3"
@@ -6,6 +8,8 @@ val scalaArmVersion = "2.0"
 def jacocoUrl(artifactName: String): String = s"https://github.com/AbsaOSS/jacoco/releases/download/$jacocoVersion/org.jacoco.$artifactName-$jacocoVersion.jar"
 def ow2Url(artifactName: String): String = s"https://repo1.maven.org/maven2/org/ow2/asm/$artifactName/$ow2Version/$artifactName-$ow2Version.jar"
 def armUrl(scalaMajor: String): String = s"https://repo1.maven.org/maven2/com/jsuereth/scala-arm_$scalaMajor/$scalaArmVersion/scala-arm_$scalaMajor-$scalaArmVersion.jar"
+
+addSbtPlugin("com.github.sbt" % "sbt-ci-release" % sbtCiReleaseVersion)
 
 addSbtPlugin("com.jsuereth" %% "scala-arm" % scalaArmVersion from armUrl("2.11"))
 addSbtPlugin("com.jsuereth" %% "scala-arm" % scalaArmVersion from armUrl("2.12"))

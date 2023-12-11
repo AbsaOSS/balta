@@ -21,10 +21,13 @@ It's a natural complement to the use of [Fa-Db library](https://github.com/AbsaO
 Advantages of this approach is that the tests repeateble, they are isolated from each other and the database is always 
 in a known state before and after each test.
 
-
 ## How to generate JaCoCo code coverage report
 Run command from path `{project-root}`
 ```
 sbt jacoco
 ```
 Report should be available on path `{project-root}/balta/target/scala-2.12/jacoco/report/html`
+
+## How to Release
+
+Please see [this file](RELEASE.md) for more details.

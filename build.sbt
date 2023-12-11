@@ -37,7 +37,6 @@ lazy val balta = (project in file("balta"))
   .settings(
     name := "balta",
     crossScalaVersions := supportedScalaVersions,
-
     libraryDependencies ++= libDependencies
   ).settings(
     jacocoReportSettings := commonJacocoReportSettings.withTitle(s"balta - scala:${scalaVersion.value}"),
