@@ -30,6 +30,5 @@ lazy val balta = (project in file("balta"))
   .settings(
     name := "balta",
     crossScalaVersions := supportedScalaVersions,
-
     libraryDependencies ++= libDependencies
   )

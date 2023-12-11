@@ -20,3 +20,7 @@ It's a natural complement to the use of [Fa-Db library](https://github.com/AbsaO
 
 Advantages of this approach is that the tests repeateble, they are isolated from each other and the database is always 
 in a known state before and after each test.
+
+## How to Release
+
+Please see [this file](RELEASE.md) for more details.
