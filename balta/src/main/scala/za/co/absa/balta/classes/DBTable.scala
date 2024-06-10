@@ -197,7 +197,7 @@ case class DBTable(tableName: String) extends DBQuerySupport{
   }
 
   private def paramsToWhereCondition(params: NamedParams): String = {
-    params.pairs.foldLeft(List.empty[String]) {case (acc, (fieldName, setterFnc)) =>
+    params.pairs.foldRight(List.empty[String]) {case ((fieldName, setterFnc), acc) =>
       s"$fieldName = ${setterFnc.sqlEntry}" :: acc // TODO https://github.com/AbsaOSS/balta/issues/2
     }.mkString(" AND ")
   }
