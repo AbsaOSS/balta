@@ -17,7 +17,7 @@
 package za.co.absa.balta
 
 import org.scalactic.source
-import org.scalatest.Tag
+import org.scalatest.{BeforeAndAfterAll, Tag}
 import org.scalatest.funsuite.AnyFunSuite
 import za.co.absa.balta.classes.DBFunction.DBFunctionWithPositionedParamsOnly
 import za.co.absa.balta.classes.setter.{AllowedParamTypes, Params}
@@ -35,7 +35,7 @@ import java.util.Properties
  * * easy access to DB tables and functions
  * * the now() function that returns the current transaction time in the DB
  */
-abstract class DBTestSuite extends AnyFunSuite {
+abstract class DBTestSuite extends AnyFunSuite with BeforeAndAfterAll {
 
   /* the DB connection is ``lazy`, so it actually can be created only when needed and therefore the credentials
   overridden in the successor */
@@ -45,6 +45,11 @@ abstract class DBTestSuite extends AnyFunSuite {
       connectionInfo.username,
       connectionInfo.password
     )
+  }
+
+  override def beforeAll(): Unit = {
+    super.beforeAll()
+    dbConnection // just to initialize the connection
   }
 
   /**
