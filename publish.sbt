@@ -49,6 +49,8 @@ ThisBuild / developers := List(
   )
 )
 
+ThisBuild / organization := "za.co.absa.db.balta"
+
 ThisBuild / organizationName := "ABSA Group Limited"
 ThisBuild / organizationHomepage := Some(url("https://www.absa.africa"))
 

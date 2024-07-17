@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package za.co.absa.balta.classes
+package za.co.absa.db.balta.classes
 
 import java.sql.ResultSet
 

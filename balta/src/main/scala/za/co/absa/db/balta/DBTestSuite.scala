@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package za.co.absa.balta
+package za.co.absa.db.balta
 
 import org.scalactic.source
 import org.scalatest.Tag
 import org.scalatest.funsuite.AnyFunSuite
-import za.co.absa.balta.classes.DBFunction.DBFunctionWithPositionedParamsOnly
-import za.co.absa.balta.classes.setter.{AllowedParamTypes, Params}
-import za.co.absa.balta.classes.setter.Params.{NamedParams, OrderedParams}
-import za.co.absa.balta.classes.{ConnectionInfo, DBConnection, DBFunction, DBTable, QueryResult}
+import za.co.absa.db.balta.classes.DBFunction.DBFunctionWithPositionedParamsOnly
+import classes.setter.{AllowedParamTypes, Params}
+import za.co.absa.db.balta.classes.setter.Params.{NamedParams, OrderedParams}
+import classes.{DBConnection, DBFunction, DBTable, QueryResult}
+import za.co.absa.db.balta.classes.simple.ConnectionInfo
 
-import java.sql.DriverManager
 import java.time.OffsetDateTime
 import java.util.Properties
 
@@ -39,13 +39,7 @@ abstract class DBTestSuite extends AnyFunSuite {
 
   /* the DB connection is ``lazy`, so it actually can be created only when needed and therefore the credentials
   overridden in the successor */
-  protected lazy implicit val dbConnection: DBConnection = {
-    createConnection(
-      connectionInfo.dbUrl,
-      connectionInfo.username,
-      connectionInfo.password
-    )
-  }
+  protected lazy implicit val dbConnection: DBConnection = DBConnection(connectionInfo)
 
   /**
    * This is the connection info for the DB. It can be overridden in the derived classes to provide specific credentials
@@ -152,12 +146,6 @@ abstract class DBTestSuite extends AnyFunSuite {
   }
 
   // private functions
-  private def createConnection(url: String, username: String, password: String): DBConnection = {
-    val conn = DriverManager.getConnection(url, username, password)
-    conn.setAutoCommit(false)
-    new DBConnection(conn)
-  }
-
   private def readConnectionInfoFromConfig = {
     val properties = new Properties()
     properties.load(getClass.getResourceAsStream("/database.properties"))

@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package za.co.absa.balta.classes
+package za.co.absa.db.balta.classes
 
 import org.postgresql.util.PGobject
+import za.co.absa.db.balta.classes.simple.JsonBString
 
 import java.sql.{Date, ResultSet, Time}
 import java.time.{Instant, OffsetDateTime}

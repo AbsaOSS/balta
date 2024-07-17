@@ -14,21 +14,18 @@
  * limitations under the License.
  */
 
-import Dependencies._
+package za.co.absa.db.balta
 
-lazy val scala211 = "2.11.12"
-lazy val scala212 = "2.12.18"
-lazy val scala213 = "2.13.11"
+import za.co.absa.db.balta.classes.DBConnection
 
-lazy val supportedScalaVersions: Seq[String] = Seq(scala211, scala212 , scala213)
+import java.sql.Connection
+import scala.language.implicitConversions
 
-ThisBuild / scalaVersion := scala212
+package object implicits {
 
-ThisBuild / versionScheme := Some("early-semver")
+  /**
+   * This implicit conversion allows to use a DBConnection at any place where as a JDBC Connection is required.
+   */
+  implicit def dbConnectionToJdbcConnection(in: DBConnection): Connection = in.connection
 
-lazy val balta = (project in file("balta"))
-  .settings(
-    name := "balta",
-    crossScalaVersions := supportedScalaVersions,
-    libraryDependencies ++= libDependencies
-  )
+}

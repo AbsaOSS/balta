@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package za.co.absa.balta.classes
+package za.co.absa.db.balta.classes
 
-import za.co.absa.balta.classes.setter.SetterFnc
+import za.co.absa.db.balta.classes.setter.SetterFnc
 
 /**
  * This is a based trait providing the ability to run an SQL query and verify the result via a provided function.
