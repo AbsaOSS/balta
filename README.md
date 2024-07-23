@@ -1,6 +1,6 @@
 # Balta
 
-Scala library to used for writing Postgres DB code tests.
+Balta makes testing DB entities from Scala easier. It's primarily focused on testing the behavior of [Postgres functions](https://www.postgresql.org/docs/current/xfunc.html).
 
 ---
 
