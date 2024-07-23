@@ -6,7 +6,7 @@ Balta makes testing DB entities from Scala easier. It's primarily focused on tes
 
 ### Build Status
 
-[![Build](https://github.com/AbsaOSS/balta/workflows/Build/badge.svg)](https://github.com/AbsaOSS/fa-db/actions)
+[![Build](https://github.com/AbsaOSS/balta/workflows/Build/badge.svg)](https://github.com/AbsaOSS/balta/actions)
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/za.co.absa.db/balta_2.12/badge.svg)](https://search.maven.org/search?q=g:za.co.absa.db.balta)
 
