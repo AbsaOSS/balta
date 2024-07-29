@@ -18,7 +18,6 @@ package za.co.absa.db.balta.classes
 
 import DBFunction.{DBFunctionWithNamedParamsToo, DBFunctionWithPositionedParamsOnly, ParamsMap}
 import za.co.absa.db.balta.classes.setter.{AllowedParamTypes, SetterFnc}
-import za.co.absa.db.balta.classes.setter.{AllowedParamTypes, SetterFnc}
 
 import scala.collection.immutable.ListMap
 
