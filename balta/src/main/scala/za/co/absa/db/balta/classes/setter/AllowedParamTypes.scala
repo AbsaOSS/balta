@@ -14,11 +14,11 @@
  * limitations under the License.
  */
 
-package za.co.absa.balta.classes.setter
+package za.co.absa.db.balta.classes.setter
 
-import za.co.absa.balta.classes.JsonBString
+import za.co.absa.db.balta.classes.simple.JsonBString
 
-import java.time.{Instant, OffsetDateTime, LocalTime, LocalDate}
+import java.time.{Instant, LocalDate, LocalTime, OffsetDateTime}
 import java.util.UUID
 
 /**

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package za.co.absa.balta.classes
+package za.co.absa.db.balta.classes
 
-import za.co.absa.balta.classes.setter.{AllowedParamTypes, Params, SetterFnc}
-import za.co.absa.balta.classes.setter.Params.NamedParams
+import za.co.absa.db.balta.classes.setter.{AllowedParamTypes, Params, SetterFnc}
+import za.co.absa.db.balta.classes.setter.Params.NamedParams
 
 /**
   * This class represents a database table. It allows to perform INSERT, SELECT and COUNT operations on the table easily.

@@ -1,10 +1,19 @@
 # Balta
 
-Scala library to write Postgres DB code tests with
+Balta makes testing DB entities from Scala easier. It's primarily focused on testing the behavior of [Postgres functions](https://www.postgresql.org/docs/current/xfunc.html).
+
+---
+
+### Build Status
+
+[![Build](https://github.com/AbsaOSS/balta/workflows/Build/badge.svg)](https://github.com/AbsaOSS/balta/actions)
+
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/za.co.absa.db/balta_2.12/badge.svg)](https://search.maven.org/search?q=g:za.co.absa.db.balta)
+
+---
 
 Balta is a Scala library to help creating database tests, particularly testing Database functions. It is based on the 
-popular [ScalaTest](http://www.scalatest.org/) library and uses [PostgreSQL](https://www.postgresql.org/) as the 
-database engine.
+popular [ScalaTest](http://www.scalatest.org/) library and uses [PostgreSQL](https://www.postgresql.org/) as the database engine.
 
 It's a natural complement to the use of [Fa-Db library](https://github.com/AbsaOSS/fa-db) in applications.
 
