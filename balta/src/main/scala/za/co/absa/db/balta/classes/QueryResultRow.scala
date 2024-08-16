@@ -17,14 +17,11 @@
 package za.co.absa.db.balta.classes
 
 import QueryResultRow._
-import org.postgresql.jdbc.PgArray
-import org.postgresql.util.PGobject
 
 import java.sql
-import java.sql.{Date, ResultSet, ResultSetMetaData, SQLException, Time, Types}
-import java.time.{Instant, LocalDateTime, LocalTime, OffsetDateTime, OffsetTime}
+import java.sql.{Date, ResultSet, ResultSetMetaData, Time, Types}
+import java.time.{Instant, LocalDateTime, OffsetDateTime, OffsetTime}
 import java.util.UUID
-import scala.util.Try
 
 /**
  * This is a row of a query result. It allows to safely extract values from the row by column name.
