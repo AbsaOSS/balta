@@ -54,7 +54,13 @@ jobs:
       - uses: coursier/cache-action@v5
 
       - name: Setup database
-        run: psql postgresql://postgres:postgres@localhost:5432/mag_db -f balta/src/test/resources/db/postgres/02_users.ddl
+        run: |
+          psql postgresql://postgres:postgres@localhost:5432/mag_db -f balta/src/test/resources/db/postgres/02_users.ddl
+          psql postgresql://postgres:postgres@localhost:5432/mag_db -f balta/src/test/resources/db/postgres/03_schema_testing.ddl
+          psql postgresql://postgres:postgres@localhost:5432/mag_db -f balta/src/test/resources/db/postgres/04_testing.base_types.ddl
+          psql postgresql://postgres:postgres@localhost:5432/mag_db -f balta/src/test/resources/db/postgres/05_testing._base_types_data.sql
+          psql postgresql://postgres:postgres@localhost:5432/mag_db -f balta/src/test/resources/db/postgres/06_testing.pg_types.ddl
+          psql postgresql://postgres:postgres@localhost:5432/mag_db -f balta/src/test/resources/db/postgres/07_testing_pg_types_data.sql
 
       - name: Setup Scala
         uses: olafurpg/setup-scala@v10
@@ -63,3 +69,6 @@ jobs:
 
       - name: Build and run unit tests
         run: sbt ++${{matrix.scala}} test doc
+
+      - name: Build and run integration tests
+        run: sbt ++${{matrix.scala}} testIT
