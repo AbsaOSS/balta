@@ -49,7 +49,7 @@ class QueryResultRow private[classes](val rowNumber: Int,
   def getAs[T](columnLabel: String, transformer: TransformerFnc[T]): Option[T] = getAs(columnNumber(columnLabel), transformer)
   def getAs[T](columnLabel: String): Option[T] = apply(columnNumber(columnLabel)).map(_.asInstanceOf[T])
 
-  def getBoolean(column: Int): Option[Boolean] = getAs(column: Int, item => item.asInstanceOf[Boolean])
+  def getBoolean(column: Int): Option[Boolean] = getAs(column: Int, {item: Object => item.asInstanceOf[Boolean]})
   def getBoolean(columnLabel: String): Option[Boolean] = getBoolean(columnNumber(columnLabel))
 
   def getChar(column: Int): Option[Char] = {
