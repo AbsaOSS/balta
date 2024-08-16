@@ -41,7 +41,7 @@ class QueryResult(resultSet: ResultSet) extends Iterator[QueryResultRow] {
           nextRow = Some(QueryResultRow(resultSet))
         }
       } catch {
-        case e: SQLException => throw e // TODO Do nothing
+        case _: SQLException =>  // TODO Do nothing
       }
     }
     nextRow.nonEmpty

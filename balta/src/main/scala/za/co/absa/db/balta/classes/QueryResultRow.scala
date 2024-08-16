@@ -63,47 +63,47 @@ class QueryResultRow private[classes](val rowNumber: Int,
   def getChar(columnLabel: String): Option[Char] = getChar(columnNumber(columnLabel))
 
 
-  def getString(column: Int): Option[String] = getAs(column: Int, _.asInstanceOf[String])
+  def getString(column: Int): Option[String] = getAs(column: Int, {item: Object => item.asInstanceOf[String]})
   def getString(columnLabel: String): Option[String] = getString(columnNumber(columnLabel))
 
-  def getInt(column: Int): Option[Int] = getAs(column: Int, _.asInstanceOf[Int])
+  def getInt(column: Int): Option[Int] = getAs(column: Int, {item: Object => item.asInstanceOf[Int]})
   def getInt(columnLabel: String): Option[Int] = getInt(columnNumber(columnLabel))
 
-  def getLong(column: Int): Option[Long] = getAs(column: Int, _.asInstanceOf[Long])
+  def getLong(column: Int): Option[Long] = getAs(column: Int, {item: Object => item.asInstanceOf[Long]})
   def getLong(columnLabel: String): Option[Long] = getLong(columnNumber(columnLabel))
 
-  def getDouble(column: Int): Option[Double] = getAs(column: Int, _.asInstanceOf[Double])
+  def getDouble(column: Int): Option[Double] = getAs(column: Int, {item: Object => item.asInstanceOf[Double]})
   def getDouble(columnLabel: String): Option[Double] = getDouble(columnNumber(columnLabel))
 
-  def getFloat(column: Int): Option[Float] = getAs(column: Int, _.asInstanceOf[Float])
+  def getFloat(column: Int): Option[Float] = getAs(column: Int, {item: Object => item.asInstanceOf[Float]})
   def getFloat(columnLabel: String): Option[Float] = getFloat(columnNumber(columnLabel))
 
   def getBigDecimal(column: Int): Option[BigDecimal] = getAs(column: Int, _.asInstanceOf[java.math.BigDecimal]).map(scala.math.BigDecimal(_))
   def getBigDecimal(columnLabel: String): Option[BigDecimal] = getBigDecimal(columnNumber(columnLabel))
 
-  def getTime(column: Int): Option[Time] = getAs(column: Int, _.asInstanceOf[Time])
+  def getTime(column: Int): Option[Time] = getAs(column: Int, {item: Object => item.asInstanceOf[Time]})
   def getTime(columnLabel: String): Option[Time] = getTime(columnNumber(columnLabel))
 
-  def getDate(column: Int): Option[Date] = getAs(column: Int, _.asInstanceOf[Date])
+  def getDate(column: Int): Option[Date] = getAs(column: Int, {item: Object => item.asInstanceOf[Date]})
   def getDate(columnLabel: String): Option[Date] = getDate(columnNumber(columnLabel))
 
-  def getLocalDateTime(column: Int): Option[LocalDateTime] = getAs(column: Int, _.asInstanceOf[LocalDateTime])
+  def getLocalDateTime(column: Int): Option[LocalDateTime] = getAs(column: Int, {item: Object => item.asInstanceOf[LocalDateTime]})
   def getLocalDateTime(columnLabel: String): Option[LocalDateTime] = getLocalDateTime(columnNumber(columnLabel))
 
-  def getOffsetDateTime(column: Int): Option[OffsetDateTime] = getAs(column: Int, _.asInstanceOf[OffsetDateTime])
+  def getOffsetDateTime(column: Int): Option[OffsetDateTime] = getAs(column: Int, {item: Object => item.asInstanceOf[OffsetDateTime]})
   def getOffsetDateTime(columnLabel: String): Option[OffsetDateTime] = getOffsetDateTime(columnNumber(columnLabel))
 
   def getInstant(column: Int): Option[Instant] = getOffsetDateTime(column).map(_.toInstant)
   def getInstant(columnLabel: String): Option[Instant] = getOffsetDateTime(columnLabel).map(_.toInstant)
 
-  def getUUID(column: Int): Option[UUID] = getAs(column: Int, _.asInstanceOf[UUID])
+  def getUUID(column: Int): Option[UUID] = getAs(column: Int, {item: Object => item.asInstanceOf[UUID]})
   def getUUID(columnLabel: String): Option[UUID] = getUUID(columnNumber(columnLabel))
 
   def getArray[T](column: Int): Option[Vector[T]] = {
     def transformerFnc(obj: Object): Vector[T] = {
       obj.asInstanceOf[sql.Array].getArray().asInstanceOf[Array[T]].toVector
     }
-    getAs(column: Int, transformerFnc _) //TODO
+    getAs(column: Int, transformerFnc _)
   }
 
   def getArray[T](columnLabel: String): Option[Vector[T]] = getArray[T](columnNumber(columnLabel))
