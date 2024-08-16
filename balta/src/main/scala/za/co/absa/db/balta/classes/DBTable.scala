@@ -156,6 +156,7 @@ case class DBTable(tableName: String) extends DBQuerySupport{
    * @param connection  - a database connection used for the SELECT operation.
    * @return            - the number of rows
    */
+  @deprecated("Use countOnCondition instead", "0.2.0")
   def count(params: NamedParams)(implicit connection: DBConnection): Long = {
     composeCountAndRun(strToOption(paramsToWhereCondition(params)), params.setters)
   }
@@ -166,7 +167,28 @@ case class DBTable(tableName: String) extends DBQuerySupport{
    * @param connection  - a database connection used for the SELECT operation.
    * @return            - the number of rows
    */
+  @deprecated("Use countOnCondition instead", "0.2.0")
   def count(condition: String)(implicit connection: DBConnection): Long = {
+    composeCountAndRun(strToOption(condition))
+  }
+
+  /**
+   * Counts the rows in the table based on the provided parameters that form a condition.
+   * @param params      - the parameters used for the WHERE clause
+   * @param connection  - a database connection used for the SELECT operation.
+   * @return            - the number of rows
+   */
+  def countOnCondition(params: NamedParams)(implicit connection: DBConnection): Long = {
+    composeCountAndRun(strToOption(paramsToWhereCondition(params)), params.setters)
+  }
+
+  /**
+   * Counts the rows in the table based on the provided condition.
+   * @param condition   - the condition used for the WHERE clause
+   * @param connection  - a database connection used for the SELECT operation.
+   * @return            - the number of rows
+   */
+  def countOnCondition(condition: String)(implicit connection: DBConnection): Long = {
     composeCountAndRun(strToOption(condition))
   }
 
