@@ -164,4 +164,5 @@ object QueryResultRow {
       }
     }.toVector
   }
+
 }
