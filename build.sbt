@@ -22,6 +22,8 @@ lazy val scala213 = "2.13.11"
 
 lazy val supportedScalaVersions: Seq[String] = Seq(scala211, scala212 , scala213)
 
+name := "balta"
+
 ThisBuild / scalaVersion := scala212
 
 ThisBuild / versionScheme := Some("early-semver")

@@ -78,7 +78,9 @@ class QueryResultRow private[classes](val rowNumber: Int,
   def getFloat(column: Int): Option[Float] = getAs(column: Int, {item: Object => item.asInstanceOf[Float]})
   def getFloat(columnLabel: String): Option[Float] = getFloat(columnNumber(columnLabel))
 
-  def getBigDecimal(column: Int): Option[BigDecimal] = getAs(column: Int, _.asInstanceOf[java.math.BigDecimal]).map(scala.math.BigDecimal(_))
+  def getBigDecimal(column: Int): Option[BigDecimal] =
+    getAs(column: Int, {item: Object => item.asInstanceOf[java.math.BigDecimal]})
+      .map(scala.math.BigDecimal(_))
   def getBigDecimal(columnLabel: String): Option[BigDecimal] = getBigDecimal(columnNumber(columnLabel))
 
   def getTime(column: Int): Option[Time] = getAs(column: Int, {item: Object => item.asInstanceOf[Time]})
@@ -127,7 +129,8 @@ object QueryResultRow {
 
   type FieldNames = Map[String, Int]
   type TransformerFnc[T] = Object => T
-  type Extractors = Vector[ResultSet => Option[Object]]
+  type Extractor = ResultSet => Option[Object]
+  type Extractors = Vector[Extractor]
 
   def apply(resultSet: ResultSet)(implicit fieldNames: FieldNames, extractors: Extractors): QueryResultRow = {
     val fields = extractors.map(_(resultSet))
@@ -155,13 +158,14 @@ object QueryResultRow {
     def columnTypeName(column: Int): String = metaData.getColumnTypeName(column).toLowerCase()
 
     Range.inclusive(1, metaData.getColumnCount).map { column =>
-      metaData.getColumnType(column) match {
-        case Types.TIME if columnTypeName(column) == "timetz" =>  timeTzExtractor(_, column)
+       val extractor: Extractor = metaData.getColumnType(column) match {
+        case Types.TIME if columnTypeName(column) == "timetz" => timeTzExtractor(_, column)
         case Types.TIMESTAMP if columnTypeName(column) == "timestamptz" => timestampTzExtractor(_, column)
         case Types.TIMESTAMP => timestampExtractor(_, column)
         case Types.ARRAY => arrayExtractor(_, column)
         case _ => generalExtractor(_, column)
       }
+      extractor
     }.toVector
   }
 
