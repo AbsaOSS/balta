@@ -14,8 +14,12 @@
  * limitations under the License.
  */
 
-package za.co.absa.db.balta.classes.fields
+package za.co.absa.db.balta.classes.simple
 
-trait RowField {
+/**
+ * A simple class to signal a JSON string is expected. No validation is performed. No extended comparison functionality
+ * is provided.
+ * @param value A JSON string.
+ */
+case class SimpleJsonString(value: String) extends AnyVal
 
-}

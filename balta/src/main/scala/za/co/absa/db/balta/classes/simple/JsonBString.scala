@@ -16,4 +16,5 @@
 
 package za.co.absa.db.balta.classes.simple
 
+@deprecated("Use SimpleJsonString instead", "0.2.0")
 case class JsonBString(value: String) extends AnyVal

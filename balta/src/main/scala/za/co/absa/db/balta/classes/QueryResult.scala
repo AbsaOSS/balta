@@ -16,7 +16,9 @@
 
 package za.co.absa.db.balta.classes
 
-import java.sql.ResultSet
+import za.co.absa.db.balta.classes.QueryResultRow.{Extractors, FieldNames}
+
+import java.sql.{ResultSet, ResultSetMetaData, SQLException}
 
 /**
  *  This is an iterator over the result of a query.
@@ -24,24 +26,34 @@ import java.sql.ResultSet
  * @param resultSet - the JDBC result of a query
  */
 class QueryResult(resultSet: ResultSet) extends Iterator[QueryResultRow] {
-  private [this] var resultSetHasNext: Option[Boolean] = Some(resultSet.next())
+  val resultSetMetaData: ResultSetMetaData = resultSet.getMetaData
+  val columnCount: Int = resultSetMetaData.getColumnCount
+
+  private [this] var nextRow: Option[QueryResultRow] = None
+
+  private [this] implicit val fieldNames: FieldNames = QueryResultRow.fieldNamesFromMetdata(resultSetMetaData)
+  private [this] implicit val extractors: Extractors = QueryResultRow.createExtractors(resultSetMetaData)
 
   override def hasNext: Boolean = {
-    resultSetHasNext.getOrElse {
-      val result = resultSet.next()
-      resultSetHasNext = Some(result)
-      result
+    if (nextRow.isEmpty) {
+      try {
+        if (resultSet.next()) {
+          nextRow = Some(QueryResultRow(resultSet))
+        }
+      } catch {
+        case e: SQLException => throw e // TODO Do nothing
+      }
     }
+    nextRow.nonEmpty
   }
 
   override def next(): QueryResultRow = {
-    if (resultSetHasNext.isEmpty) {
-      resultSet.next()
-      new QueryResultRow(resultSet)
+    if (hasNext) {
+      val row = nextRow.get
+      nextRow = None
+      row
     } else {
-      resultSetHasNext = None
-      new QueryResultRow(resultSet)
-
+      throw new NoSuchElementException("No more rows in the result set")
     }
   }
 }

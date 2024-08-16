@@ -18,8 +18,6 @@ package za.co.absa.db.balta.classes
 
 import za.co.absa.db.balta.classes.setter.{AllowedParamTypes, Params, SetterFnc}
 import za.co.absa.db.balta.classes.setter.Params.NamedParams
-import za.co.absa.db.balta.classes.setter.Params.NamedParams
-import za.co.absa.db.balta.classes.setter.{AllowedParamTypes, Params}
 
 /**
   * This class represents a database table. It allows to perform INSERT, SELECT and COUNT operations on the table easily.

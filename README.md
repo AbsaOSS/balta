@@ -33,3 +33,8 @@ in a known state before and after each test.
 ## How to Release
 
 Please see [this file](RELEASE.md) for more details.
+
+## Known Issues
+
+### Postgres
+* `TIMESTAMP WITH TIME ZONE[]`, `TIME WITH TIME ZONE[]`, generally arrays of time related types are not translated to appropriate time zone aware Scala/Java types

@@ -33,13 +33,33 @@ jobs:
 
     name: Scala ${{matrix.scala}}
 
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: mag_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
       - uses: coursier/cache-action@v5
+
+      - name: Setup database
+        run: psql postgresql://postgres:postgres@localhost:5432/mag_db -f balta/src/test/resources/db/postgres/02_users.ddl
+
       - name: Setup Scala
         uses: olafurpg/setup-scala@v10
         with:
           java-version: "adopt@1.8"
-      - name: Build and run tests
+
+      - name: Build and run unit tests
         run: sbt ++${{matrix.scala}} test doc
