@@ -134,7 +134,7 @@ object QueryResultRow {
     new QueryResultRow(resultSet.getRow, fields, fieldNames)
   }
 
-  def fieldNamesFromMetdata(metaData: ResultSetMetaData): FieldNames = {
+  def fieldNamesFromMetadata(metaData: ResultSetMetaData): FieldNames = {
     Range.inclusive(1, metaData.getColumnCount).map(i => metaData.getColumnName(i) -> i).toMap
   }
 

@@ -24,7 +24,7 @@ import java.sql.ResultSetMetaData
 import Postgres.PostgresRow
 import za.co.absa.db.balta.classes.simple.SimpleJsonString
 
-class PostgresRowIntegrationTests extends AnyFunSuiteLike  with DBTestingConnection{
+class PostgresRowIntegrationTests extends AnyFunSuiteLike with DBTestingConnection{
   private val (tableRows: List[QueryResultRow], metadata: ResultSetMetaData) = DBTable("testing.pg_types").all("id") { q =>
     (q.toList, q.resultSetMetaData)
   }
@@ -32,7 +32,7 @@ class PostgresRowIntegrationTests extends AnyFunSuiteLike  with DBTestingConnect
   test("fieldNamesFromMetada") {
     val result = QueryResultRow.fieldNamesFromMetdata(metadata)
 
-    val expecedResult = Seq(
+    val expectedResult = Seq(
       "id",
       "json_type",
       "jsonb_type",
@@ -42,7 +42,7 @@ class PostgresRowIntegrationTests extends AnyFunSuiteLike  with DBTestingConnect
       .map(x => (x._1, x._2 + 1))
       .toMap
     assert(result.size == 4)
-    assert(result == expecedResult)
+    assert(result == expectedResult)
   }
 
   test("getSimpleJson") {
@@ -68,7 +68,7 @@ class PostgresRowIntegrationTests extends AnyFunSuiteLike  with DBTestingConnect
       SimpleJsonString("""{"a": 3, "body": ""}"""),
       SimpleJsonString("""{"a": 4}""")
     )
-    assert(tableRows.head.getSJSArray(4).get == (expected))
+    assert(tableRows.head.getSJSArray(4).get == expected)
     assert(tableRows.head.getSJSArray("array_of_json_type").contains(expected))
     //second row
     val secondRow = tableRows.tail.head
