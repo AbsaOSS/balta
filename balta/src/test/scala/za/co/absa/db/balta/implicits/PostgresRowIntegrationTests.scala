@@ -30,7 +30,7 @@ class PostgresRowIntegrationTests extends AnyFunSuiteLike with DBTestingConnecti
   }
 
   test("fieldNamesFromMetada") {
-    val result = QueryResultRow.fieldNamesFromMetdata(metadata)
+    val result = QueryResultRow.fieldNamesFromMetadata(metadata)
 
     val expectedResult = Seq(
       "id",

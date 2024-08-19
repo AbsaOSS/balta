@@ -1,4 +1,4 @@
-DELETE FROM testing.base_types;
+TRUNCATE testing.base_types;
 
 INSERT INTO testing.base_types(
     long_type, boolean_type, char_type, string_type, int_type, double_type, float_type, bigdecimal_type, date_type,

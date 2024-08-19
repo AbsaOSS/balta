@@ -1,5 +1,4 @@
-DELETE FROM
-    testing.pg_types;
+TRUNCATE testing.pg_types;
 
 
 INSERT INTO testing.pg_types(

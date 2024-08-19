@@ -30,7 +30,7 @@ class QueryResultRowIntegrationTests extends AnyFunSuiteLike with DBTestingConne
   }
 
   test("fieldNamesFromMetada") {
-    val result = QueryResultRow.fieldNamesFromMetdata(metadata)
+    val result = QueryResultRow.fieldNamesFromMetadata(metadata)
 
     val expecedResult = Seq(
       "long_type",
