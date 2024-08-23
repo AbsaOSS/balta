@@ -207,7 +207,7 @@ class QueryResultRowIntegrationTests extends AnyFunSuiteLike with DBTestingConne
     assert(secondRow.getUUID("uuid_type").isEmpty)
   }
 
-  test("getVector[Int]") {
+  test("getArray[Int]") {
     //first row
     val expected = Vector(1, 2, 3)
     assert(tableRows.head.getArray[Int](14).contains(expected))
