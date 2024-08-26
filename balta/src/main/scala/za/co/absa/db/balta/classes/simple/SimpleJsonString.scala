@@ -14,23 +14,12 @@
  * limitations under the License.
  */
 
-import Dependencies._
+package za.co.absa.db.balta.classes.simple
 
-lazy val scala211 = "2.11.12"
-lazy val scala212 = "2.12.18"
-lazy val scala213 = "2.13.11"
+/**
+ * A simple class to signal a JSON string is expected. No validation is performed. No extended comparison functionality
+ * is provided.
+ * @param value A JSON string.
+ */
+case class SimpleJsonString(value: String) extends AnyVal
 
-lazy val supportedScalaVersions: Seq[String] = Seq(scala211, scala212 , scala213)
-
-name := "balta"
-
-ThisBuild / scalaVersion := scala212
-
-ThisBuild / versionScheme := Some("early-semver")
-
-lazy val balta = (project in file("balta"))
-  .settings(
-    name := "balta",
-    crossScalaVersions := supportedScalaVersions,
-    libraryDependencies ++= libDependencies
-  )

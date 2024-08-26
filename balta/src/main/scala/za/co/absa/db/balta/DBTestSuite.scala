@@ -146,7 +146,7 @@ abstract class DBTestSuite extends AnyFunSuite {
   }
 
   // private functions
-  private def readConnectionInfoFromConfig = {
+  private def readConnectionInfoFromConfig: ConnectionInfo = {
     val properties = new Properties()
     properties.load(getClass.getResourceAsStream("/database.properties"))
 

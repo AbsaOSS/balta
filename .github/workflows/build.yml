@@ -33,13 +33,42 @@ jobs:
 
     name: Scala ${{matrix.scala}}
 
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: mag_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
       - uses: coursier/cache-action@v5
+
       - name: Setup Scala
         uses: olafurpg/setup-scala@v10
         with:
           java-version: "adopt@1.8"
-      - name: Build and run tests
+
+      - name: Build and run unit tests
         run: sbt ++${{matrix.scala}} test doc
+
+      - name: Setup database
+        run: |
+          psql postgresql://postgres:postgres@localhost:5432/mag_db -f balta/src/test/resources/db/postgres/02_users.ddl
+          psql postgresql://postgres:postgres@localhost:5432/mag_db -f balta/src/test/resources/db/postgres/03_schema_testing.ddl
+          psql postgresql://postgres:postgres@localhost:5432/mag_db -f balta/src/test/resources/db/postgres/04_testing.base_types.ddl
+          psql postgresql://postgres:postgres@localhost:5432/mag_db -f balta/src/test/resources/db/postgres/05_testing._base_types_data.sql
+          psql postgresql://postgres:postgres@localhost:5432/mag_db -f balta/src/test/resources/db/postgres/06_testing.pg_types.ddl
+          psql postgresql://postgres:postgres@localhost:5432/mag_db -f balta/src/test/resources/db/postgres/07_testing_pg_types_data.sql
+
+      - name: Build and run integration tests
+        run: sbt ++${{matrix.scala}} testIT

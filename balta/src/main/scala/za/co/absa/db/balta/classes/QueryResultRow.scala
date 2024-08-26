@@ -16,83 +16,154 @@
 
 package za.co.absa.db.balta.classes
 
-import org.postgresql.util.PGobject
-import za.co.absa.db.balta.classes.simple.JsonBString
+import QueryResultRow._
 
-import java.sql.{Date, ResultSet, Time}
-import java.time.{Instant, OffsetDateTime}
+import java.sql
+import java.sql.{Date, ResultSet, ResultSetMetaData, Time, Types}
+import java.time.{Instant, LocalDateTime, OffsetDateTime, OffsetTime}
 import java.util.UUID
 
 /**
  * This is a row of a query result. It allows to safely extract values from the row by column name.
  *
- * @param resultSet - the JDBC result of a query
+ * @param rowNumber   - the number of the row in the result set
+ * @param fields      - the values of the row
+ * @param columnNames - the names of the columns
  */
-class QueryResultRow private[classes](val resultSet: ResultSet) extends AnyVal {
-  // this is not stable as resultSet mutates, but good enough for now
-  private def safe[T](fnc: => T): Option[T] = {
-    val result = fnc
-    if (resultSet.wasNull()) {
-      None
-    } else {
-      Some(result)
-    }
-  }
+class QueryResultRow private[classes](val rowNumber: Int,
+                                      private val fields: Vector[Option[Object]],
+                                      private val columnNames: FieldNames) {
 
-  def getBoolean(columnLabel: String): Option[Boolean] = safe(resultSet.getBoolean(columnLabel))
+  def columnCount: Int = fields.length
+  def columnNumber(columnLabel: String): Int = columnNames(columnLabel.toLowerCase)
 
-  def getChar(columnLabel: String): Option[Char] = {
-    getString(columnLabel) match {
+  def apply(column: Int): Option[Object] = fields(column - 1)
+  def apply(columnLabel: String): Option[Object] = apply(columnNumber(columnLabel))
+
+  def getAs[T](column: Int, transformer: TransformerFnc[T]): Option[T] = apply(column).map(transformer)
+  def getAs[T](column: Int): Option[T] = apply(column)map(_.asInstanceOf[T])
+
+  def getAs[T](columnLabel: String, transformer: TransformerFnc[T]): Option[T] = getAs(columnNumber(columnLabel), transformer)
+  def getAs[T](columnLabel: String): Option[T] = apply(columnNumber(columnLabel)).map(_.asInstanceOf[T])
+
+  def getBoolean(column: Int): Option[Boolean] = getAs(column: Int, {item: Object => item.asInstanceOf[Boolean]})
+  def getBoolean(columnLabel: String): Option[Boolean] = getBoolean(columnNumber(columnLabel))
+
+  def getChar(column: Int): Option[Char] = {
+    getString(column) match {
       case Some(value) =>
         if (value.isEmpty) None else Some(value.charAt(0))
       case None =>
         None
     }
   }
+  def getChar(columnLabel: String): Option[Char] = getChar(columnNumber(columnLabel))
 
-  def getString(columnLabel: String): Option[String] = safe(resultSet.getString(columnLabel))
 
-  def getInt(columnLabel: String): Option[Int] = safe(resultSet.getInt(columnLabel))
+  def getString(column: Int): Option[String] = getAs(column: Int, {item: Object => item.asInstanceOf[String]})
+  def getString(columnLabel: String): Option[String] = getString(columnNumber(columnLabel))
 
-  def getLong(columnLabel: String): Option[Long] = safe(resultSet.getLong(columnLabel))
+  def getInt(column: Int): Option[Int] = getAs(column: Int, {item: Object => item.asInstanceOf[Int]})
+  def getInt(columnLabel: String): Option[Int] = getInt(columnNumber(columnLabel))
 
-  def getDouble(columnLabel: String): Option[Double] = safe(resultSet.getDouble(columnLabel))
+  def getLong(column: Int): Option[Long] = getAs(column: Int, {item: Object => item.asInstanceOf[Long]})
+  def getLong(columnLabel: String): Option[Long] = getLong(columnNumber(columnLabel))
 
-  def getFloat(columnLabel: String): Option[Float] = safe(resultSet.getFloat(columnLabel))
+  def getDouble(column: Int): Option[Double] = getAs(column: Int, {item: Object => item.asInstanceOf[Double]})
+  def getDouble(columnLabel: String): Option[Double] = getDouble(columnNumber(columnLabel))
 
-  def getBigDecimal(columnLabel: String): Option[BigDecimal] = safe(resultSet.getBigDecimal(columnLabel))
+  def getFloat(column: Int): Option[Float] = getAs(column: Int, {item: Object => item.asInstanceOf[Float]})
+  def getFloat(columnLabel: String): Option[Float] = getFloat(columnNumber(columnLabel))
 
-  def getUUID(columnLabel: String): Option[UUID] = Option(resultSet.getObject(columnLabel).asInstanceOf[UUID])
+  def getBigDecimal(column: Int): Option[BigDecimal] =
+    getAs(column: Int, {item: Object => item.asInstanceOf[java.math.BigDecimal]})
+      .map(scala.math.BigDecimal(_))
+  def getBigDecimal(columnLabel: String): Option[BigDecimal] = getBigDecimal(columnNumber(columnLabel))
 
-  def getOffsetDateTime(columnLabel: String): Option[OffsetDateTime] = Option(resultSet.getObject(columnLabel, classOf[OffsetDateTime]))
+  def getTime(column: Int): Option[Time] = getAs(column: Int, {item: Object => item.asInstanceOf[Time]})
+  def getTime(columnLabel: String): Option[Time] = getTime(columnNumber(columnLabel))
 
+  def getDate(column: Int): Option[Date] = getAs(column: Int, {item: Object => item.asInstanceOf[Date]})
+  def getDate(columnLabel: String): Option[Date] = getDate(columnNumber(columnLabel))
+
+  def getLocalDateTime(column: Int): Option[LocalDateTime] = getAs(column: Int, {item: Object => item.asInstanceOf[LocalDateTime]})
+  def getLocalDateTime(columnLabel: String): Option[LocalDateTime] = getLocalDateTime(columnNumber(columnLabel))
+
+  def getOffsetDateTime(column: Int): Option[OffsetDateTime] = getAs(column: Int, {item: Object => item.asInstanceOf[OffsetDateTime]})
+  def getOffsetDateTime(columnLabel: String): Option[OffsetDateTime] = getOffsetDateTime(columnNumber(columnLabel))
+
+  def getInstant(column: Int): Option[Instant] = getOffsetDateTime(column).map(_.toInstant)
   def getInstant(columnLabel: String): Option[Instant] = getOffsetDateTime(columnLabel).map(_.toInstant)
 
-  def getTime(columnLabel: String): Option[Time] = safe(resultSet.getTime(columnLabel))
+  def getUUID(column: Int): Option[UUID] = getAs(column: Int, {item: Object => item.asInstanceOf[UUID]})
+  def getUUID(columnLabel: String): Option[UUID] = getUUID(columnNumber(columnLabel))
 
-  def getDate(columnLabel: String): Option[Date] = safe(resultSet.getDate(columnLabel))
-
-  def getJsonB(columnLabel: String): Option[JsonBString] = {
-    Option(resultSet.getObject(columnLabel).asInstanceOf[PGobject])map(pgo => JsonBString(pgo.toString))
+  def getArray[T](column: Int): Option[Vector[T]] = {
+    def transformerFnc(obj: Object): Vector[T] = {
+      obj.asInstanceOf[sql.Array].getArray().asInstanceOf[Array[T]].toVector
+    }
+    getAs(column: Int, transformerFnc _)
   }
 
-  def getArray[T](columnLabel: String): Option[Array[T]] = {
-    val array = resultSet.getArray(columnLabel)
-    if (resultSet.wasNull()) {
-      None
-    } else {
-      Option(array.getArray.asInstanceOf[Array[T]])
+  def getArray[T](columnLabel: String): Option[Vector[T]] = getArray[T](columnNumber(columnLabel))
+
+  def getArray[T](column: Int, itemTransformerFnc: TransformerFnc[T]): Option[Vector[T]] = {
+    def transformerFnc(obj: Object): Vector[T] = {
+      obj
+        .asInstanceOf[sql.Array]
+        .getArray()
+        .asInstanceOf[Array[Object]]
+        .toVector
+        .map(itemTransformerFnc)
     }
+
+    getAs(column: Int, transformerFnc _)
   }
 
-  def getAs[T](columnLabel: String): Option[T] = {
-    val result = resultSet.getObject(columnLabel)
-    if (resultSet.wasNull()) {
-      None
-    } else {
-      val resultTyped = result.asInstanceOf[T]
-      Option(resultTyped)
+}
+
+object QueryResultRow {
+
+  type FieldNames = Map[String, Int]
+  type TransformerFnc[T] = Object => T
+  type Extractor = ResultSet => Option[Object]
+  type Extractors = Vector[Extractor]
+
+  def apply(resultSet: ResultSet)(implicit fieldNames: FieldNames, extractors: Extractors): QueryResultRow = {
+    val fields = extractors.map(_(resultSet))
+    new QueryResultRow(resultSet.getRow, fields, fieldNames)
+  }
+
+  def fieldNamesFromMetadata(metaData: ResultSetMetaData): FieldNames = {
+    Range.inclusive(1, metaData.getColumnCount).map(i => metaData.getColumnName(i) -> i).toMap
+  }
+
+  def createExtractors(metaData: ResultSetMetaData): Extractors = {
+    def generalExtractor(resultSet: ResultSet, column: Int): Option[Object] = Option(resultSet.getObject(column))
+
+    def timeTzExtractor(resultSet: ResultSet, column: Int): Option[Object] = Option(resultSet.getObject(column, classOf[OffsetTime]))
+
+    def timestampExtractor(resultSet: ResultSet, column: Int): Option[Object] = Option(resultSet.getObject(column, classOf[LocalDateTime]))
+
+    def timestampTzExtractor(resultSet: ResultSet, column: Int): Option[Object] = Option(resultSet.getObject(column, classOf[OffsetDateTime]))
+
+    def arrayExtractor(resultSet: ResultSet, column: Int): Option[Object] = {
+      val array: sql.Array = resultSet.getArray(column)
+      Option(array)
     }
+
+    def columnTypeName(column: Int): String = metaData.getColumnTypeName(column).toLowerCase()
+
+    Range.inclusive(1, metaData.getColumnCount).map { column =>
+       val extractor: Extractor = metaData.getColumnType(column) match {
+        case Types.TIME if columnTypeName(column) == "timetz" => timeTzExtractor(_, column)
+        case Types.TIMESTAMP if columnTypeName(column) == "timestamptz" => timestampTzExtractor(_, column)
+        case Types.TIMESTAMP => timestampExtractor(_, column)
+        case Types.ARRAY => arrayExtractor(_, column)
+        case _ => generalExtractor(_, column)
+      }
+      extractor
+    }.toVector
   }
 
 }

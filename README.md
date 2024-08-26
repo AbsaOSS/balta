@@ -30,6 +30,23 @@ It's a natural complement to the use of [Fa-Db library](https://github.com/AbsaO
 Advantages of this approach is that the tests repeateble, they are isolated from each other and the database is always 
 in a known state before and after each test.
 
+## How to Test
+There are integration tests part of the package that can be run with the following command:
+
+```bash
+sbt testIT
+```
+
+The tests to finish successfully, a Postgres database must be running and populated.
+* by default the database is expected to be running on `localhost:5432`
+* if you wish to run against a different server modify the `src/test/resources/database.properties` file
+* to populate the database run the scripts in the `src/test/resources/db/postgres` folder
+
 ## How to Release
 
 Please see [this file](RELEASE.md) for more details.
+
+## Known Issues
+
+### Postgres
+* `TIMESTAMP WITH TIME ZONE[]`, `TIME WITH TIME ZONE[]`, generally arrays of time related types are not translated to appropriate time zone aware Scala/Java types
