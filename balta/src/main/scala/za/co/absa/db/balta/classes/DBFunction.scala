@@ -46,6 +46,14 @@ sealed abstract class DBFunction private(functionName: String,
   }
 
   /**
+   * Executes the function.
+   * @param connection  - the database connection
+   */
+  def execute()(implicit connection: DBConnection): Unit = {
+    execute("")(_ => Unit)
+  }
+
+  /**
    *  Executes the function and verifies the result via the verify function.
    *
    * @param verify      - the function that verifies the result
