@@ -60,7 +60,7 @@ sealed abstract class DBFunction private(functionName: String,
    * @param connection  - the database connection
    */
   def getResult(orderBy: String = "")(implicit connection: DBConnection): List[QueryResultRow] = {
-    execute("")(_.toList)
+    execute(orderBy)(_.toList)
   }
 
   /**
