@@ -50,7 +50,7 @@ sealed abstract class DBFunction private(functionName: String,
    * @param connection  - the database connection
    */
   def execute()(implicit connection: DBConnection): Unit = {
-    execute("")(_ => Unit)
+    execute("")(_ => ())
   }
 
   /**
