@@ -46,11 +46,21 @@ sealed abstract class DBFunction private(functionName: String,
   }
 
   /**
-   * Executes the function.
+   * Executes the function without caring about the result. The goal is the side-effect of the function.
    * @param connection  - the database connection
    */
-  def execute()(implicit connection: DBConnection): Unit = {
+  def perform()(implicit connection: DBConnection): Unit = {
     execute("")(_ => ())
+  }
+
+  /**
+   * Executes the function without any verification proceudre. It instantiate the function result(s) and return them in
+   * a list.
+   * @param orderBy     - the clause how to order the function result, if empty, default ordering is preserved
+   * @param connection  - the database connection
+   */
+  def getResult(orderBy: String = "")(implicit connection: DBConnection): List[QueryResultRow] = {
+    execute("")(_.toList)
   }
 
   /**
