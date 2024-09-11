@@ -54,7 +54,7 @@ sealed abstract class DBFunction private(functionName: String,
   }
 
   /**
-   * Executes the function without any verification proceudre. It instantiate the function result(s) and return them in
+   * Executes the function without any verification procedure. It instantiates the function result(s) and returns them in
    * a list.
    * @param orderBy     - the clause how to order the function result, if empty, default ordering is preserved
    * @param connection  - the database connection
