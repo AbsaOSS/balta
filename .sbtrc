@@ -25,3 +25,5 @@ alias test=; testOnly *UnitTests
 # * Integration tests
 alias testIT=; testOnly *IntegrationTests
 
+# Run all tests
+alias testAll=; testOnly *

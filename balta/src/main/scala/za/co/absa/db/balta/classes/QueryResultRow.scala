@@ -17,6 +17,7 @@
 package za.co.absa.db.balta.classes
 
 import QueryResultRow._
+import za.co.absa.db.balta.implicits.MapImplicits.MapEnhancements
 
 import java.sql
 import java.sql.{Date, ResultSet, ResultSetMetaData, Time, Types}
@@ -35,7 +36,10 @@ class QueryResultRow private[classes](val rowNumber: Int,
                                       private val columnNames: FieldNames) {
 
   def columnCount: Int = fields.length
-  def columnNumber(columnLabel: String): Int = columnNames(columnLabel.toLowerCase)
+  def columnNumber(columnLabel: String): Int = {
+    val actualLabel = columnLabel.toLowerCase
+    columnNames.getOrThrow(actualLabel, new NoSuchElementException(s"Column '$actualLabel' not found"))
+  }
 
   def apply(column: Int): Option[Object] = fields(column - 1)
   def apply(columnLabel: String): Option[Object] = apply(columnNumber(columnLabel))
@@ -119,7 +123,6 @@ class QueryResultRow private[classes](val rowNumber: Int,
 
     getAs(column: Int, transformerFnc _)
   }
-
 }
 
 object QueryResultRow {
