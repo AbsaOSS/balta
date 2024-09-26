@@ -29,7 +29,7 @@ $$
 --      Function returning static data for testing purposes
 --
 -- Parameters:
---      i_return_data   - flag if data re to be returned or not         -
+--      i_return_data   - flag if data are to be returned or not         -
 --
 -- Returns:
 --      sample data

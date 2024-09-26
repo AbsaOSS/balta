@@ -96,7 +96,7 @@ class QueryResultRowImplicitsIntegrationTests extends AnyFunSuiteLike with DBTes
   }
 
   test("Product type of tuple is created if correct naming exists") {
-    implicit val naming: NamingConvention =  MapBasedNaming(Map(
+    implicit val naming: NamingConvention = MapBasedNaming(Map(
       "_1" -> "int_data",
       "_2" -> "text_data",
       "_3" -> "timestamp_data",
@@ -116,7 +116,7 @@ class QueryResultRowImplicitsIntegrationTests extends AnyFunSuiteLike with DBTes
   }
 }
 
-// these classes has to be top level
+// these classes have to be top level
 case class ResultTypeOptional(
                               intData: Option[Int],
                               textData: Option[String],

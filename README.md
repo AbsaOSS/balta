@@ -61,7 +61,7 @@ This iterator represents the result of a query. It provides methods for iteratin
 
 This class represents a row in a query result. It provides methods for accessing the columns of the row - via name or index.
 
-To make specific Postgres types available in `QueryResultRow` there is th implicit classes 
+To make specific Postgres types available in `QueryResultRow` there is the implicit class 
 [`Postgres.PostgresRow`](https://github.com/AbsaOSS/balta/blob/master/balta/src/main/scala/za/co/absa/db/balta/implicits/Postgres.scala)
 enhancing the `QueryResultRow` with the ability to get type like `JSON` (including JSONB) and `JSON[]` (JSON array).
 

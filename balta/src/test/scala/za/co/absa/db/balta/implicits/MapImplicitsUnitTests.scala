@@ -22,6 +22,7 @@ import za.co.absa.db.balta.implicits.MapImplicits.MapEnhancements
 
 class MapImplicitsUnitTests extends AnyFunSuiteLike {
   private val map = Map("foo" -> 1, "bar" -> 2)
+
   test("getOrThrow returns the value if it is defined") {
     assert(map.getOrThrow("foo", new Exception("Foo")) == 1)
   }
