@@ -20,7 +20,6 @@ import za.co.absa.db.balta.classes.QueryResultRow
 import za.co.absa.db.balta.implicits.OptionImplicits.OptionEnhancements
 import za.co.absa.db.mag.naming.NamingConvention
 
-import java.lang
 import scala.reflect.runtime.currentMirror
 import scala.reflect.runtime.universe._
 
