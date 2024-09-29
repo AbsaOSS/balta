@@ -42,6 +42,15 @@ The tests to finish successfully, a Postgres database must be running and popula
 * if you wish to run against a different server modify the `src/test/resources/database.properties` file
 * to populate the database run the scripts in the `src/test/resources/db/postgres` folder
 
+## How to generate JaCoCo code coverage report
+
+Run the following command from path `{project-root}`
+```bash
+sbt jacoco
+```
+Report should be available on path `{project-root}/balta/target/scala-2.12/jacoco/report/html`
+
+
 ## How to Release
 
 Please see [this file](RELEASE.md) for more details.
