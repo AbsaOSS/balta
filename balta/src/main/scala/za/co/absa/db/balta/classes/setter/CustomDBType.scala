@@ -14,18 +14,12 @@
  * limitations under the License.
  */
 
-package za.co.absa.balta
+package za.co.absa.db.balta.classes.setter
 
-import za.co.absa.balta.classes.DBConnection
-
-import java.sql.Connection
-import scala.language.implicitConversions
-
-package object implicits {
-
-  /**
-   * This implicit conversion allows to use a DBConnection at any place where as a JDBC Connection is required.
-   */
-  implicit def dbConnectionToJdbcConnection(in: DBConnection): Connection = in.connection
-
-}
+/**
+ * This is a case class representing a custom DB type.
+ *
+ * @param valueAsString - the value of the custom DB type as a string
+ * @param dbType        - the DB type name
+ */
+case class CustomDBType(valueAsString: String, dbType: String)

@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package za.co.absa.balta.classes
+package za.co.absa.db.balta.classes
 
-import za.co.absa.balta.classes.setter.{AllowedParamTypes, Params, SetterFnc}
-import za.co.absa.balta.classes.setter.Params.NamedParams
+import za.co.absa.db.balta.classes.setter.{AllowedParamTypes, Params, SetterFnc}
+import za.co.absa.db.balta.classes.setter.Params.NamedParams
 
 /**
   * This class represents a database table. It allows to perform INSERT, SELECT and COUNT operations on the table easily.
@@ -156,6 +156,7 @@ case class DBTable(tableName: String) extends DBQuerySupport{
    * @param connection  - a database connection used for the SELECT operation.
    * @return            - the number of rows
    */
+  @deprecated("Use countOnCondition instead", "0.2.0")
   def count(params: NamedParams)(implicit connection: DBConnection): Long = {
     composeCountAndRun(strToOption(paramsToWhereCondition(params)), params.setters)
   }
@@ -166,7 +167,28 @@ case class DBTable(tableName: String) extends DBQuerySupport{
    * @param connection  - a database connection used for the SELECT operation.
    * @return            - the number of rows
    */
+  @deprecated("Use countOnCondition instead", "0.2.0")
   def count(condition: String)(implicit connection: DBConnection): Long = {
+    composeCountAndRun(strToOption(condition))
+  }
+
+  /**
+   * Counts the rows in the table based on the provided parameters that form a condition.
+   * @param params      - the parameters used for the WHERE clause
+   * @param connection  - a database connection used for the SELECT operation.
+   * @return            - the number of rows
+   */
+  def countOnCondition(params: NamedParams)(implicit connection: DBConnection): Long = {
+    composeCountAndRun(strToOption(paramsToWhereCondition(params)), params.setters)
+  }
+
+  /**
+   * Counts the rows in the table based on the provided condition.
+   * @param condition   - the condition used for the WHERE clause
+   * @param connection  - a database connection used for the SELECT operation.
+   * @return            - the number of rows
+   */
+  def countOnCondition(condition: String)(implicit connection: DBConnection): Long = {
     composeCountAndRun(strToOption(condition))
   }
 
@@ -197,7 +219,7 @@ case class DBTable(tableName: String) extends DBQuerySupport{
   }
 
   private def paramsToWhereCondition(params: NamedParams): String = {
-    params.pairs.foldLeft(List.empty[String]) {case (acc, (fieldName, setterFnc)) =>
+    params.pairs.foldRight(List.empty[String]) {case ((fieldName, setterFnc), acc) =>
       s"$fieldName = ${setterFnc.sqlEntry}" :: acc // TODO https://github.com/AbsaOSS/balta/issues/2
     }.mkString(" AND ")
   }

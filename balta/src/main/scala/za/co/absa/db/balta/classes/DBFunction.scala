@@ -14,10 +14,10 @@
  * limitations under the License.
  */
 
-package za.co.absa.balta.classes
+package za.co.absa.db.balta.classes
 
-import za.co.absa.balta.classes.DBFunction.{DBFunctionWithNamedParamsToo, DBFunctionWithPositionedParamsOnly, ParamsMap}
-import za.co.absa.balta.classes.setter.{AllowedParamTypes, SetterFnc}
+import DBFunction.{DBFunctionWithNamedParamsToo, DBFunctionWithPositionedParamsOnly, ParamsMap}
+import za.co.absa.db.balta.classes.setter.{AllowedParamTypes, SetterFnc}
 
 import scala.collection.immutable.ListMap
 

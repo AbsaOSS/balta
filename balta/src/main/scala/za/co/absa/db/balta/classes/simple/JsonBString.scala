@@ -14,12 +14,7 @@
  * limitations under the License.
  */
 
-package za.co.absa.balta.classes.setter
+package za.co.absa.db.balta.classes.simple
 
-/**
- * This is a case class representing a custom DB type.
- *
- * @param valueAsString - the value of the custom DB type as a string
- * @param dbType        - the DB type name
- */
-case class CustomDBType(valueAsString: String, dbType: String)
+@deprecated("Use SimpleJsonString instead", "0.2.0")
+case class JsonBString(value: String) extends AnyVal
