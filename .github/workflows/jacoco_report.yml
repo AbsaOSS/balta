@@ -1,0 +1,119 @@
+name: CI check JaCoCo code-coverage
+
+on:
+  pull_request:
+    branches: [ master ]
+
+env:
+  scalaLong: 2.12.18
+  scalaShort: "2.12"
+  coverage-overall: 0.0
+  coverage-changed-files: 0.0
+  check-overall-coverages: true
+
+jobs:
+  build-test-and-measure:
+    name: Build, Test and Measure
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: mag_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Setup Scala
+        uses: olafurpg/setup-scala@v10
+        with:
+          java-version: "adopt@1.8"
+
+      - name: Setup database
+        run: |
+          psql postgresql://postgres:postgres@localhost:5432/mag_db -f balta/src/test/resources/db/postgres/02_users.ddl
+          psql postgresql://postgres:postgres@localhost:5432/mag_db -f balta/src/test/resources/db/postgres/03_schema_testing.ddl
+          psql postgresql://postgres:postgres@localhost:5432/mag_db -f balta/src/test/resources/db/postgres/04_testing.base_types.ddl
+          psql postgresql://postgres:postgres@localhost:5432/mag_db -f balta/src/test/resources/db/postgres/05_testing._base_types_data.sql
+          psql postgresql://postgres:postgres@localhost:5432/mag_db -f balta/src/test/resources/db/postgres/06_testing.pg_types.ddl
+          psql postgresql://postgres:postgres@localhost:5432/mag_db -f balta/src/test/resources/db/postgres/07_testing_pg_types_data.sql
+
+      - name: Build and run tests
+        continue-on-error: true
+        id: jacocorun
+        run: sbt jacoco
+
+      - name: Add coverage to PR
+        if: steps.jacocorun.outcome == 'success'
+        id: jacoco-balta
+        uses: madrapps/jacoco-report@v1.7.1
+        with:
+          paths: ${{ github.workspace }}/balta/target/scala-${{ env.scalaShort }}/jacoco/report/jacoco.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: ${{ env.coverage-overall }}
+          min-coverage-changed-files: ${{ env.coverage-changed-files }}
+          title: JaCoCo 'balta' module code coverage report - scala ${{ env.scalaLong }}
+          update-comment: true
+      - name: Get the Coverage info
+        if: steps.jacocorun.outcome == 'success'
+        run: |
+          echo "Total 'balta' module coverage ${{ steps.jacoco-balta.outputs.coverage-overall }}"
+          echo "Changed Files coverage ${{ steps.jacoco-balta.outputs.coverage-changed-files }}"
+      - name: Fail PR if changed files coverage is less than ${{ env.coverage-changed-files }}%
+        if: steps.jacocorun.outcome == 'success'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const coverageCheckFailed =
+              Number('${{ steps.jacoco-balta.outputs.coverage-changed-files }}') < Number('${{ env.coverage-changed-files }}')
+            if (coverageCheckFailed) {
+              core.setFailed('Changed files coverage is less than ${{ env.coverage-changed-files }}%!');
+            }
+      - name: Fail PR if overall files coverage is less than ${{ env.coverage-overall }}%
+        if: ${{ (steps.jacocorun.outcome == 'success') && (env.check-overall-coverages == 'true') }}
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const coverageCheckFailed =
+              Number('${{ steps.jacoco-balta.outputs.coverage-overall }}') < Number('${{ env.coverage-overall }}');
+            if (coverageCheckFailed) {
+              core.setFailed('Overall coverage is less than ${{ env.coverage-overall }}%!');
+            }
+      - name: Edit JaCoCo comments on build failure
+        if: steps.jacocorun.outcome != 'success'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const issue_number = context.issue.number;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const jacocoReportRegExp = /^### JaCoCo .* code coverage report .*/;
+
+            const comments = await github.rest.issues.listComments({
+              owner,
+              repo,
+              issue_number,
+            });
+
+            for (const comment of comments.data) {
+              const lines = comment.body.split('\n');
+              if (lines.length > 0 && jacocoReportRegExp.test(lines[0])) {
+                await github.rest.issues.updateComment({
+                  owner,
+                  repo,
+                  comment_id: comment.id,
+                  body: lines[0] + "\n\n### Build Failed",
+                });
+              }
+            }
+
+            core.setFailed('JaCoCo test coverage report generation failed, and related PR comments were updated.');
