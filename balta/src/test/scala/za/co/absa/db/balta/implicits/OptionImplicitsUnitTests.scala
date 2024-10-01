@@ -31,4 +31,19 @@ class OptionImplicitsUnitTests extends AnyFunSuiteLike {
     assertThrows[Exception](opt.getOrThrow(new Exception("Foo")))
   }
 
+  test("@= returns true if the value is defined and equals the provided value") {
+    val opt = Some(42)
+    assert(opt @= 42)
+  }
+
+  test("@= returns false if the value is defined but does not equal the provided value") {
+    val opt = Some(42)
+    assert(!(opt @= 43))
+  }
+
+  test("@= returns false if the value is not defined") {
+    val opt = None
+    assert(!(opt @= 42))
+  }
+
 }

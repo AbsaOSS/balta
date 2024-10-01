@@ -27,6 +27,14 @@ object OptionImplicits {
     def getOrThrow(exception: => Throwable): T = {
       option.getOrElse(throw exception)
     }
+
+    /**
+     * The function is an alias for `contains` method, but shorter and suitable for inflix usage
+     *
+     * @param value the value to check if present in the `option`
+     * @return      true if the `option` is defined and contains the provided value, false otherwise
+     */
+    def @=(value: T): Boolean = option.contains(value)
   }
 
 }

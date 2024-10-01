@@ -16,12 +16,12 @@
 
 package za.co.absa.db.balta.classes.setter
 
-import java.sql.{Date, PreparedStatement, Time, Timestamp, Types => SqlTypes}
+import java.sql.{Date, PreparedStatement, Time, Types => SqlTypes}
 import java.util.UUID
 import org.postgresql.util.PGobject
 import za.co.absa.db.balta.classes.simple.JsonBString
 
-import java.time.{Instant, LocalDate, LocalTime, OffsetDateTime, ZoneId, ZoneOffset}
+import java.time.{Instant, LocalDate, LocalTime, OffsetDateTime, ZoneOffset}
 
 /**
  * This is a trait representing a function that sets a value in a prepared statement.
