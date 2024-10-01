@@ -27,7 +27,7 @@ It's a natural complement to the use of [Fa-Db library](https://github.com/AbsaO
 
  * The transaction start and rollback are done automatically before or after the execution respectively of the `test` function provided
 
-Advantages of this approach is that the tests are repeateble, they are isolated from each other and the database is always 
+Advantages of this approach is that the tests are repeatable, they are isolated from each other and the database is always 
 in a known state before and after each test.
 
 
@@ -39,7 +39,7 @@ The foundation is the [`DBTestSuite`](https://github.com/AbsaOSS/balta/blob/mast
 class that provides the necessary setup and teardown for the tests to each run in its own transaction. It is an 
 enhancement class to standard ScalaTest `AnyFunSuite` class.
 
-Besides that, it provides easy access to tables, query them and insert data into them.
+Besides that, it provides easy access to tables, queries them and inserts data into them.
 
 And it allows easy access to database functions and executing them.
 
