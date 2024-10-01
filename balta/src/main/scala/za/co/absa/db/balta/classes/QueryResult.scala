@@ -56,4 +56,9 @@ class QueryResult(resultSet: ResultSet) extends Iterator[QueryResultRow] {
       throw new NoSuchElementException("No more rows in the result set")
     }
   }
+
+  /**
+   * A naturally easily understandable opposite of `hasNext`
+   */
+  def noMore: Boolean = !hasNext
 }

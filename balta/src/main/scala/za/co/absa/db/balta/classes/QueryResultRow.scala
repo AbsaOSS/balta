@@ -37,14 +37,27 @@ class QueryResultRow private[classes](val rowNumber: Int,
   def columnCount: Int = fields.length
   def columnNumber(columnLabel: String): Int = columnNames(columnLabel.toLowerCase)
 
-  def apply(column: Int): Option[Object] = fields(column - 1)
-  def apply(columnLabel: String): Option[Object] = apply(columnNumber(columnLabel))
+  /**
+   * Extracts a value from the row by column number.
+   * @param column  - the number of the column, 1 based
+   * @return        - the value stored in the column, type `Any` is for warningless comparison with any type
+   */
+  def apply(column: Int): Option[Any] = getObject(column - 1)
+  /**
+   * Extracts a value from the row by column name.
+   * @param columnLabel - the name of the column
+   * @return            - the value stored in the column, type `Any` is for warningless comparison with any type
+   */
+  def apply(columnLabel: String): Option[Any] = getObject(columnNumber(columnLabel))
 
-  def getAs[T](column: Int, transformer: TransformerFnc[T]): Option[T] = apply(column).map(transformer)
-  def getAs[T](column: Int): Option[T] = apply(column)map(_.asInstanceOf[T])
+  def getAs[T](column: Int, transformer: TransformerFnc[T]): Option[T] = getObject(column).map(transformer)
+  def getAs[T](column: Int): Option[T] = getObject(column)map(_.asInstanceOf[T])
 
   def getAs[T](columnLabel: String, transformer: TransformerFnc[T]): Option[T] = getAs(columnNumber(columnLabel), transformer)
-  def getAs[T](columnLabel: String): Option[T] = apply(columnNumber(columnLabel)).map(_.asInstanceOf[T])
+  def getAs[T](columnLabel: String): Option[T] = getObject(columnNumber(columnLabel)).map(_.asInstanceOf[T])
+
+  def getObject(column: Int): Option[Object] = fields(column - 1)
+  def getObject(columnLabel: String): Option[Object] = getObject(columnNumber(columnLabel))
 
   def getBoolean(column: Int): Option[Boolean] = getAs(column: Int, {item: Object => item.asInstanceOf[Boolean]})
   def getBoolean(columnLabel: String): Option[Boolean] = getBoolean(columnNumber(columnLabel))
@@ -58,7 +71,6 @@ class QueryResultRow private[classes](val rowNumber: Int,
     }
   }
   def getChar(columnLabel: String): Option[Char] = getChar(columnNumber(columnLabel))
-
 
   def getString(column: Int): Option[String] = getAs(column: Int, {item: Object => item.asInstanceOf[String]})
   def getString(columnLabel: String): Option[String] = getString(columnNumber(columnLabel))
