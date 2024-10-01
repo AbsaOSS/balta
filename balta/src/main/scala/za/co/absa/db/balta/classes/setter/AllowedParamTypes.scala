@@ -16,7 +16,7 @@
 
 package za.co.absa.db.balta.classes.setter
 
-import za.co.absa.db.balta.classes.simple.JsonBString
+import za.co.absa.db.balta.classes.simple.{JsonBString, SimpleJsonString}
 
 import java.time.{Instant, LocalDate, LocalTime, OffsetDateTime}
 import java.util.UUID
@@ -51,6 +51,8 @@ object AllowedParamTypes {
   implicit object UUIDParamType extends AllowedParamTypes[UUID]
 
   implicit object JsonBParamType extends AllowedParamTypes[JsonBString]
+
+  implicit object SimpleJsonStringParamType extends AllowedParamTypes[SimpleJsonString]
 
   implicit object InstantParamType extends AllowedParamTypes[Instant]
 

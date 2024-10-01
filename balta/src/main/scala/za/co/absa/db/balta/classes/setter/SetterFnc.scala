@@ -19,7 +19,7 @@ package za.co.absa.db.balta.classes.setter
 import java.sql.{Date, PreparedStatement, Time, Types => SqlTypes}
 import java.util.UUID
 import org.postgresql.util.PGobject
-import za.co.absa.db.balta.classes.simple.JsonBString
+import za.co.absa.db.balta.classes.simple.{JsonBString, SimpleJsonString}
 
 import java.time.{Instant, LocalDate, LocalTime, OffsetDateTime, ZoneOffset}
 
@@ -50,7 +50,8 @@ object SetterFnc {
       case ch: Char                    => simple((prep: PreparedStatement, position: Int) => {prep.setString(position, ch.toString)})
       case s: String                   => simple((prep: PreparedStatement, position: Int) => {prep.setString(position, s)})
       case u: UUID                     => new UuidSetterFnc(u)
-      case js: JsonBString             => new JsonBSetterFnc(js)
+      case js: JsonBString             => new JsonSetterFnc(js.value)
+      case js: SimpleJsonString        => new JsonSetterFnc(js.value)
       case i: Instant                  => simple((prep: PreparedStatement, position: Int) => {prep.setObject(position, OffsetDateTime.ofInstant(i, ZoneOffset.UTC))})
       case ts: OffsetDateTime          => simple((prep: PreparedStatement, position: Int) => {prep.setObject(position, ts)})
       case lt: LocalTime               => simple((prep: PreparedStatement, position: Int) => {prep.setTime(position, Time.valueOf(lt))})
@@ -73,10 +74,10 @@ object SetterFnc {
     }
   }
 
-  private class JsonBSetterFnc(value: JsonBString) extends SetterFnc {
+  private class JsonSetterFnc(jsonString: String) extends SetterFnc {
     private val jsonObject = new PGobject()
     jsonObject.setType("jsonb")
-    jsonObject.setValue(value.value)
+    jsonObject.setValue(jsonString)
 
     def apply(prep: PreparedStatement, position: Int): Unit = {
       prep.setObject(position, jsonObject)
