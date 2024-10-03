@@ -54,6 +54,15 @@ class QueryResultRowIntegrationTests extends AnyFunSuiteLike with DBTestingConne
     assert(result == expecedResult)
   }
 
+  test("columnCount") {
+    assert(tableRows.head.columnCount == 14)
+  }
+
+  test("rowNumber") {
+    assert(tableRows.head.rowNumber == 1)
+    assert(tableRows.tail.head.rowNumber == 2)
+  }
+
   test("getLong") {
     //first row
     assert(tableRows.head.getLong(1).contains(1))
