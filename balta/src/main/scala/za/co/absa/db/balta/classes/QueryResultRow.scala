@@ -27,20 +27,23 @@ import java.util.UUID
 /**
  * This is a row of a query result. It allows to safely extract values from the row by column name.
  *
- * @param rowNumber   - the number of the row in the result set
- * @param fields      - the values of the row
- * @param columnNames - the names of the columns
+ * @param rowNumber     - the number of the row in the result set
+ * @param fields        - the values of the row
+ * @param columnLabels  - the names of the columns; class uses `columnLabel(s)` to refer to the column names in accordance
+ *                      to `java.sql.ResultSet`, which is is build around and that despite that aliases are not expected
+ *                      to appear here
  */
 class QueryResultRow private[classes](val rowNumber: Int,
                                       private val fields: Vector[Option[Object]],
-                                      private val columnNames: FieldNames) {
+                                      private val columnLabels: FieldNames) {
 
   def columnCount: Int = fields.length
   def columnNumber(columnLabel: String): Int = {
     val actualLabel = columnLabel.toLowerCase
-    columnNames.getOrThrow(actualLabel, new NoSuchElementException(s"Column '$actualLabel' not found"))
+    columnLabels.getOrThrow(actualLabel, new NoSuchElementException(s"Column '$actualLabel' not found"))
   }
 
+  val r: ResultSet = null
   /**
    * Extracts a value from the row by column number.
    * @param column  - the number of the column, 1 based
