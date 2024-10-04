@@ -17,6 +17,7 @@
 package za.co.absa.db.balta.classes
 
 import QueryResultRow._
+import za.co.absa.db.balta.implicits.MapImplicits.MapEnhancements
 
 import java.sql
 import java.sql.{Date, ResultSet, ResultSetMetaData, Time, Types}
@@ -26,16 +27,21 @@ import java.util.UUID
 /**
  * This is a row of a query result. It allows to safely extract values from the row by column name.
  *
- * @param rowNumber   - the number of the row in the result set
- * @param fields      - the values of the row
- * @param columnNames - the names of the columns
+ * @param rowNumber     - the number of the row in the result set
+ * @param fields        - the values of the row
+ * @param columnLabels  - the names of the columns; class uses `columnLabel(s)` to refer to the column names in accordance
+ *                      to `java.sql.ResultSet`, which is is build around and that despite that aliases are not expected
+ *                      to appear here
  */
 class QueryResultRow private[classes](val rowNumber: Int,
                                       private val fields: Vector[Option[Object]],
-                                      private val columnNames: FieldNames) {
+                                      private val columnLabels: FieldNames) {
 
   def columnCount: Int = fields.length
-  def columnNumber(columnLabel: String): Int = columnNames(columnLabel.toLowerCase)
+  def columnNumber(columnLabel: String): Int = {
+    val actualLabel = columnLabel.toLowerCase
+    columnLabels.getOrThrow(actualLabel, new NoSuchElementException(s"Column '$actualLabel' not found"))
+  }
 
   /**
    * Extracts a value from the row by column number.
@@ -131,7 +137,6 @@ class QueryResultRow private[classes](val rowNumber: Int,
 
     getAs(column: Int, transformerFnc _)
   }
-
 }
 
 object QueryResultRow {
