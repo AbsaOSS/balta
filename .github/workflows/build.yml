@@ -69,6 +69,7 @@ jobs:
           psql postgresql://postgres:postgres@localhost:5432/mag_db -f balta/src/test/resources/db/postgres/05_testing._base_types_data.sql
           psql postgresql://postgres:postgres@localhost:5432/mag_db -f balta/src/test/resources/db/postgres/06_testing.pg_types.ddl
           psql postgresql://postgres:postgres@localhost:5432/mag_db -f balta/src/test/resources/db/postgres/07_testing_pg_types_data.sql
+          psql postgresql://postgres:postgres@localhost:5432/mag_db -f balta/src/test/resources/db/postgres/08_testing.simple_function.sql
 
       - name: Build and run integration tests
         run: sbt ++${{matrix.scala}} testIT
