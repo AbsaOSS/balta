@@ -43,7 +43,6 @@ class QueryResultRow private[classes](val rowNumber: Int,
     columnLabels.getOrThrow(actualLabel, new NoSuchElementException(s"Column '$actualLabel' not found"))
   }
 
-  val r: ResultSet = null
   /**
    * Extracts a value from the row by column number.
    * @param column  - the number of the column, 1 based
