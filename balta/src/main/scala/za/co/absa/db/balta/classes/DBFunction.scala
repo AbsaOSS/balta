@@ -46,6 +46,27 @@ sealed abstract class DBFunction private(functionName: String,
   }
 
   /**
+   * Executes the function without caring about the result. The goal is the side-effect of the function.
+   * @param connection  - the database connection
+   */
+  def perform()(implicit connection: DBConnection): Unit = {
+    execute("")(_ => ())
+  }
+
+  /**
+   * Executes the function without any verification procedure. It instantiates the function result(s) and returns them in
+   * a list.
+   * @param orderBy     - the clause how to order the function result, if empty, default ordering is preserved
+   *                    examples:
+   *                      * "product_id DESC"
+   *                      * "product_name, import_date DESC"
+   * @param connection  - the database connection
+   */
+  def getResult(orderBy: String = "")(implicit connection: DBConnection): List[QueryResultRow] = {
+    execute(orderBy)(_.toList)
+  }
+
+  /**
    *  Executes the function and verifies the result via the verify function.
    *
    * @param verify      - the function that verifies the result
@@ -61,6 +82,9 @@ sealed abstract class DBFunction private(functionName: String,
    *  Executes the function and verifies the result via the verify function.
    *
    * @param orderBy     - the clause how to order the function result
+   *                    examples:
+   *                      * "product_id DESC"
+   *                      * "product_name, import_date DESC"
    * @param verify      - the function that verifies the result
    * @param connection  - the database connection
    * @tparam R          - the type of the result that is returned by the verify function
