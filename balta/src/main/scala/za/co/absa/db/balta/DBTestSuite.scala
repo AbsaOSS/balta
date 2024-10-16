@@ -35,7 +35,11 @@ import java.util.Properties
  * * easy access to DB tables and functions
  * * the now() function that returns the current transaction time in the DB
  */
-abstract class DBTestSuite extends AnyFunSuite {
+abstract class DBTestSuite(val persistDataOverride: Option[Boolean] = None) extends AnyFunSuite {
+
+  def this(persistDataOverride: Boolean) {
+    this(Some(persistDataOverride));
+  }
 
   /* the DB connection is ``lazy`, so it actually can be created only when needed and therefore the credentials
   overridden in the successor */
@@ -44,7 +48,9 @@ abstract class DBTestSuite extends AnyFunSuite {
   /**
    * This is the connection info for the DB. It can be overridden in the derived classes to provide specific credentials
    */
-  protected lazy val connectionInfo: ConnectionInfo = readConnectionInfoFromConfig
+  protected lazy val connectionInfo: ConnectionInfo = {
+    persistDataOverride.map(overrideValue => connectionInfo.copy(persistData = overrideValue)).getOrElse(connectionInfo)
+  }
 
   /**
    * This is an enhanced test function that automatically rolls back the transaction after the test is finished
