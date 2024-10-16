@@ -30,7 +30,8 @@ trait DBQuerySupport {
 
     setters.foldLeft(1) { case (parameterIndex, fnc) =>
       fnc(preparedStatement, parameterIndex)
-      parameterIndex + 1
+      if (fnc.setsToNull) parameterIndex //null values is entered as constant, not as parameter
+      else parameterIndex + 1
     }
 
     val result = preparedStatement.executeQuery()
