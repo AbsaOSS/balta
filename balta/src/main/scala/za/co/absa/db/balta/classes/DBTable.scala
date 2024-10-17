@@ -160,8 +160,6 @@ case class DBTable(tableName: String) extends DBQuerySupport{
   def delete(whereCondition: String = "")(implicit connection: DBConnection): Unit = {
     composeDeleteAndRun(strToOption(whereCondition))(_ => ())
   }
-
-
   /**
    * Counts the rows in the table.
    * @param connection  - a database connection used for the SELECT operation.
