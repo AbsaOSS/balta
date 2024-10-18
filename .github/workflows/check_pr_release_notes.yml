@@ -24,10 +24,10 @@ on:
 jobs:
   check-release-notes:
     runs-on: ubuntu-latest
+    env:
+      SKIP_LABEL: 'skip-release-notes-check'
+      RLS_NOTES_TAG_REGEX: 'Release Notes:'
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
       - name: Get Pull Request Info
         id: pr_info
         uses: actions/github-script@v7
@@ -41,10 +41,11 @@ jobs:
             });
             const labels = pr.data.labels ? pr.data.labels.map(label => label.name) : [];
 
-            // Check if "skip-release-notes-check" label is present
-            if (labels.includes("skip-release-notes-check")) {
-              console.log("Skipping release notes check because 'skip-release-notes-check' label is present.");
+            // Check if SKIP_LABEL is present
+            if (labels.includes(${{ env.SKIP_LABEL }})) {
+              console.log("Skipping release notes check because '${{ env.SKIP_LABEL }}' label is present.");
               core.setOutput("skip_check", 'true');
+              core.setOutput("pr_body", "");
               return;
             }
 
@@ -59,7 +60,7 @@ jobs:
             core.setOutput("skip_check", 'false');
             return;
 
-      - name: Skip check if 'skip-release-notes-check' label is present
+      - name: Skip check if SKIP_LABEL is present
         if: steps.pr_info.outputs.skip_check == 'true'
         run: echo "Skipping release notes validation."
 
@@ -70,16 +71,16 @@ jobs:
           PR_BODY="${{ steps.pr_info.outputs.pr_body }}"
 
           # Check if "Release Notes:" exists
-          if ! echo "$PR_BODY" | grep -q 'Release Notes:'; then
-            echo "Error: 'Release Notes:' not found in pull request description."
+          if ! echo "$PR_BODY" | grep -q '${{ env.RLS_NOTES_TAG_REGEX }}'; then
+            echo "Error: release notes tag not found in pull request description. Has to adhere to format '${{ env.RLS_NOTES_TAG_REGEX }}'."
             exit 1
           fi
 
           # Extract text after "Release Notes:" line
-          RELEASE_NOTES=$(echo "$PR_BODY" | sed -n '/[Rr]elease.*[Nn]otes/,$p' | tail -n +2)
+          TEXT_BELOW_RELEASE_NOTES_TAG=$(echo "$PR_BODY" | sed -n '/${{ env.RLS_NOTES_TAG_REGEX }}/,$p' | tail -n +2)
 
           # Check if there's a bullet list (lines starting with '-', '+' or '*')
-          if ! echo "$RELEASE_NOTES" | grep -qE '^\s*[-+*]\s+.+$'; then
-            echo "Error: No bullet list found under 'Release Notes:'."
+          if ! echo "$TEXT_BELOW_RELEASE_NOTES_TAG" | grep -qE '^\s*[-+*]\s+.+$'; then
+            echo "Error: No bullet list found under release notes tag."
             exit 1
           fi
