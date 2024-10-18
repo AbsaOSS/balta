@@ -49,7 +49,9 @@ abstract class DBTestSuite(val persistDataOverride: Option[Boolean] = None) exte
    * This is the connection info for the DB. It can be overridden in the derived classes to provide specific credentials
    */
   protected lazy val connectionInfo: ConnectionInfo = {
-    persistDataOverride.map(overrideValue => connectionInfo.copy(persistData = overrideValue)).getOrElse(connectionInfo)
+    val connectionInfoFromConfig = readConnectionInfoFromConfig
+    persistDataOverride.map(overrideValue => connectionInfoFromConfig.copy(persistData = overrideValue))
+      .getOrElse(connectionInfoFromConfig)
   }
 
   /**
@@ -152,7 +154,7 @@ abstract class DBTestSuite(val persistDataOverride: Option[Boolean] = None) exte
   }
 
   // private functions
-  private def readConnectionInfoFromConfig: ConnectionInfo = {
+  protected def readConnectionInfoFromConfig: ConnectionInfo = {
     val properties = new Properties()
     properties.load(getClass.getResourceAsStream("/database.properties"))
 
