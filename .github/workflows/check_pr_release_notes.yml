@@ -22,7 +22,7 @@ on:
     branches: [ master ]
 
 env:
-  SKIP_LABEL: 'skip-release-notes-check'
+  SKIP_LABEL: 'no RN'
   RLS_NOTES_TAG_REGEX: 'Release Notes:'
 
 jobs:
