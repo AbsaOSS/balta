@@ -43,7 +43,7 @@ jobs:
             });
             const labels = pr.data.labels ? pr.data.labels.map(label => label.name) : [];
 
-            if (labels.includes(${{ env.SKIP_LABEL }})) {
+            if (labels.includes("${{ env.SKIP_LABEL }}")) {
               console.log("Skipping release notes check because '${{ env.SKIP_LABEL }}' label is present.");
               core.setOutput("skip_check", 'true');
               core.setOutput("pr_body", "");
