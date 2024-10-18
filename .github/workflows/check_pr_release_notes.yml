@@ -21,12 +21,14 @@ on:
     types: [opened, synchronize, reopened, edited, labeled, unlabeled]
     branches: [ master ]
 
+env:
+  SKIP_LABEL: 'skip-release-notes-check'
+  RLS_NOTES_TAG_REGEX: 'Release Notes:'
+
 jobs:
-  check-release-notes:
+  check-pr-release-notes:
     runs-on: ubuntu-latest
-    env:
-      SKIP_LABEL: 'skip-release-notes-check'
-      RLS_NOTES_TAG_REGEX: 'Release Notes:'
+
     steps:
       - name: Get Pull Request Info
         id: pr_info
@@ -41,7 +43,6 @@ jobs:
             });
             const labels = pr.data.labels ? pr.data.labels.map(label => label.name) : [];
 
-            // Check if SKIP_LABEL is present
             if (labels.includes(${{ env.SKIP_LABEL }})) {
               console.log("Skipping release notes check because '${{ env.SKIP_LABEL }}' label is present.");
               core.setOutput("skip_check", 'true');
