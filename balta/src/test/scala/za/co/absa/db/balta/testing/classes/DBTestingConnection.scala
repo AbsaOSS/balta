@@ -16,15 +16,24 @@
 
 package za.co.absa.db.balta.testing.classes
 
-import za.co.absa.db.balta.classes.DBConnection
+import za.co.absa.db.balta.classes.{DBConnection, QueryResult}
 import za.co.absa.db.balta.classes.simple.ConnectionInfo
 
+import java.time.OffsetDateTime
 import java.util.Properties
 
 trait DBTestingConnection {
   lazy implicit val connection: DBConnection = DBConnection(connectionInfo)
 
   protected lazy val connectionInfo: ConnectionInfo = readConnectionInfoFromConfig
+
+  protected def now(): OffsetDateTime = {
+    val preparedStatement = connection.connection.prepareStatement("SELECT now() AS now")
+    val prep = preparedStatement.executeQuery()
+    val result = new QueryResult(prep).next().getOffsetDateTime("now").get
+    prep.close()
+    result
+  }
 
   private def readConnectionInfoFromConfig: ConnectionInfo = {
     val properties = new Properties()

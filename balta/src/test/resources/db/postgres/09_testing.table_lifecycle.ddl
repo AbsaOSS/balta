@@ -14,16 +14,16 @@
  * limitations under the License.
  */
 
-DROP TABLE IF EXISTS testing.pg_types;
+DROP TABLE IF EXISTS testing.table_lifecycle;
 
-CREATE TABLE testing.pg_types
+CREATE TABLE testing.table_lifecycle
 (
-    id bigint NOT NULL,
-    json_type json,
-    jsonb_type jsonb,
-    array_of_json_type json[],
-    PRIMARY KEY (id)
+    id_field bigint NOT NULL,
+    text_field text,
+    boolean_field boolean,
+    created_at timestamp with time zone NOT NULL DEFAULT now(),
+    PRIMARY KEY (id_field)
 );
 
-ALTER TABLE IF EXISTS testing.pg_types
+ALTER TABLE IF EXISTS testing.table_lifecycle
     OWNER to mag_owner;
