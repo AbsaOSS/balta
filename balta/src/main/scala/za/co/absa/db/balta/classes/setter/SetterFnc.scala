@@ -28,6 +28,7 @@ import java.time.{Instant, LocalDate, LocalTime, OffsetDateTime, ZoneOffset}
  */
 abstract class SetterFnc extends ((PreparedStatement, Int) => Unit) {
   def sqlEntry: String = "?"
+  def setsToNull: Boolean = false
 }
 
 object SetterFnc {
@@ -60,7 +61,12 @@ object SetterFnc {
     }
   }
 
-  val nullSetterFnc: SetterFnc = simple((prep: PreparedStatement, position: Int) => prep.setNull(position, SqlTypes.NULL))
+  val nullSetterFnc: SetterFnc = new SetterFnc {
+    override def apply(v1: PreparedStatement, v2: Int): Unit = {}
+    override def sqlEntry: String = "NULL"
+    override def setsToNull: Boolean = true
+  }
+    //simple((prep: PreparedStatement, position: Int) => prep.setNull(position, SqlTypes.NULL))
 
   private [this] def simple(body: (PreparedStatement, Int) => Unit): SetterFnc = {
     new SetterFnc {
