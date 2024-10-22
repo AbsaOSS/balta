@@ -154,9 +154,15 @@ abstract class DBTestSuite(val persistDataOverride: Option[Boolean] = None) exte
   }
 
   // private functions
-  protected def readConnectionInfoFromConfig: ConnectionInfo = {
+  private def readConnectionInfoFromConfig: ConnectionInfo = {
+    DBTestSuite.connectionInfoFromResourceConfig("/database.properties")
+  }
+}
+
+object DBTestSuite {
+  def connectionInfoFromResourceConfig(resourceName: String): ConnectionInfo = {
     val properties = new Properties()
-    properties.load(getClass.getResourceAsStream("/database.properties"))
+    properties.load(getClass.getResourceAsStream(resourceName))
 
     ConnectionInfo(
       dbUrl = properties.getProperty("test.jdbc.url"),
