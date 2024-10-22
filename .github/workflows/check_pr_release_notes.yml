@@ -69,7 +69,10 @@ jobs:
         if: steps.pr_info.outputs.skip_check == 'false'
         run: |
           # Extract the body from the previous step
-          PR_BODY="${{ steps.pr_info.outputs.pr_body }}"
+          PR_BODY=$(cat <<-'EOF'
+          ${{ steps.pr_info.outputs.pr_body }}
+          EOF
+          )
 
           # Check if "Release Notes:" exists
           if ! echo "$PR_BODY" | grep -q '${{ env.RLS_NOTES_TAG_REGEX }}'; then
