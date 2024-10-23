@@ -113,7 +113,7 @@ jobs:
 
       - name: Generate release notes
         id: generate_release_notes
-        uses: AbsaOSS/generate-release-notes@feature/v0.4.0
+        uses: AbsaOSS/generate-release-notes@v0.4.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
