@@ -35,7 +35,11 @@ import java.util.Properties
  * * easy access to DB tables and functions
  * * the now() function that returns the current transaction time in the DB
  */
-abstract class DBTestSuite extends AnyFunSuite {
+abstract class DBTestSuite(val persistDataOverride: Option[Boolean] = None) extends AnyFunSuite {
+
+  def this(persistDataOverride: Boolean) {
+    this(Some(persistDataOverride));
+  }
 
   /* the DB connection is ``lazy`, so it actually can be created only when needed and therefore the credentials
   overridden in the successor */
@@ -44,7 +48,11 @@ abstract class DBTestSuite extends AnyFunSuite {
   /**
    * This is the connection info for the DB. It can be overridden in the derived classes to provide specific credentials
    */
-  protected lazy val connectionInfo: ConnectionInfo = readConnectionInfoFromConfig
+  protected lazy val connectionInfo: ConnectionInfo = {
+    val connectionInfoFromConfig = readConnectionInfoFromConfig
+    persistDataOverride.map(overrideValue => connectionInfoFromConfig.copy(persistData = overrideValue))
+      .getOrElse(connectionInfoFromConfig)
+  }
 
   /**
    * This is an enhanced test function that automatically rolls back the transaction after the test is finished
@@ -147,8 +155,14 @@ abstract class DBTestSuite extends AnyFunSuite {
 
   // private functions
   private def readConnectionInfoFromConfig: ConnectionInfo = {
+    DBTestSuite.connectionInfoFromResourceConfig("/database.properties")
+  }
+}
+
+object DBTestSuite {
+  def connectionInfoFromResourceConfig(resourceName: String): ConnectionInfo = {
     val properties = new Properties()
-    properties.load(getClass.getResourceAsStream("/database.properties"))
+    properties.load(getClass.getResourceAsStream(resourceName))
 
     ConnectionInfo(
       dbUrl = properties.getProperty("test.jdbc.url"),
