@@ -51,7 +51,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - uses: coursier/cache-action@v5
+      - uses: coursier/cache-action@v6
 
       - name: Setup Scala
         uses: olafurpg/setup-scala@v10
