@@ -48,10 +48,10 @@ ThisBuild / developers := List(
     url   = url("https://github.com/ABLL526")
   ),
   Developer(
-    id    = "MatloaItumeleng",
-    name  = "Itumeleng Matloa",
-    email = "itumeleng.matloa@absa.africa",
-    url   = url("https://github.com/MatloaItumeleng")
+    id = "jakipatryk",
+    name = "Bartlomiej Baj",
+    email = "bartlomiej.baj@absa.africa",
+    url = url("https://github.com/jakipatryk")
   ),
   Developer(
     id = "salamonpavel",
