@@ -42,6 +42,18 @@ ThisBuild / developers := List(
     url   = url("https://github.com/lsulak")
   ),
   Developer(
+    id    = "ABLL526",
+    name  = "Liam Leibrandt",
+    email = "liam.leibrandt@absa.africa",
+    url   = url("https://github.com/ABLL526")
+  ),
+  Developer(
+    id = "jakipatryk",
+    name = "Bartlomiej Baj",
+    email = "bartlomiej.baj@absa.africa",
+    url = url("https://github.com/jakipatryk")
+  ),
+  Developer(
     id = "salamonpavel",
     name = "Pavel Salamon",
     email = "pavel.salamon@absa.africa",
@@ -50,7 +62,6 @@ ThisBuild / developers := List(
 )
 
 ThisBuild / organization := "za.co.absa.db"
-sonatypeProfileName := "za.co.absa"
 
 ThisBuild / organizationName := "ABSA Group Limited"
 ThisBuild / organizationHomepage := Some(url("https://www.absa.africa"))

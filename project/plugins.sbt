@@ -1,4 +1,4 @@
-lazy val sbtCiReleaseVersion = "1.5.10"
+lazy val sbtCiReleaseVersion = "1.11.2"
 
 lazy val ow2Version = "9.5"
 lazy val jacocoVersion = "0.8.10-absa.1"
