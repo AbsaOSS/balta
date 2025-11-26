@@ -31,7 +31,7 @@ case class SimpleJsonString(value: String) extends AnyVal
 object SimpleJsonString {
   implicit def fromString(value: String): SimpleJsonString = SimpleJsonString(value)
 
-  implicit object SimpleJsonStringParamType extends QueryParamType[SimpleJsonString] {
+  implicit object ParamTypeSimpleJsonString extends QueryParamType[SimpleJsonString] {
     override def toQueryParamValue(value: SimpleJsonString): QueryParamValue = new PostgresObjectQueryParamValue(value.value, "json")
   }
 }

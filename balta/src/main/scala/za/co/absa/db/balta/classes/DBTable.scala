@@ -18,9 +18,7 @@ package za.co.absa.db.balta.classes
 
 import za.co.absa.db.balta.classes.inner.Params
 import za.co.absa.db.balta.classes.inner.Params.NamedParams
-import javax.management.Query
-import za.co.absa.db.balta.typeclasses.QueryParamValue
-import za.co.absa.db.balta.typeclasses.QueryParamType
+import za.co.absa.db.balta.typeclasses.{QueryParamValue, QueryParamType}
 
 /**
   * This class represents a database table. It allows to perform INSERT, SELECT and COUNT operations on the table easily.

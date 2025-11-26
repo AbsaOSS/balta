@@ -23,6 +23,7 @@ import za.co.absa.db.balta.implicits.OptionImplicits.OptionEnhancements
 import DBTableIntegrationTests.QueryResultRowAssertion
 
 import java.time.OffsetDateTime
+import za.co.absa.db.balta.typeclasses.QueryParamType.NULL
 
 class DBTableIntegrationTests extends AnyFunSuiteLike with DBTestingConnection{
   private val table = DBTable("testing.table_lifecycle")
@@ -53,8 +54,8 @@ class DBTableIntegrationTests extends AnyFunSuiteLike with DBTestingConnection{
     )
     val insertedNulls = table.insert(Params
       .add("id_field", 5)
-      .addNull("text_field")
-      .addNull("boolean_field")
+      .add("text_field", NULL)
+      .add("boolean_field", NULL)
     )
     insertedNulls.assertHasJustId(5)
 
@@ -124,8 +125,8 @@ class DBTableIntegrationTests extends AnyFunSuiteLike with DBTestingConnection{
     )
     val insertedNulls = table.insert(Params
       .add("id_field", 5)
-      .addNull("text_field")
-      .addNull("boolean_field")
+      .add("text_field", NULL)
+      .add("boolean_field", NULL)
     )
     insertedNulls.assertHasJustId(5)
 

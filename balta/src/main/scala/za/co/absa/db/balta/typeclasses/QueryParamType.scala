@@ -31,61 +31,61 @@ trait QueryParamType[T] {
 
 object QueryParamType {
 
-  implicit object SQLParamBoolean extends QueryParamType[Boolean] {
+  implicit object QueryParamBoolean extends QueryParamType[Boolean] {
     override def toQueryParamValue(value: Boolean): QueryParamValue = new SimpleQueryParamValue((prep: PreparedStatement, position: Int) => {prep.setBoolean(position, value)})
   }
 
-  implicit object SQLParamInt extends QueryParamType[Int] {
+  implicit object QueryParamInt extends QueryParamType[Int] {
     override def toQueryParamValue(value: Int): QueryParamValue = new SimpleQueryParamValue((prep: PreparedStatement, position: Int) => {prep.setInt(position, value)})
   }
 
-  implicit object SQLParamLong extends QueryParamType[Long] {
+  implicit object QueryParamLong extends QueryParamType[Long] {
     override def toQueryParamValue(value: Long): QueryParamValue = new SimpleQueryParamValue((prep: PreparedStatement, position: Int) => {prep.setLong(position, value)})
   }
 
-  implicit object SQLParamString extends QueryParamType[String] {
+  implicit object QueryParamString extends QueryParamType[String] {
     override def toQueryParamValue(value: String): QueryParamValue = new SimpleQueryParamValue((prep: PreparedStatement, position: Int) => {prep.setString(position, value)})
   }
 
-  implicit object SQLParamDouble extends QueryParamType[Double] {
+  implicit object QueryParamDouble extends QueryParamType[Double] {
     override def toQueryParamValue(value: Double): QueryParamValue = new SimpleQueryParamValue((prep: PreparedStatement, position: Int) => {prep.setDouble(position, value)})
   }
 
-  implicit object SQLParamFloat extends QueryParamType[Float] {
+  implicit object QueryParamFloat extends QueryParamType[Float] {
     override def toQueryParamValue(value: Float): QueryParamValue = new SimpleQueryParamValue((prep: PreparedStatement, position: Int) => {prep.setFloat(position, value)})
   }
 
-  implicit object SQLParamBigDecimal extends QueryParamType[BigDecimal] {
+  implicit object QueryParamBigDecimal extends QueryParamType[BigDecimal] {
     override def toQueryParamValue(value: BigDecimal): QueryParamValue = new SimpleQueryParamValue((prep: PreparedStatement, position: Int) => {prep.setBigDecimal(position, value.bigDecimal)})
   }
 
-  implicit object SQLParamChar extends QueryParamType[Char] {
+  implicit object QueryParamChar extends QueryParamType[Char] {
     override def toQueryParamValue(value: Char): QueryParamValue = new SimpleQueryParamValue((prep: PreparedStatement, position: Int) => {prep.setString(position, value.toString)})
   }
 
-  implicit object SQLParamInstant extends QueryParamType[Instant] {
+  implicit object QueryParamInstant extends QueryParamType[Instant] {
     override def toQueryParamValue(value: Instant): QueryParamValue = new ObjectQueryParamValue(OffsetDateTime.ofInstant(value, ZoneOffset.UTC))
   }
 
-  implicit object SQLParamOffsetDateTime extends QueryParamType[OffsetDateTime] {
+  implicit object QueryParamOffsetDateTime extends QueryParamType[OffsetDateTime] {
     override def toQueryParamValue(value: OffsetDateTime): QueryParamValue = new ObjectQueryParamValue(value)
   }
 
-  implicit object SQLParamLocalTime extends QueryParamType[LocalTime] {
+  implicit object QueryParamLocalTime extends QueryParamType[LocalTime] {
     override def toQueryParamValue(value: LocalTime): QueryParamValue = new SimpleQueryParamValue((prep: PreparedStatement, position: Int) => {prep.setTime(position, Time.valueOf(value))})
   }
 
-  implicit object SQLParamLocalDate extends QueryParamType[LocalDate] {
+  implicit object QueryParamLocalDate extends QueryParamType[LocalDate] {
     override def toQueryParamValue(value: LocalDate): QueryParamValue = new SimpleQueryParamValue((prep: PreparedStatement, position: Int) => {prep.setDate(position, Date.valueOf(value))})
   }
 
-  implicit object SQLParamUUID extends QueryParamType[UUID] {
+  implicit object QueryParamUUID extends QueryParamType[UUID] {
     override def toQueryParamValue(value: UUID): QueryParamValue = new ObjectQueryParamValue(value)
   }
 
   object NULL
 
-  implicit object SQLParamNull extends QueryParamType[NULL.type] {
+  implicit object QueryParamNull extends QueryParamType[NULL.type] {
     override def toQueryParamValue(value: NULL.type): QueryParamValue = QueryParamValue.NullParamValue
   }
 

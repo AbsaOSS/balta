@@ -19,16 +19,15 @@ package za.co.absa.db.balta
 import org.scalactic.source
 import org.scalatest.Tag
 import org.scalatest.funsuite.AnyFunSuite
+import za.co.absa.db.balta.classes.{DBConnection, DBFunction, DBTable, QueryResult}
 import za.co.absa.db.balta.classes.DBFunction.DBFunctionWithPositionedParamsOnly
 import za.co.absa.db.balta.classes.inner.Params
 import za.co.absa.db.balta.classes.inner.Params.{NamedParams, OrderedParams}
-import classes.{DBConnection, DBFunction, DBTable, QueryResult}
 import za.co.absa.db.balta.classes.inner.ConnectionInfo
+import za.co.absa.db.balta.typeclasses.QueryParamType
 
 import java.time.OffsetDateTime
 import java.util.Properties
-import javax.management.Query
-import za.co.absa.db.balta.typeclasses.QueryParamType
 
 /**
  * This is a base class for all DB tests. It inherits from AnyFunSuite and provides the following:

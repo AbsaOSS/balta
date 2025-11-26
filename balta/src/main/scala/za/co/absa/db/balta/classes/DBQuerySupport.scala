@@ -16,7 +16,6 @@
 
 package za.co.absa.db.balta.classes
 
-import javax.management.Query
 import za.co.absa.db.balta.typeclasses.QueryParamValue
 
 /**
