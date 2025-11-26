@@ -14,7 +14,12 @@
  * limitations under the License.
  */
 
-package za.co.absa.db.balta.classes.simple
+package za.co.absa.db.balta.postgres.classes
+
+import scala.language.implicitConversions
+import za.co.absa.db.balta.typeclasses.QueryParamType
+import za.co.absa.db.balta.typeclasses.QueryParamValue
+import za.co.absa.db.balta.postgres.typeclasses.PostgresQueryParamValue.PostgresObjectQueryParamValue
 
 /**
  * A simple class to signal a JSON string is expected. No validation is performed. No extended comparison functionality
@@ -22,4 +27,12 @@ package za.co.absa.db.balta.classes.simple
  * @param value A JSON string.
  */
 case class SimpleJsonString(value: String) extends AnyVal
+
+object SimpleJsonString {
+  implicit def fromString(value: String): SimpleJsonString = SimpleJsonString(value)
+
+  implicit object SimpleJsonStringParamType extends QueryParamType[SimpleJsonString] {
+    override def toQueryParamValue(value: SimpleJsonString): QueryParamValue = new PostgresObjectQueryParamValue(value.value, "json")
+  }
+}
 

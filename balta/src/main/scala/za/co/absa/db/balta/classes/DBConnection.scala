@@ -16,7 +16,8 @@
 
 package za.co.absa.db.balta.classes
 
-import za.co.absa.db.balta.classes.simple.ConnectionInfo
+import scala.language.implicitConversions
+import za.co.absa.db.balta.classes.inner.ConnectionInfo
 
 import java.sql.{Connection, DriverManager}
 
@@ -28,4 +29,14 @@ object DBConnection {
     connection.setAutoCommit(false)
     new DBConnection(connection)
   }
+
+  def apply(dbUrl: String, username: String, password: String, persistData: Boolean = false): DBConnection =
+    apply(ConnectionInfo(dbUrl, username, password, persistData)
+)
+
+  /**
+   * This implicit conversion allows to use a DBConnection at any place where as a JDBC Connection is required.
+   */
+  implicit def dbConnectionToJdbcConnection(in: DBConnection): Connection = in.connection
+
 }

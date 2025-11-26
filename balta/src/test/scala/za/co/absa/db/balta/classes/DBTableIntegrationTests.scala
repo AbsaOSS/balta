@@ -17,7 +17,7 @@
 package za.co.absa.db.balta.classes
 
 import org.scalatest.funsuite.AnyFunSuiteLike
-import za.co.absa.db.balta.classes.setter.Params
+import za.co.absa.db.balta.classes.inner.Params
 import za.co.absa.db.balta.testing.classes.DBTestingConnection
 import za.co.absa.db.balta.implicits.OptionImplicits.OptionEnhancements
 import DBTableIntegrationTests.QueryResultRowAssertion

@@ -16,22 +16,27 @@
 
 package za.co.absa.db.balta.classes
 
-import za.co.absa.db.balta.classes.setter.SetterFnc
+import javax.management.Query
+import za.co.absa.db.balta.typeclasses.QueryParamValue
 
 /**
  * This is a based trait providing the ability to run an SQL query and verify the result via a provided function.
  */
 trait DBQuerySupport {
 
-  protected def runQuery[R](sql: String, setters: List[SetterFnc])
+  protected def runQuery[R](sql: String, queryValues: List[QueryParamValue])
                  (verify: QueryResult => R /* Assertion */)
                  (implicit connection: DBConnection): R = {
     val preparedStatement = connection.connection.prepareStatement(sql)
 
-    setters.foldLeft(1) { case (parameterIndex, fnc) =>
-      fnc(preparedStatement, parameterIndex)
-      if (fnc.setsToNull) parameterIndex //null values is entered as constant, not as parameter
-      else parameterIndex + 1
+    queryValues.foldLeft(1) { case (parameterIndex, queryValue) =>
+      queryValue.assign match { // this is better readable-wise than map + getOrElse
+        case Some(assignFnc) =>
+          assignFnc(preparedStatement, parameterIndex)
+          parameterIndex + 1
+        case None =>
+          parameterIndex
+      }
     }
 
     val result = preparedStatement.executeQuery()

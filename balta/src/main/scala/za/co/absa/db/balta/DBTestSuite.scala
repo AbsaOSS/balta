@@ -20,13 +20,15 @@ import org.scalactic.source
 import org.scalatest.Tag
 import org.scalatest.funsuite.AnyFunSuite
 import za.co.absa.db.balta.classes.DBFunction.DBFunctionWithPositionedParamsOnly
-import classes.setter.{AllowedParamTypes, Params}
-import za.co.absa.db.balta.classes.setter.Params.{NamedParams, OrderedParams}
+import za.co.absa.db.balta.classes.inner.Params
+import za.co.absa.db.balta.classes.inner.Params.{NamedParams, OrderedParams}
 import classes.{DBConnection, DBFunction, DBTable, QueryResult}
-import za.co.absa.db.balta.classes.simple.ConnectionInfo
+import za.co.absa.db.balta.classes.inner.ConnectionInfo
 
 import java.time.OffsetDateTime
 import java.util.Properties
+import javax.management.Query
+import za.co.absa.db.balta.typeclasses.QueryParamType
 
 /**
  * This is a base class for all DB tests. It inherits from AnyFunSuite and provides the following:
@@ -118,7 +120,7 @@ abstract class DBTestSuite(val persistDataOverride: Option[Boolean] = None) exte
    * @tparam T        - the type of the parameter value
    * @return          - a list parameters to be used in an SQL prepared statement
    */
-  protected def add[T: AllowedParamTypes](paramName: String, value: T): NamedParams = {
+  protected def add[T: QueryParamType](paramName: String, value: T): NamedParams = {
     Params.add(paramName, value)
   }
 
@@ -128,6 +130,7 @@ abstract class DBTestSuite(val persistDataOverride: Option[Boolean] = None) exte
    * @param paramName - the name of the parameter
    * @return          - a list parameters to be used in an SQL prepared statement
    */
+  @deprecated("Use add(NULL)", "balta 0.3.0")
   protected def addNull(paramName: String): NamedParams = {
     Params.addNull(paramName)
   }
@@ -139,7 +142,7 @@ abstract class DBTestSuite(val persistDataOverride: Option[Boolean] = None) exte
    * @tparam T    - the type of the parameter value
    * @return      - a list parameters to be used in an SQL prepared statement
    */
-  protected def add[T: AllowedParamTypes](value: T): OrderedParams = {
+  protected def add[T: QueryParamType](value: T): OrderedParams = {
     Params.add(value)
   }
 
@@ -149,7 +152,8 @@ abstract class DBTestSuite(val persistDataOverride: Option[Boolean] = None) exte
    * @tparam T - the type of the parameter value
    * @return   - a list parameters to be used in an SQL prepared statement
    */
-  protected def addNull[T: AllowedParamTypes](): OrderedParams = {
+  @deprecated("Use add(NULL)", "balta 0.3.0")
+  protected def addNull[T: QueryParamType](): OrderedParams = {
     Params.addNull()
   }
 

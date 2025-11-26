@@ -17,9 +17,9 @@
 package za.co.absa.db.balta.classes
 
 import DBFunction.{DBFunctionWithNamedParamsToo, DBFunctionWithPositionedParamsOnly, ParamsMap}
-import za.co.absa.db.balta.classes.setter.{AllowedParamTypes, SetterFnc}
 
 import scala.collection.immutable.ListMap
+import za.co.absa.db.balta.typeclasses.{QueryParamValue, QueryParamType}
 
 /**
  * A class that represents a database function call. It can be used to execute a function and verify the result.
@@ -103,10 +103,10 @@ sealed abstract class DBFunction private(functionName: String,
     * @param value      - the value of the parameter
     * @return           - a new instance of the DBFunction class with the new parameter
     */
-  def setParam[T: AllowedParamTypes](paramName: String, value: T): DBFunctionWithNamedParamsToo = {
+  def setParam[T: QueryParamType](paramName: String, value: T): DBFunctionWithNamedParamsToo = {
     val key = Right(paramName) // TODO normalization TODO https://github.com/AbsaOSS/balta/issues/1
-    val fnc = SetterFnc.createSetterFnc(value)
-    DBFunctionWithNamedParamsToo(functionName, params + (key -> fnc))
+    val queryValue = implicitly[QueryParamType[T]].toQueryParamValue(value)
+    DBFunctionWithNamedParamsToo(functionName, params + (key -> queryValue))
   }
 
   /**
@@ -116,10 +116,9 @@ sealed abstract class DBFunction private(functionName: String,
     * @param paramName  - the name of the parameter to set
     * @return           - a new instance of the DBFunction class with the new parameter
     */
-  def setParamNull(paramName: String): DBFunctionWithPositionedParamsOnly = {
-    val key = Right(paramName) // TODO normalization TODO https://github.com/AbsaOSS/balta/issues/1
-    val fnc = SetterFnc.nullSetterFnc
-    DBFunctionWithPositionedParamsOnly(functionName, params + (key -> fnc))
+  @deprecated("Use setParam(NULL)", "balta 0.3.0")
+  def setParamNull(paramName: String): DBFunctionWithNamedParamsToo = {
+    setParam(paramName, QueryParamType.NULL)
   }
 
   /**
@@ -135,7 +134,7 @@ sealed abstract class DBFunction private(functionName: String,
 
 object DBFunction {
 
-  type ParamsMap = ListMap[Either[Int, String], SetterFnc]
+  type ParamsMap = ListMap[Either[Int, String], QueryParamValue]
 
   /**
    * Creates a new instance of the DBFunction class with the given function name without any parameters set.
@@ -164,10 +163,10 @@ object DBFunction {
      * @param value  - the value of the parameter
      * @return       - a new instance of the DBFunction class with the new parameter
      */
-    def setParam[T: AllowedParamTypes](value: T): DBFunctionWithPositionedParamsOnly = {
+    def setParam[T: QueryParamType](value: T): DBFunctionWithPositionedParamsOnly = {
       val key = Left(params.size + 1)
-      val fnc = SetterFnc.createSetterFnc(value)
-      DBFunctionWithPositionedParamsOnly(functionName, params + (key -> fnc))
+      val queryValue = implicitly[QueryParamType[T]].toQueryParamValue(value)
+      DBFunctionWithPositionedParamsOnly(functionName, params + (key -> queryValue))
     }
 
     /**
@@ -176,10 +175,9 @@ object DBFunction {
      *
      * @return       - a new instance of the DBFunction class with the new parameter
      */
+    @deprecated("Use setParam(NULL)", "balta 0.3.0")
     def setParamNull(): DBFunctionWithPositionedParamsOnly = {
-      val key = Left(params.size + 1)
-      val fnc = SetterFnc.nullSetterFnc
-      DBFunctionWithPositionedParamsOnly(functionName, params + (key -> fnc))
+      setParam(QueryParamType.NULL)
     }
 
   }
