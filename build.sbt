@@ -38,6 +38,10 @@ lazy val commonJacocoExcludes: Seq[String] = Seq()
 lazy val balta = (project in file("balta"))
   .settings(
     name := "balta",
+    scalacOptions ++= Seq(
+      "-deprecation",
+      "-feature",
+    ),
     crossScalaVersions := supportedScalaVersions,
     libraryDependencies ++= libDependencies,
     jacocoReportSettings := commonJacocoReportSettings.withTitle(s"balta - scala:${scalaVersion.value}"),

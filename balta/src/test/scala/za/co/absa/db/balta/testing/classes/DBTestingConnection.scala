@@ -17,7 +17,7 @@
 package za.co.absa.db.balta.testing.classes
 
 import za.co.absa.db.balta.classes.{DBConnection, QueryResult}
-import za.co.absa.db.balta.classes.simple.ConnectionInfo
+import za.co.absa.db.balta.classes.inner.ConnectionInfo
 
 import java.time.OffsetDateTime
 import java.util.Properties

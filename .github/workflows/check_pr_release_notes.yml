@@ -21,6 +21,10 @@ on:
     types: [opened, synchronize, reopened, edited, labeled, unlabeled]
     branches: [ master ]
 
+env:
+  SKIP_LABEL: 'no RN'
+  RLS_NOTES_TAG_REGEX: 'Release Notes:'
+
 jobs:
   check-release-notes:
     runs-on: ubuntu-latest

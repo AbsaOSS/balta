@@ -14,21 +14,15 @@
  * limitations under the License.
  */
 
-package za.co.absa.db.balta.implicits
+package za.co.absa.db.balta.postgres.implicits
 
 import org.postgresql.util.PGobject
 import za.co.absa.db.balta.classes.QueryResultRow
-import za.co.absa.db.balta.classes.simple.{JsonBString, SimpleJsonString}
+import za.co.absa.db.balta.postgres.classes.SimpleJsonString
 
 object Postgres {
   implicit class PostgresRow(val row: QueryResultRow) extends AnyVal {
-    private def jsonBStringTransformer(obj: Object): JsonBString = JsonBString(obj.asInstanceOf[PGobject].toString)
     private def simpleJsonStringTransformer(obj: Object): SimpleJsonString = SimpleJsonString(obj.asInstanceOf[PGobject].toString)
-
-    @deprecated("Use getSimpleJsonString instead", "0.2.0")
-    def getJsonB(column: Int): Option[JsonBString] = row.getAs[JsonBString](column: Int, jsonBStringTransformer _)
-    @deprecated("Use getSimpleJsonString instead", "0.2.0")
-    def getJsonB(columnLabel: String): Option[JsonBString] = getJsonB(row.columnNumber(columnLabel))
 
     def getSimpleJsonString(column: Int): Option[SimpleJsonString] = row.getAs[SimpleJsonString](column: Int, simpleJsonStringTransformer _)
     def getSimpleJsonString(columnLabel: String): Option[SimpleJsonString] = getSimpleJsonString(row.columnNumber(columnLabel))

@@ -35,6 +35,9 @@ syntax: glob
 
 # vs code
 .vscode
+.metals/
+.bloop/
+metals.sbt
 
 # building
 target

@@ -14,9 +14,10 @@
  * limitations under the License.
  */
 
-package za.co.absa.db.balta.classes.setter
+package za.co.absa.db.balta.classes.inner
 
 import scala.collection.immutable.ListMap
+import za.co.absa.db.balta.typeclasses.{QueryParamValue, QueryParamType}
 
 /**
  * This class represents a list of parameters for a prepared statement. It cannot be instantiated directly, only via
@@ -24,11 +25,11 @@ import scala.collection.immutable.ListMap
  *
  * @param items - a list of parameter values, eventually with their names or positions
  */
-sealed abstract class Params private(items: ListMap[String, SetterFnc]) {
+sealed abstract class Params private(items: ListMap[String, QueryParamValue]) {
   def keys: Option[List[String]]
-  def setters: List[SetterFnc] = items.values.toList
+  def values: List[QueryParamValue] = items.values.toList
 
-  def apply(paramName: String): SetterFnc = {
+  def apply(paramName: String): QueryParamValue = {
     items(paramName)
   }
 
@@ -46,7 +47,7 @@ object Params {
    * @tparam T        - the type of the parameter value
    * @return          - a list parameters to be used in an SQL prepared statement
    */
-  def add[T: AllowedParamTypes](paramName: String, value: T): NamedParams = {
+  def add[T: QueryParamType](paramName: String, value: T): NamedParams = {
     new NamedParams().add(paramName, value)
   }
 
@@ -58,7 +59,7 @@ object Params {
    * @return          - a list parameters to be used in an SQL prepared statement
    */
   def addNull(paramName: String): NamedParams = {
-    new NamedParams().addNull(paramName)
+    new NamedParams().add(paramName, QueryParamType.NULL)
   }
 
   /**
@@ -69,7 +70,7 @@ object Params {
    * @tparam T    - the type of the parameter value
    * @return      - a list parameters to be used in an SQL prepared statement
    */
-  def add[T: AllowedParamTypes](value: T): OrderedParams = {
+  def add[T: QueryParamType](value: T): OrderedParams = {
     new OrderedParams().add(value)
   }
 
@@ -80,8 +81,8 @@ object Params {
    * @tparam T - the type of the parameter value
    * @return   - a list parameters to be used in an SQL prepared statement
    */
-  def addNull[T: AllowedParamTypes](): OrderedParams = {
-    new OrderedParams().addNull()
+  def addNull[T: QueryParamType](): OrderedParams = {
+    new OrderedParams().add(QueryParamType.NULL)
   }
 
   /**
@@ -89,7 +90,7 @@ object Params {
    *
    * @param items - a map of parameter names and their values
    */
-  sealed class NamedParams private[setter](items: ListMap[String, SetterFnc] = ListMap.empty) extends Params(items) {
+  sealed class NamedParams private[Params](items: ListMap[String, QueryParamValue] = ListMap.empty) extends Params(items) {
     /**
      * This method adds a new parameter to the list. It actually creates a new list with the new parameter added.
      *
@@ -98,9 +99,9 @@ object Params {
      * @tparam T        - the type of the parameter value
      * @return          - a list parameters to be used in an SQL prepared statement
      */
-    def add[T: AllowedParamTypes](paramName: String, value: T): NamedParams = {
-      val setter = SetterFnc.createSetterFnc(value)
-      new NamedParams(items + (paramName -> setter)) // TODO https://github.com/AbsaOSS/balta/issues/1
+    def add[T: QueryParamType](paramName: String, value: T): NamedParams = {
+      val queryValue = implicitly[QueryParamType[T]].toQueryParamValue(value)
+      new NamedParams(items + (paramName -> queryValue)) // TODO https://github.com/AbsaOSS/balta/issues/1
     }
 
     /**
@@ -110,12 +111,12 @@ object Params {
      * @param paramName - the name of the parameter
      * @return          - a list parameters to be used in an SQL prepared statement
      */
+    @deprecated("Use add(NULL)", "balta 0.3.0")
     def addNull(paramName: String): NamedParams = {
-      val setter = SetterFnc.nullSetterFnc
-      new NamedParams(items + (paramName -> setter)) // TODO https://github.com/AbsaOSS/balta/issues/1
+      add(paramName, QueryParamType.NULL)
     }
 
-    def pairs: List[(String, SetterFnc)] = items.toList
+    def pairs: List[(String, QueryParamValue)] = items.toList
 
     override def keys: Option[List[String]] = Some(items.keys.toList)
   }
@@ -125,7 +126,7 @@ object Params {
    *
    * @param items - a list of parameters identified by their positions
    */
-  sealed class OrderedParams private[setter](items: ListMap[String, SetterFnc] = ListMap.empty) extends Params(items) {
+  sealed class OrderedParams private[Params](items: ListMap[String, QueryParamValue] = ListMap.empty) extends Params(items) {
     /**
      * This method adds a new parameter to the end of the list. It actually creates a new list with the new parameter added.
      *
@@ -133,10 +134,10 @@ object Params {
      * @tparam T    - the type of the parameter value
      * @return      - a list parameters to be used in an SQL prepared statement
      */
-    def add[T: AllowedParamTypes](value: T): OrderedParams = {
+    def add[T: QueryParamType](value: T): OrderedParams = {
       val key = items.size.toString
-      val setter = SetterFnc.createSetterFnc(value)
-      new OrderedParams(items + (key -> setter))
+      val queryValue = implicitly[QueryParamType[T]].toQueryParamValue(value)
+      new OrderedParams(items + (key -> queryValue))
     }
 
     /**
@@ -146,10 +147,9 @@ object Params {
      * @tparam T - the type of the parameter value
      * @return   - a list parameters to be used in an SQL prepared statement
      */
-    def addNull[T: AllowedParamTypes](): OrderedParams = {
-      val key = items.size.toString
-      val setter = SetterFnc.nullSetterFnc
-      new OrderedParams(items + (key -> setter))
+    @deprecated("Use add(NULL)", "balta 0.3.0")
+    def addNull[T: QueryParamType](): OrderedParams = {
+      add(QueryParamType.NULL)
     }
 
     override val keys: Option[List[String]] = None

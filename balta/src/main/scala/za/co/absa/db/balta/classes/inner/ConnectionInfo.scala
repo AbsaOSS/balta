@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package za.co.absa.db.balta.classes.simple
+package za.co.absa.db.balta.classes.inner
 
 /**
  * This is a function that sets a parameter of a prepared statement.

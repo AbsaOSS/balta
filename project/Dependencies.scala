@@ -25,7 +25,7 @@ object Dependencies {
 
   def libDependencies: Seq[ModuleID] = {
     lazy val scalaTest  = "org.scalatest"  %% "scalatest"  % Versions.scalatest
-    lazy val postgresql = "org.postgresql" %  "postgresql" % Versions.postgresql
+    lazy val postgresql = "org.postgresql" %  "postgresql" % Versions.postgresql % Optional
     Seq(
       scalaTest,
       postgresql,

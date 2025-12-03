@@ -18,11 +18,11 @@ package za.co.absa.db.balta.implicits
 
 import org.scalatest.funsuite.AnyFunSuiteLike
 import za.co.absa.db.balta.classes.{DBTable, QueryResultRow}
+import za.co.absa.db.balta.postgres.implicits.Postgres.PostgresRow
+import za.co.absa.db.balta.postgres.classes.SimpleJsonString
 import za.co.absa.db.balta.testing.classes.DBTestingConnection
 
 import java.sql.ResultSetMetaData
-import Postgres.PostgresRow
-import za.co.absa.db.balta.classes.simple.SimpleJsonString
 
 class PostgresRowIntegrationTests extends AnyFunSuiteLike with DBTestingConnection{
   private val (tableRows: List[QueryResultRow], metadata: ResultSetMetaData) = DBTable("testing.pg_types").all("id") { q =>
