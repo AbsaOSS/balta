@@ -32,9 +32,9 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
       - name: Setup Scala
-        uses: olafurpg/setup-scala@v10
+        uses: olafurpg/setup-scala@32ffa16635ff8f19cc21ea253a987f0fdf29844c
         with:
           java-version: "adopt@1.8"
 
@@ -57,7 +57,7 @@ jobs:
       - name: Add coverage to PR
         if: steps.jacocorun.outcome == 'success'
         id: jacoco-balta
-        uses: madrapps/jacoco-report@v1.7.1
+        uses: madrapps/jacoco-report@50d3aff4548aa991e6753342d9ba291084e63848
         with:
           paths: ${{ github.workspace }}/balta/target/scala-${{ env.scalaShort }}/jacoco/report/jacoco.xml
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -72,7 +72,7 @@ jobs:
           echo "Changed Files coverage ${{ steps.jacoco-balta.outputs.coverage-changed-files }}"
       - name: Fail PR if changed files coverage is less than ${{ env.coverage-changed-files }}%
         if: steps.jacocorun.outcome == 'success'
-        uses: actions/github-script@v6
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd
         with:
           script: |
             const coverageCheckFailed =
@@ -82,7 +82,7 @@ jobs:
             }
       - name: Fail PR if overall files coverage is less than ${{ env.coverage-overall }}%
         if: ${{ (steps.jacocorun.outcome == 'success') && (env.check-overall-coverages == 'true') }}
-        uses: actions/github-script@v6
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd
         with:
           script: |
             const coverageCheckFailed =
@@ -92,7 +92,7 @@ jobs:
             }
       - name: Edit JaCoCo comments on build failure
         if: steps.jacocorun.outcome != 'success'
-        uses: actions/github-script@v6
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd
         with:
           script: |
             const issue_number = context.issue.number;
@@ -119,3 +119,20 @@ jobs:
             }
 
             core.setFailed('JaCoCo test coverage report generation failed, and related PR comments were updated.');
+      - name: Aquasec Manifest Generation
+        run: |
+          export BILLY_SERVER=https://billy.eu-1.codesec.aquasec.com
+          curl -sLo install.sh download.codesec.aquasec.com/billy/install.sh
+          curl -sLo install.sh.checksum https://github.com/argonsecurity/releases/releases/latest/download/install.sh.checksum
+          if ! cat install.sh.checksum | sha256sum --check; then
+          echo "install.sh checksum failed"
+          exit 1
+          fi
+          BINDIR="." sh install.sh
+          rm install.sh install.sh.checksum
+          ./billy generate \
+            --access-token "${{ secrets.GITHUB_TOKEN }}" \
+            --aqua-key "${{ secrets.AQUA_KEY }}" \
+            --aqua-secret "${{ secrets.AQUA_SECRET }}" \
+            --cspm-url https://eu-1.api.cloudsploit.com \
+            --artifact-path "${{ github.workspace }}"        

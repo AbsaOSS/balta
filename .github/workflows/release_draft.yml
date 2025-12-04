@@ -26,12 +26,12 @@ jobs:
   tag:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
         with:
           fetch-depth: 0
       # the following step is disabled because it doesn't order the version tags correctly
 #      - name: Validate format of received tag
-#        uses: actions/github-script@v7
+#        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd
 #        with:
 #          script: |
 #            const newTag = core.getInput('tag-name');
@@ -65,7 +65,7 @@ jobs:
 #          tag-name: ${{ github.event.inputs.tagName }}
 
       - name: Create and push tag
-        uses: actions/github-script@v7
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd
         with:
           script: |
             const tag = core.getInput('tag-name')
@@ -102,47 +102,42 @@ jobs:
     needs: tag
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
         with:
           fetch-depth: 0
           ref: refs/tags/${{ github.event.inputs.tagName }}
 
-      - uses: actions/setup-python@v5.1.1
+      - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548
         with:
           python-version: '3.11'
 
       - name: Generate release notes
         id: generate_release_notes
-        uses: AbsaOSS/generate-release-notes@v0.4.0
+        uses: AbsaOSS/generate-release-notes@b90223510d1704301a36a36f0d86a72a0e72f0cf
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag-name: ${{ github.event.inputs.tagName }}
-          chapters: '[
-            {"title": "No entry 🚫", "label": "duplicate"},
-            {"title": "No entry 🚫", "label": "invalid"},
-            {"title": "No entry 🚫", "label": "wontfix"},
-            {"title": "No entry 🚫", "label": "no RN"},
-            {"title": "Breaking Changes 💥", "label": "breaking-change"},
-            {"title": "New Features 🎉", "label": "enhancement"},
-            {"title": "New Features 🎉", "label": "feature"},
-            {"title": "Bugfixes 🛠", "label": "bug"},
-            {"title": "Infrastructure ⚙️", "label": "infrastructure"},
-            {"title": "Silent-live 🤫", "label": "silent-live"},
-            {"title": "Documentation 📜", "label": "documentation"}
-          ]'
+          chapters: |
+            - { title: No entry 🚫, label: duplicate }
+            - { title: Breaking Changes 💥, label: breaking-change }
+            - { title: New Features 🎉, label: enhancement }
+            - { title: Bugfixes 🛠, label: bug }
+            - { title: Infrastructure ⚙️, label: infrastructure }
+            - { title: Silent-live 🤫, label: silent-live }
+            - { title: Documentation 📜, label: documentation }
+            - { title: Closed Epics 📚, label: epic }
           duplicity-scope: 'service'
           duplicity-icon: '🔁'
           warnings: true
-          skip-release-notes-label: "no RN"
+          skip-release-notes-labels: "no RN"
           print-empty-chapters: false
-          chapters-to-pr-without-issue: true
           row-format-issue: '_{title}_ {developed-by} {co-authored-by} in #{number}'
           row-format-pr: '_{title}_ {developed-by} {co-authored-by} in #{number}'
           row-format-link-pr: true
 
       - name: Create draft release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
