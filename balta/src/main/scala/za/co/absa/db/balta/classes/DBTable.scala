@@ -19,6 +19,7 @@ package za.co.absa.db.balta.classes
 import za.co.absa.db.balta.classes.inner.Params
 import za.co.absa.db.balta.classes.inner.Params.NamedParams
 import za.co.absa.db.balta.typeclasses.{QueryParamValue, QueryParamType}
+import za.co.absa.db.balta.classes.inner.Params.OrderedParams
 
 /**
   * This class represents a database table. It allows to perform INSERT, SELECT and COUNT operations on the table easily.
@@ -35,10 +36,11 @@ case class DBTable(tableName: String) extends DBQuerySupport{
     * @return           - the inserted row.
     */
   def insert(values: Params)(implicit connection: DBConnection): QueryResultRow = {
-    val columns = values.keys.map {keys =>
-      val keysString = keys.mkString(",") // TODO https://github.com/AbsaOSS/balta/issues/2
-      s"($keysString)"
-    }.getOrElse("")
+    val columns = values match {
+      case namedParams: NamedParams => namedParams.paramNames.map(_.sqlEntry).mkString("(", ",", ")")
+      case _: OrderedParams => ""
+    }
+
     val paramStr = values.values.map(_.sqlEntry).mkString(",")
     val sql = s"INSERT INTO $tableName $columns VALUES($paramStr) RETURNING *;"
     runQuery(sql, values.values){_.next()}
@@ -212,7 +214,7 @@ case class DBTable(tableName: String) extends DBQuerySupport{
     composeCountAndRun(strToOption(condition))
   }
 
-  private def composeSelectAndRun[R](whereCondition: Option[String], orderByExpr: Option[String], values: List[QueryParamValue] = List.empty)
+  private def composeSelectAndRun[R](whereCondition: Option[String], orderByExpr: Option[String], values: Vector[QueryParamValue] = Vector.empty)
                               (verify: QueryResult => R)
                               (implicit connection: DBConnection): R = {
     val where = whereCondition.map("WHERE " + _).getOrElse("")
@@ -221,7 +223,7 @@ case class DBTable(tableName: String) extends DBQuerySupport{
     runQuery(sql, values)(verify)
   }
 
-  private def composeDeleteAndRun[R](whereCondition: Option[String], values: List[QueryParamValue] = List.empty)
+  private def composeDeleteAndRun[R](whereCondition: Option[String], values: Vector[QueryParamValue] = Vector.empty)
                                     (verify: QueryResult => R)
                                     (implicit connection: DBConnection): R = {
     val where = whereCondition.map("WHERE " + _).getOrElse("")
@@ -229,7 +231,7 @@ case class DBTable(tableName: String) extends DBQuerySupport{
     runQuery(sql, values)(verify)
   }
 
-  private def composeCountAndRun[R](whereCondition: Option[String], values: List[QueryParamValue] = List.empty)
+  private def composeCountAndRun(whereCondition: Option[String], values: Vector[QueryParamValue] = Vector.empty)
                                    (implicit connection: DBConnection): Long = {
     val where = whereCondition.map("WHERE " + _).getOrElse("")
     val sql = s"SELECT count(1) AS cnt FROM $tableName $where;"
@@ -247,9 +249,8 @@ case class DBTable(tableName: String) extends DBQuerySupport{
   }
 
   private def paramsToWhereCondition(params: NamedParams): String = {
-    params.pairs.foldRight(List.empty[String]) {case ((fieldName, value), acc) =>
-      // TODO https://github.com/AbsaOSS/balta/issues/2
-      val condition = s"$fieldName ${value.equalityOperator} ${value.sqlEntry}"
+    params.items.foldRight(List.empty[String]) {case ((columnName, value), acc) =>
+      val condition = s"${columnName.sqlEntry} ${value.equalityOperator} ${value.sqlEntry}"
       condition :: acc
     }.mkString(" AND ")
   }

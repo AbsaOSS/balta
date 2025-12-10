@@ -16,7 +16,7 @@
 
 package za.co.absa.db.balta.classes
 
-import za.co.absa.db.balta.classes.QueryResultRow.{Extractors, FieldNames}
+import za.co.absa.db.balta.classes.QueryResultRow.{Extractors, ColumnNames}
 
 import java.sql.{ResultSet, ResultSetMetaData, SQLException}
 
@@ -31,7 +31,7 @@ class QueryResult(resultSet: ResultSet) extends Iterator[QueryResultRow] {
 
   private [this] var nextRow: Option[QueryResultRow] = None
 
-  private [this] implicit val fieldNames: FieldNames = QueryResultRow.fieldNamesFromMetadata(resultSetMetaData)
+  private [this] implicit val fieldNames: ColumnNames = QueryResultRow.fieldNamesFromMetadata(resultSetMetaData)
   private [this] implicit val extractors: Extractors = QueryResultRow.createExtractors(resultSetMetaData)
 
   override def hasNext: Boolean = {

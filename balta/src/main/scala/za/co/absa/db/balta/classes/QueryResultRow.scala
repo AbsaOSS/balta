@@ -35,12 +35,20 @@ import java.util.UUID
  */
 class QueryResultRow private[classes](val rowNumber: Int,
                                       private val fields: Vector[Option[Object]],
-                                      private val columnLabels: FieldNames) {
+                                      private val columnLabels: ColumnNames) {
 
   def columnCount: Int = fields.length
   def columnNumber(columnLabel: String): Int = {
-    val actualLabel = columnLabel.toLowerCase
-    columnLabels.getOrThrow(actualLabel, new NoSuchElementException(s"Column '$actualLabel' not found"))
+    val quotedRegex = """^"(.+)"$""".r
+    columnLabel match {
+      case quotedRegex(innerLabel) => // in case the column label is quoted, first try to find it as is, then without quotes
+        columnLabels.getOrElse(
+          columnLabel,
+          columnLabels.getOrThrow(innerLabel, new NoSuchElementException(s"Column '$columnLabel' not found"))
+        )
+      case _ => columnLabels.getOrThrow(columnLabel, new NoSuchElementException(s"Column '$columnLabel' not found"))
+    }
+
   }
 
   /**
@@ -141,17 +149,17 @@ class QueryResultRow private[classes](val rowNumber: Int,
 
 object QueryResultRow {
 
-  type FieldNames = Map[String, Int]
+  type ColumnNames = Map[String, Int]
   type TransformerFnc[T] = Object => T
   type Extractor = ResultSet => Option[Object]
   type Extractors = Vector[Extractor]
 
-  def apply(resultSet: ResultSet)(implicit fieldNames: FieldNames, extractors: Extractors): QueryResultRow = {
+  def apply(resultSet: ResultSet)(implicit columnNames: ColumnNames, extractors: Extractors): QueryResultRow = {
     val fields = extractors.map(_(resultSet))
-    new QueryResultRow(resultSet.getRow, fields, fieldNames)
+    new QueryResultRow(resultSet.getRow, fields, columnNames)
   }
 
-  def fieldNamesFromMetadata(metaData: ResultSetMetaData): FieldNames = {
+  def fieldNamesFromMetadata(metaData: ResultSetMetaData): ColumnNames = {
     Range.inclusive(1, metaData.getColumnCount).map(i => metaData.getColumnName(i) -> i).toMap
   }
 
