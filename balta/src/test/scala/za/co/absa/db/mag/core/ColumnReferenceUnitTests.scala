@@ -27,17 +27,16 @@ class ColumnReferenceUnitTests extends AnyFunSuiteLike{
   }
 
   test("Quoted regular name doesn't need quoting") {
-    val quotedExact = ColumnReference("\"ab\"")
-    assert(quotedExact.isInstanceOf[ColumnReference.ColumnNameExact], "Expected ColumnNameExact for \"ab\"")
-    assert(quotedExact.enteredName == "\"ab\"")
-    assert(quotedExact.sqlEntry == "ab")
+    val quotedExact = ColumnReference("\"abc\"")
+    assert(quotedExact.isInstanceOf[ColumnReference.ColumnNameExact], "Expected ColumnNameExact for \"abc\"")
+    assert(quotedExact.enteredName == "\"abc\"")
+    assert(quotedExact.sqlEntry == "abc")
   }
 
   test("Quoted string is used literally") {
     val quotedGeneral = ColumnReference("\"Col Name\"")
-    assert(quotedGeneral.isInstanceOf[ColumnReference.ColumnNameQuoted], "Expected ColumnNameQuoted for \"Col Name\"")
-    assert(quotedGeneral.enteredName == "Col Name")
-    assert(quotedGeneral.sqlEntry == "\"Col Name\"")
+    assert(quotedGeneral.isInstanceOf[ColumnReference.ColumnNameSimple], "Expected ColumnNameQuoted for \"Col Name\"")
+    assert(quotedGeneral.enteredName == """"Col Name"""")
     assert(quotedGeneral.sqlEntry == """"Col Name"""")
    }
 
@@ -66,9 +65,9 @@ class ColumnReferenceUnitTests extends AnyFunSuiteLike{
   }
 
   test("Contains a non-regular character - quote") {
-    val containsQuote = ColumnReference("a\"b")
-    assert(containsQuote.enteredName == "a\"b")
-    assert(containsQuote.sqlEntry == "a\"\"b")
+    val containsQuote = ColumnReference("a\"bc")
+    assert(containsQuote.enteredName == "a\"bc")
+    assert(containsQuote.sqlEntry == "\"a\"\"bc\"")
   }
 
   test("Starts with a number") {
@@ -88,6 +87,13 @@ class ColumnReferenceUnitTests extends AnyFunSuiteLike{
   test("Equality and hashCode based on sqlEntry") {
     val n1 = ColumnReference("ab")             // ColumnNameSimple with sqlEntry "ab"
     val n2 = ColumnReference("\"ab\"")         // ColumnNameExact with sqlEntry "ab"
+    assert(n1 == n2, "Expected equality based on sqlEntry")
+    assert(n1.hashCode == n2.hashCode, "Expected equal hashCode based on sqlEntry")
+  }
+
+  test("Equality and hashCode based on sqlEntry for non-standard names") {
+    val n1 = ColumnReference("a-b")             // ColumnNameSimple with sqlEntry "ab"
+    val n2 = ColumnReference("\"a-b\"")         // ColumnNameExact with sqlEntry "ab"
     assert(n1 == n2, "Expected equality based on sqlEntry")
     assert(n1.hashCode == n2.hashCode, "Expected equal hashCode based on sqlEntry")
   }

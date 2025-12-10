@@ -32,17 +32,19 @@ abstract class ColumnName extends ColumnReference{
 
 object ColumnReference {
   private val regularColumnNamePattern = "^([a-z_][a-z0-9_]*)$".r
-  private val quotedRegularColumnNamePattern = "^\"([a-z_][a-z0-9_])\"$".r
+  private val quotedRegularColumnNamePattern = "^\"([a-z_][a-z0-9_]*)\"$".r
   private val quotedColumnNamePattern = "^\"(.+)\"$".r
+
+  private def quote(stringToQuote: String): String = s""""$stringToQuote""""
+  private def escapeQuote(stringToEscape: String): String = stringToEscape.replace("\"", "\"\"")
 
   def apply(name: String): ColumnName = {
     val trimmedName = name.trim
     trimmedName match {
-      case regularColumnNamePattern(columnName) => ColumnNameSimple(columnName)
-      case quotedRegularColumnNamePattern(columnName) => ColumnNameExact(trimmedName, columnName)
-      case quotedColumnNamePattern(columnName) => ColumnNameQuoted(columnName)
-      case columnName if columnName.contains("\"") => ColumnNameExact(trimmedName, trimmedName.replace("\"", "\"\""))
-      case _ => ColumnNameQuoted(trimmedName)
+      case regularColumnNamePattern(columnName) => ColumnNameSimple(columnName) // column name per SQL standard, no quoting needed
+      case quotedRegularColumnNamePattern(columnName) => ColumnNameExact(trimmedName, columnName) // quoted but regular name, remove quotes
+      case quotedColumnNamePattern(_)  => ColumnNameSimple(trimmedName) // quoted name, use as is
+      case _ => ColumnNameExact(trimmedName, quote(escapeQuote(trimmedName))) // needs quoting and perhaps escaping
     }
   }
 
@@ -57,10 +59,6 @@ object ColumnReference {
   }
 
   final case class ColumnNameExact private(enteredName: String, sqlEntry: String) extends ColumnName
-
-  final case class ColumnNameQuoted private(enteredName: String) extends ColumnName {
-    val sqlEntry: String = s""""$enteredName""""
-  }
 
   final case class ColumnIndex private(index: Int) extends ColumnReference {
     val sqlEntry: String = index.toString
