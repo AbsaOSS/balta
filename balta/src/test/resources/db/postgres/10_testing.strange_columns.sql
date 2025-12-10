@@ -11,19 +11,23 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under tIhe License.
+ * limitations under the License.
  */
 
-package za.co.absa.db.balta
+DROP TABLE IF EXISTS testing.strange_columns;
 
-import org.scalatest.funsuite.AnyFunSuiteLike
+CREATE TABLE testing.strange_columns
+(
+    id_strange_columns  BIGINT NOT NULL,
 
-class DBTestSuiteUnitTests extends AnyFunSuiteLike {
-  test("connectionInfoFromResourceConfig reads local resource file correctly") {
-    val connectionInfo = DBTestSuite.connectionInfoFromResourceConfig("/database.properties")
-    assert(connectionInfo.dbUrl == "jdbc:postgresql://localhost:5432/mag_db")
-    assert(connectionInfo.username == "mag_owner")
-    assert(connectionInfo.password == "changeme")
-    assert(!connectionInfo.persistData)
-  }
-}
+    col1                TEXT NOT NULL,
+    "Col1"              TEXT NOT NULL,
+    "col 1"             TEXT NOT NULL,
+    "col-1"             TEXT NOT NULL,
+    "colá"              TEXT NOT NULL,
+    "1col"              TEXT NOT NULL,
+    PRIMARY KEY (id_strange_columns)
+);
+
+ALTER TABLE IF EXISTS testing.strange_columns
+    OWNER to mag_owner;

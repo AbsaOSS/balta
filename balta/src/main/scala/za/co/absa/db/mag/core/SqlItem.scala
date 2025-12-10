@@ -11,19 +11,11 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under tIhe License.
+ * limitations under the License.
  */
 
-package za.co.absa.db.balta
+package za.co.absa.db.mag.core
 
-import org.scalatest.funsuite.AnyFunSuiteLike
-
-class DBTestSuiteUnitTests extends AnyFunSuiteLike {
-  test("connectionInfoFromResourceConfig reads local resource file correctly") {
-    val connectionInfo = DBTestSuite.connectionInfoFromResourceConfig("/database.properties")
-    assert(connectionInfo.dbUrl == "jdbc:postgresql://localhost:5432/mag_db")
-    assert(connectionInfo.username == "mag_owner")
-    assert(connectionInfo.password == "changeme")
-    assert(!connectionInfo.persistData)
-  }
+trait SqlItem {
+  def sqlEntry: String
 }

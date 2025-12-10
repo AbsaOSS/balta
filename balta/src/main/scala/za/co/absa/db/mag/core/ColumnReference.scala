@@ -1,0 +1,73 @@
+/*
+ * Copyright 2023 ABSA Group Limited
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package za.co.absa.db.mag.core
+
+trait ColumnReference extends SqlItem
+
+abstract class ColumnName extends ColumnReference{
+  def enteredName: String
+  def sqlEntry: String
+  override def equals(obj: Any): Boolean = {
+    obj match {
+      case that: ColumnName => this.sqlEntry == that.sqlEntry
+      case _ => false
+    }
+  }
+  override def hashCode(): Int = sqlEntry.hashCode
+}
+
+object ColumnReference {
+  private val regularColumnNamePattern = "^([a-z_][a-z0-9_]*)$".r
+  private val quotedRegularColumnNamePattern = "^\"([a-z_][a-z0-9_])\"$".r
+  private val quotedColumnNamePattern = "^\"(.+)\"$".r
+
+  def apply(name: String): ColumnName = {
+    val trimmedName = name.trim
+    trimmedName match {
+      case regularColumnNamePattern(columnName) => ColumnNameSimple(columnName)
+      case quotedRegularColumnNamePattern(columnName) => ColumnNameExact(trimmedName, columnName)
+      case quotedColumnNamePattern(columnName) => ColumnNameQuoted(columnName)
+      case columnName if columnName.contains("\"") => ColumnNameExact(trimmedName, trimmedName.replace("\"", "\"\""))
+      case _ => ColumnNameQuoted(trimmedName)
+    }
+  }
+
+  def apply(index: Int): ColumnReference = {
+    ColumnIndex(index)
+  }
+
+  def unapply(columnName: ColumnName): String = columnName.enteredName
+
+  final case class ColumnNameSimple private(enteredName: String) extends ColumnName {
+    override def sqlEntry: String = enteredName
+  }
+
+  final case class ColumnNameExact private(enteredName: String, sqlEntry: String) extends ColumnName
+
+  final case class ColumnNameQuoted private(enteredName: String) extends ColumnName {
+    val sqlEntry: String = s""""$enteredName""""
+  }
+
+  final case class ColumnIndex private(index: Int) extends ColumnReference {
+    val sqlEntry: String = index.toString
+  }
+}
+
+object ColumnName {
+  def apply(name: String): ColumnName = ColumnReference(name)
+  def unapply(columnName: ColumnName): String = columnName.enteredName
+}
