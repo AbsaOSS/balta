@@ -86,7 +86,7 @@ class ColumnReferenceUnitTests extends AnyFunSuiteLike{
 
   test("Equality and hashCode based on sqlEntry") {
     val n1 = ColumnReference("ab")             // ColumnNameSimple with sqlEntry "ab"
-    val n2 = ColumnReference("\"ab\"")         // ColumnNameExact with sqlEntry "ab"
+    val n2 = ColumnReference("\"ab\"")
     assert(n1 == n2, "Expected equality based on sqlEntry")
     assert(n1.hashCode == n2.hashCode, "Expected equal hashCode based on sqlEntry")
   }

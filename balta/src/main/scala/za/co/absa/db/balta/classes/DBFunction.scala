@@ -19,6 +19,8 @@ package za.co.absa.db.balta.classes
 import za.co.absa.db.balta.classes.DBFunction.{DBFunctionWithNamedParamsToo, DBFunctionWithPositionedParamsOnly}
 import za.co.absa.db.balta.typeclasses.QueryParamType
 import za.co.absa.db.balta.classes.inner.Params.{NamedParams, OrderedParams}
+import za.co.absa.db.mag.core.SqlEntry
+import za.co.absa.db.mag.core.SqlEntryComposition._
 
 /**
  * A class that represents a database function call. It can be used to execute a function and verify the result.
@@ -32,18 +34,18 @@ import za.co.absa.db.balta.classes.inner.Params.{NamedParams, OrderedParams}
  * @param namedParams   - the list of parameters identified by their name (following the positioned parameters)
  *
  */
-sealed abstract class DBFunction private(functionName: String,
+sealed abstract class DBFunction private(functionName: SqlEntry,
                                          orderedParams: OrderedParams,
                                          namedParams: NamedParams) extends DBQuerySupport {
 
-  private def sql(orderBy: String): String = {
+  private def sql(orderBy: Option[SqlEntry]): SqlEntry = {
     val positionedParamEntries = orderedParams.values.map(_.sqlEntry)
     val namedParamEntries = namedParams.items.map{ case (columnName, queryParamValue) =>
-      columnName.sqlEntry + " := " + queryParamValue.sqlEntry
+      columnName.sqlEntry := queryParamValue.sqlEntry
     }
     val paramEntries = positionedParamEntries ++ namedParamEntries
     val paramsLine = paramEntries.mkString(",")
-    s"SELECT * FROM $functionName($paramsLine) $orderBy"
+    SELECT(ALL) FROM functionName(paramsLine) ORDER BY (orderBy)
   }
 
   /**
@@ -92,7 +94,7 @@ sealed abstract class DBFunction private(functionName: String,
    * @return            - the result of the verify function
    */
   def execute[R](orderBy: String)(verify: QueryResult => R /* Assertion */)(implicit connection: DBConnection): R = {
-    val orderByPart = if (orderBy.nonEmpty) {s"ORDER BY $orderBy"} else ""
+    val orderByPart = SqlEntry(orderBy).toOption
     runQuery(sql(orderByPart), orderedParams.values ++ namedParams.values)(verify)
   }
 
@@ -140,15 +142,15 @@ object DBFunction {
    * @return              - a new instance of the DBFunction class
    */
   def apply(functionName: String): DBFunctionWithPositionedParamsOnly = {
-    DBFunctionWithPositionedParamsOnly(functionName)
+    DBFunctionWithPositionedParamsOnly(SqlEntry(functionName))
   }
 
   def apply(functionName: String, params: NamedParams): DBFunctionWithNamedParamsToo = {
-    DBFunctionWithNamedParamsToo(functionName, OrderedParams(), params)
+    DBFunctionWithNamedParamsToo(SqlEntry(functionName), OrderedParams(), params)
   }
 
   def apply(functionName: String, params: OrderedParams): DBFunctionWithPositionedParamsOnly = {
-    DBFunctionWithPositionedParamsOnly(functionName, params, NamedParams())
+    DBFunctionWithPositionedParamsOnly(SqlEntry(functionName), params, NamedParams())
   }
 
   /**
@@ -159,7 +161,7 @@ object DBFunction {
    * @param orderedParams - the list of parameters identified by their position (preceding the named parameters)
    * @param namedParams   - the list of parameters identified by their name (following the positioned parameters)
    */
-  sealed case class DBFunctionWithPositionedParamsOnly private(functionName: String,
+  sealed case class DBFunctionWithPositionedParamsOnly private(functionName: SqlEntry,
                                                                orderedParams: OrderedParams = OrderedParams(),
                                                                namedParams: NamedParams = NamedParams()
                                                               ) extends DBFunction(functionName, orderedParams, namedParams) {
@@ -195,7 +197,7 @@ object DBFunction {
    * @param orderedParams - the list of parameters identified by their position (preceding the named parameters)
    * @param namedParams   - the list of parameters identified by their name (following the positioned parameters)
    */
-  sealed case class DBFunctionWithNamedParamsToo private(functionName: String,
+  sealed case class DBFunctionWithNamedParamsToo private(functionName: SqlEntry,
                                                          orderedParams: OrderedParams = OrderedParams(),
                                                          namedParams: NamedParams = NamedParams()
                                                         ) extends DBFunction(functionName, orderedParams, namedParams)

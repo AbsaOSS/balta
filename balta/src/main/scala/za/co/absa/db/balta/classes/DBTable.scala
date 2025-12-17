@@ -18,8 +18,10 @@ package za.co.absa.db.balta.classes
 
 import za.co.absa.db.balta.classes.inner.Params
 import za.co.absa.db.balta.classes.inner.Params.NamedParams
-import za.co.absa.db.balta.typeclasses.{QueryParamValue, QueryParamType}
+import za.co.absa.db.balta.typeclasses.{QueryParamType, QueryParamValue}
 import za.co.absa.db.balta.classes.inner.Params.OrderedParams
+import za.co.absa.db.mag.core.SqlEntry
+import za.co.absa.db.mag.core.SqlEntryComposition._
 
 /**
   * This class represents a database table. It allows to perform INSERT, SELECT and COUNT operations on the table easily.
@@ -27,7 +29,7 @@ import za.co.absa.db.balta.classes.inner.Params.OrderedParams
   * @param tableName  The name of the table
   */
 case class DBTable(tableName: String) extends DBQuerySupport{
-
+  private val table: SqlEntry = SqlEntry(tableName)
   /**
     * Inserts a new row into the table.
     *
@@ -42,7 +44,7 @@ case class DBTable(tableName: String) extends DBQuerySupport{
     }
 
     val paramStr = values.values.map(_.sqlEntry).mkString(",")
-    val sql = s"INSERT INTO $tableName $columns VALUES($paramStr) RETURNING *;"
+    val sql = INSERT INTO table(columns) VALUES(paramStr) RETURNING ALL
     runQuery(sql, values.values){_.next()}
   }
 
@@ -78,7 +80,7 @@ case class DBTable(tableName: String) extends DBQuerySupport{
    * @return            - the result of the verify function
    */
   def where[R](params: NamedParams)(verify: QueryResult => R)(implicit connection: DBConnection): R = {
-    composeSelectAndRun(strToOption(paramsToWhereCondition(params)), None, params.values)(verify)
+    composeSelectAndRun(paramsToWhereCondition(params).toOption, None, params.values)(verify)
   }
 
   /**
@@ -91,7 +93,7 @@ case class DBTable(tableName: String) extends DBQuerySupport{
    * @return            - the result of the verify function
    */
   def where[R](params: NamedParams, orderBy: String)(verify: QueryResult => R)(implicit connection: DBConnection): R = {
-    composeSelectAndRun(strToOption(paramsToWhereCondition(params)), strToOption(orderBy), params.values)(verify)
+    composeSelectAndRun(paramsToWhereCondition(params).toOption, SqlEntry(orderBy).toOption, params.values)(verify)
   }
 
   /**
@@ -103,7 +105,7 @@ case class DBTable(tableName: String) extends DBQuerySupport{
    * @return            - the result of the verify function
    */
   def where[R](condition: String)(verify: QueryResult => R)(implicit connection: DBConnection): R = {
-    composeSelectAndRun(strToOption(condition), None)(verify)
+    composeSelectAndRun(SqlEntry(condition).toOption, None)(verify)
   }
 
   /**
@@ -116,7 +118,7 @@ case class DBTable(tableName: String) extends DBQuerySupport{
    * @return            - the result of the verify function
    */
   def where[R](condition: String, orderBy: String)(verify: QueryResult => R)(implicit connection: DBConnection): R = {
-    composeSelectAndRun(strToOption(condition), strToOption(orderBy))(verify)
+    composeSelectAndRun(SqlEntry(condition).toOption, SqlEntry(orderBy).toOption)(verify)
   }
 
   /**
@@ -141,7 +143,7 @@ case class DBTable(tableName: String) extends DBQuerySupport{
    * @return            - the result of the verify function
    */
   def all[R](orderBy: String)(verify: QueryResult => R)(implicit connection: DBConnection): R = {
-    composeSelectAndRun(None, strToOption(orderBy))(verify)
+    composeSelectAndRun(None, SqlEntry(orderBy).toOption)(verify)
   }
 
   def deleteWithCheck[R](verify: QueryResult => R)(implicit connection: DBConnection): R = {
@@ -149,19 +151,19 @@ case class DBTable(tableName: String) extends DBQuerySupport{
   }
 
   def deleteWithCheck[R](whereParams: NamedParams)(verify: QueryResult => R)(implicit connection: DBConnection): R = {
-    composeDeleteAndRun(strToOption(paramsToWhereCondition(whereParams)), whereParams.values)(verify)
+    composeDeleteAndRun(paramsToWhereCondition(whereParams).toOption, whereParams.values)(verify)
   }
 
   def deleteWithCheck[R](whereCondition: String)(verify: QueryResult => R)(implicit connection: DBConnection): R = {
-    composeDeleteAndRun(strToOption(whereCondition))(verify)
+    composeDeleteAndRun(SqlEntry(whereCondition).toOption)(verify)
   }
 
   def delete(whereParams: NamedParams)(implicit connection: DBConnection): Unit = {
-    composeDeleteAndRun(strToOption(paramsToWhereCondition(whereParams)), whereParams.values)(_ => ())
+    composeDeleteAndRun(paramsToWhereCondition(whereParams).toOption, whereParams.values)(_ => ())
   }
 
   def delete(whereCondition: String = "")(implicit connection: DBConnection): Unit = {
-    composeDeleteAndRun(strToOption(whereCondition))(_ => ())
+    composeDeleteAndRun(SqlEntry(whereCondition).toOption)(_ => ())
   }
   /**
    * Counts the rows in the table.
@@ -180,7 +182,7 @@ case class DBTable(tableName: String) extends DBQuerySupport{
    */
   @deprecated("Use countOnCondition instead", "0.2.0")
   def count(params: NamedParams)(implicit connection: DBConnection): Long = {
-    composeCountAndRun(strToOption(paramsToWhereCondition(params)), params.values)
+    composeCountAndRun(paramsToWhereCondition(params).toOption, params.values)
   }
 
   /**
@@ -191,7 +193,7 @@ case class DBTable(tableName: String) extends DBQuerySupport{
    */
   @deprecated("Use countOnCondition instead", "0.2.0")
   def count(condition: String)(implicit connection: DBConnection): Long = {
-    composeCountAndRun(strToOption(condition))
+    composeCountAndRun(SqlEntry(condition).toOption)
   }
 
   /**
@@ -201,7 +203,7 @@ case class DBTable(tableName: String) extends DBQuerySupport{
    * @return            - the number of rows
    */
   def countOnCondition(params: NamedParams)(implicit connection: DBConnection): Long = {
-    composeCountAndRun(strToOption(paramsToWhereCondition(params)), params.values)
+    composeCountAndRun(paramsToWhereCondition(params).toOption, params.values)
   }
 
   /**
@@ -211,47 +213,36 @@ case class DBTable(tableName: String) extends DBQuerySupport{
    * @return            - the number of rows
    */
   def countOnCondition(condition: String)(implicit connection: DBConnection): Long = {
-    composeCountAndRun(strToOption(condition))
+    composeCountAndRun(SqlEntry(condition).toOption)
   }
 
-  private def composeSelectAndRun[R](whereCondition: Option[String], orderByExpr: Option[String], values: Vector[QueryParamValue] = Vector.empty)
+  private def composeSelectAndRun[R](whereCondition: Option[SqlEntry], orderBy: Option[SqlEntry], values: Vector[QueryParamValue] = Vector.empty)
                               (verify: QueryResult => R)
                               (implicit connection: DBConnection): R = {
-    val where = whereCondition.map("WHERE " + _).getOrElse("")
-    val orderBy = orderByExpr.map("ORDER BY " + _).getOrElse("")
-    val sql = s"SELECT * FROM $tableName $where $orderBy;"
+    val sql = SELECT(ALL) FROM table WHERE whereCondition ORDER BY(orderBy)
     runQuery(sql, values)(verify)
   }
 
-  private def composeDeleteAndRun[R](whereCondition: Option[String], values: Vector[QueryParamValue] = Vector.empty)
+  private def composeDeleteAndRun[R](whereCondition: Option[SqlEntry], values: Vector[QueryParamValue] = Vector.empty)
                                     (verify: QueryResult => R)
                                     (implicit connection: DBConnection): R = {
-    val where = whereCondition.map("WHERE " + _).getOrElse("")
-    val sql = s"DELETE FROM $tableName $where RETURNING *;"
+    val sql = DELETE FROM table WHERE whereCondition RETURNING ALL
     runQuery(sql, values)(verify)
   }
 
-  private def composeCountAndRun(whereCondition: Option[String], values: Vector[QueryParamValue] = Vector.empty)
+  private def composeCountAndRun(whereCondition: Option[SqlEntry], values: Vector[QueryParamValue] = Vector.empty)
                                    (implicit connection: DBConnection): Long = {
-    val where = whereCondition.map("WHERE " + _).getOrElse("")
-    val sql = s"SELECT count(1) AS cnt FROM $tableName $where;"
+    val sql = SELECT(COUNT_ALL) FROM table WHERE whereCondition
     runQuery(sql, values) {resultSet =>
       resultSet.next().getLong("cnt").getOrElse(0)
     }
   }
 
-  private def strToOption(str: String): Option[String] = {
-    if (str.isEmpty) {
-      None
-    } else {
-      Option(str)
-    }
-  }
-
-  private def paramsToWhereCondition(params: NamedParams): String = {
-    params.items.foldRight(List.empty[String]) {case ((columnName, value), acc) =>
-      val condition = s"${columnName.sqlEntry} ${value.equalityOperator} ${value.sqlEntry}"
+  private def paramsToWhereCondition(params: NamedParams): SqlEntry = {
+    val resultList = params.items.foldRight(List.empty[SqlEntry]) {case ((columnName, value), acc) =>
+      val condition = columnName.sqlEntry + value.equalityOperator + value.sqlEntry
       condition :: acc
-    }.mkString(" AND ")
+    }
+    resultList.toSqlEntry(" AND ")
   }
 }

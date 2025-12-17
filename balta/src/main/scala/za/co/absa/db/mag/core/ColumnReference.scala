@@ -16,18 +16,19 @@
 
 package za.co.absa.db.mag.core
 
-trait ColumnReference extends SqlItem
-
-abstract class ColumnName extends ColumnReference{
-  def enteredName: String
-  def sqlEntry: String
+trait ColumnReference extends SqlItem {
   override def equals(obj: Any): Boolean = {
     obj match {
-      case that: ColumnName => this.sqlEntry == that.sqlEntry
+      case that: ColumnReference => this.sqlEntry == that.sqlEntry
       case _ => false
     }
   }
   override def hashCode(): Int = sqlEntry.hashCode
+}
+
+abstract class ColumnName extends ColumnReference{
+  def enteredName: String
+  def sqlEntry: SqlEntry
 }
 
 object ColumnReference {
@@ -42,9 +43,9 @@ object ColumnReference {
     val trimmedName = name.trim
     trimmedName match {
       case regularColumnNamePattern(columnName) => ColumnNameSimple(columnName) // column name per SQL standard, no quoting needed
-      case quotedRegularColumnNamePattern(columnName) => ColumnNameExact(trimmedName, columnName) // quoted but regular name, remove quotes
+      case quotedRegularColumnNamePattern(columnName) => ColumnNameExact(trimmedName, SqlEntry(columnName)) // quoted but regular name, remove quotes
       case quotedColumnNamePattern(_)  => ColumnNameSimple(trimmedName) // quoted name, use as is
-      case _ => ColumnNameExact(trimmedName, quote(escapeQuote(trimmedName))) // needs quoting and perhaps escaping
+      case _ => ColumnNameExact(trimmedName, SqlEntry(quote(escapeQuote(trimmedName)))) // needs quoting and perhaps escaping
     }
   }
 
@@ -55,13 +56,13 @@ object ColumnReference {
   def unapply(columnName: ColumnName): String = columnName.enteredName
 
   final case class ColumnNameSimple private(enteredName: String) extends ColumnName {
-    override def sqlEntry: String = enteredName
+    override def sqlEntry: SqlEntry = SqlEntry(enteredName)
   }
 
-  final case class ColumnNameExact private(enteredName: String, sqlEntry: String) extends ColumnName
+  final case class ColumnNameExact private(enteredName: String, sqlEntry: SqlEntry) extends ColumnName
 
   final case class ColumnIndex private(index: Int) extends ColumnReference {
-    val sqlEntry: String = index.toString
+    val sqlEntry: SqlEntry = SqlEntry(index.toString)
   }
 }
 

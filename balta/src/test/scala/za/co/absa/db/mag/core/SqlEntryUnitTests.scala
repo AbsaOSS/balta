@@ -16,6 +16,21 @@
 
 package za.co.absa.db.mag.core
 
-trait SqlItem {
-  def sqlEntry: SqlEntry
+import org.scalatest.funsuite.AnyFunSuiteLike
+
+
+class SqlEntryUnitTests extends AnyFunSuiteLike {
+  test("SqlEntry addition with another SqlEntry works correctly") {
+    val entry1 = SqlEntry("CREATE TABLE test_table (id INT);")
+    val entry2 = SqlEntry("INSERT INTO test_table (id) VALUES (1);")
+
+    val combinedEntry = entry1 + entry2
+    assert(combinedEntry.entry == "CREATE TABLE test_table (id INT); INSERT INTO test_table (id) VALUES (1);")
+  }
+
+  test("SqlEntry toString returns the `entry`` string") {
+    val sqlEntry = SqlEntry("SELECT * FROM test_table;")
+    assert(sqlEntry.toString == sqlEntry.entry)
+  }
+
 }
