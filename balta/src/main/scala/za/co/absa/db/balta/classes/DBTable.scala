@@ -39,12 +39,14 @@ case class DBTable(tableName: String) extends DBQuerySupport{
     */
   def insert(values: Params)(implicit connection: DBConnection): QueryResultRow = {
     val columns = values match {
-      case namedParams: NamedParams => namedParams.paramNames.map(_.sqlEntry).mkString("(", ",", ")")
-      case _: OrderedParams => ""
+      case namedParams: NamedParams =>
+        val x = namedParams.paramNames.map(_.sqlEntry)
+        x
+      case _: OrderedParams => Vector.empty
     }
 
-    val paramStr = values.values.map(_.sqlEntry).mkString(",")
-    val sql = INSERT INTO table(columns) VALUES(paramStr) RETURNING ALL
+    val paramValues = values.values.map(_.sqlEntry)
+    val sql = INSERT INTO table(columns) VALUES(paramValues) RETURNING ALL
     runQuery(sql, values.values){_.next()}
   }
 
@@ -243,6 +245,6 @@ case class DBTable(tableName: String) extends DBQuerySupport{
       val condition = columnName.sqlEntry + value.equalityOperator + value.sqlEntry
       condition :: acc
     }
-    resultList.toSqlEntry(" AND ")
+    resultList.mkSqlEntry(" AND ")
   }
 }

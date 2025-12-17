@@ -44,8 +44,7 @@ sealed abstract class DBFunction private(functionName: SqlEntry,
       columnName.sqlEntry := queryParamValue.sqlEntry
     }
     val paramEntries = positionedParamEntries ++ namedParamEntries
-    val paramsLine = paramEntries.mkString(",")
-    SELECT(ALL) FROM functionName(paramsLine) ORDER BY (orderBy)
+    SELECT(ALL) FROM functionName(paramEntries) ORDER BY (orderBy)
   }
 
   /**

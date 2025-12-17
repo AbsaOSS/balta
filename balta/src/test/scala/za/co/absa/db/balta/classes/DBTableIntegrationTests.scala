@@ -65,9 +65,9 @@ class DBTableIntegrationTests extends AnyFunSuiteLike with DBTestingConnection{
       queryResult.next().assertTo(1, "textA", booleanField = true)
       queryResult.next().assertTo(4, "textA", booleanField = false)
       assert(queryResult.noMore)
-      "Hello world"
+      "Some returned value"
     }
-    assert(returnedValue == "Hello world")
+    assert(returnedValue == "Some returned value")
 
     table.where(Params.add("text_field", "textB").add("boolean_field", false)) { queryResult =>
       queryResult.next().assertTo(2, "textB", booleanField = false)

@@ -57,13 +57,20 @@ class SqlEntryCompositionUnitTests extends AnyFunSuiteLike {
     assert(query.sqlEntry.entry == expectedSql)
   }
 
+  test("Composition of `SELECT ... FROM ...` using function call without providing parameters") {
+    val query  = SELECT(ALL) FROM functionName()
+    val expectedSql = "SELECT * FROM my_function()"
+    assert(query.sqlEntry.entry == expectedSql)
+  }
+
+
   test("Composition of `INSERT INTO ...`") {
     val query  = INSERT INTO tableName VALUES("100", "'Sample Text'")
     val expectedSql = "INSERT INTO my_table VALUES(100, 'Sample Text')"
     assert(query.sqlEntry.entry == expectedSql)
   }
 
-  test("Composition of `INSERT INTO ... VALUES RETURNING ...`") {
+  test("Composition of `INSERT INTO ... VALUES RETURNING ...` not providing any field names") {
     val query  = INSERT INTO tableName VALUES(param) RETURNING(ALL)
     val expectedSql = "INSERT INTO my_table VALUES(42) RETURNING *"
     assert(query.sqlEntry.entry == expectedSql)
@@ -73,12 +80,6 @@ class SqlEntryCompositionUnitTests extends AnyFunSuiteLike {
     val fields = SqlEntry(field1, field2)
     val query  = INSERT INTO tableName(fields.entry) VALUES("100, 'Sample Text'") RETURNING(ALL)
     val expectedSql = "INSERT INTO my_table(field1, field2) VALUES(100, 'Sample Text') RETURNING *"
-    assert(query.sqlEntry.entry == expectedSql)
-  }
-
-  test("Composition of `INSERT INTO ...() VALUES ... RETURNING ...` not providing any field names") {
-    val query  = INSERT INTO tableName() VALUES("42") RETURNING(field1)
-    val expectedSql = "INSERT INTO my_table VALUES(42) RETURNING field1"
     assert(query.sqlEntry.entry == expectedSql)
   }
 

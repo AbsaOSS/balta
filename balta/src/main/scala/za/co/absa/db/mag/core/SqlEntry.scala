@@ -33,9 +33,20 @@ class SqlEntry(val entry: String) extends AnyVal {
   def ==(other: String): Boolean = this.entry == other
   def :=(other: SqlEntry): SqlEntry = this + SqlEntry(":=") + other
   def apply(params: String*): SqlEntry = {
-    val paramsStr = params.mkString(", ")
-    val paramsEntry = SqlEntry(paramsStr).toOption.encase("(", ")")
-    this + paramsEntry.getOrElse(SqlEntry(""))
+    val paramsStr = params.mkString("(", ",", ")")
+    this + SqlEntry(paramsStr)
+  }
+
+  /** Translates a sequence of SqlEntry entries into a single SqlEntry formatted as a parameter list
+    *
+    * @param params - A sequence of SqlEntry to be included as parameters.
+    * @param foo    - A bogus parameter do differentiate this method from the `apply(params: String*)` method, as their
+   *                  signatures would be same otherwise after type erasure.
+    * @return         A new SqlEntry that combines the input as a list of parameters/columns for a function or table.
+    */
+  def apply(params: Seq[SqlEntry], foo: String = ""): SqlEntry = {
+    val paramsEntry = params.mkSqlEntry("(", ",", ")")
+    this + paramsEntry
   }
 
   def toOption: Option[SqlEntry] = {
@@ -56,11 +67,7 @@ object SqlEntry {
   def apply(maybeEntry: Option[String]): Option[SqlEntry] = maybeEntry.map(SqlEntry(_))
 
   implicit class SqlEntryOptionEnhancement(val sqlEntry: Option[SqlEntry]) extends AnyVal {
-    def prefix(withEntry: String): Option[SqlEntry] = sqlEntry.map(SqlEntry(withEntry) + _)
-    def suffix(withEntry: String): Option[SqlEntry] = sqlEntry.map(_ + SqlEntry(withEntry))
-    def encase(withEntryLeft: String, withEntryRight: String): Option[SqlEntry] = {
-      sqlEntry.map(SqlEntry(withEntryLeft) + _ + SqlEntry(withEntryRight))
-    }
+    def prefix(withEntry: SqlEntry): Option[SqlEntry] = sqlEntry.map(withEntry + _)
 
     def + (other: Option[SqlEntry]): Option[SqlEntry] = concat(sqlEntry, other)
 
@@ -71,9 +78,12 @@ object SqlEntry {
     }
   }
 
-  implicit class SqlEntryListEnhancement(val sqlEntries: List[SqlEntry]) extends AnyVal {
-    def toSqlEntry(separator: String = ", "): SqlEntry = {
-      val entriesStr = sqlEntries.map(_.entry).mkString(separator)
+  implicit class SqlEntryListEnhancement(val sqlEntries: Seq[SqlEntry]) extends AnyVal {
+    def mkSqlEntry(separator: String): SqlEntry = {
+      mkSqlEntry("", separator, "")
+    }
+    def mkSqlEntry(start: String, separator: String = ", ", end: String): SqlEntry = {
+      val entriesStr = sqlEntries.map(_.entry).mkString(start, separator, end)
       SqlEntry(entriesStr)
     }
   }
