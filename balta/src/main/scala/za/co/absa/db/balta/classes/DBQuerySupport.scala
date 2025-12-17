@@ -29,7 +29,6 @@ trait DBQuerySupport {
                  (implicit connection: DBConnection): R = {
     val preparedStatement = connection.connection.prepareStatement(sql.entry)
 
-    println(sql)
     queryValues.foldLeft(1) { case (parameterIndex, queryValue) =>
       queryValue.assign match { // this is better readable-wise than map + getOrElse
         case Some(assignFnc) =>

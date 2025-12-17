@@ -46,12 +46,12 @@ object SqlEntryComposition {
     val sqlEntry: Option[SqlEntry] = orderingEntry.prefix(orderBy)
   }
 
-  trait OrderByMixIn {
+  sealed trait OrderByMixIn {
     def sqlEntry: SqlEntry
     def ORDER(by: OrderByFragment): QueryComplete = new QueryComplete(sqlEntry + by.sqlEntry)
   }
 
-  trait ReturningMixIn {
+  sealed trait ReturningMixIn {
     def sqlEntry: SqlEntry
     def RETURNING(returningFields: SqlEntryConstant): QueryWithReturning = {
       new QueryWithReturning(sqlEntry + returning + returningFields.sqlConstant)
@@ -62,7 +62,7 @@ object SqlEntryComposition {
     }
   }
 
-  sealed protected class Query(val sqlEntry: SqlEntry)
+  sealed class Query(val sqlEntry: SqlEntry)
 
   sealed class QuerySelect private[SqlEntryComposition](sqlEntry: SqlEntry)
     extends Query(sqlEntry) with OrderByMixIn {
@@ -105,7 +105,7 @@ object SqlEntryComposition {
   def DELETE: DeleteFragment = DeleteFragment
   def BY(by: SqlEntry): OrderByFragment = BY(by.toOption)
   def BY(by: Option[SqlEntry]): OrderByFragment = new OrderByFragment(by)
-  def BY(columns: ColumnReference*): OrderByFragment= new OrderByFragment(columnsToSqlEntry(columns))
+  def BY(columns: ColumnReference*): OrderByFragment = new OrderByFragment(columnsToSqlEntry(columns))
 
   implicit def QueryToSqlEntry(query: Query): SqlEntry = query.sqlEntry
   implicit def StringToSqlEntry(string: String): SqlEntry = SqlEntry(string)
