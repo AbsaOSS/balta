@@ -18,9 +18,10 @@ package za.co.absa.db.mag.core
 
 trait ColumnReference extends SqlItem
 
-abstract class ColumnName extends ColumnReference{
-  def enteredName: String
-  def sqlEntry: String
+case class ColumnName private(enteredName: String,
+                              sqlEntry: String,
+                              quoteLess: String
+                             ) extends ColumnReference{
   override def equals(obj: Any): Boolean = {
     obj match {
       case that: ColumnName => this.sqlEntry == that.sqlEntry
@@ -32,33 +33,41 @@ abstract class ColumnName extends ColumnReference{
 
 object ColumnReference {
   private val regularColumnNamePattern = "^([a-z_][a-z0-9_]*)$".r
+  private val mixedCaseColumnNamePattern = "^[a-zA-Z_][a-zA-Z0-9_]*$".r
   private val quotedRegularColumnNamePattern = "^\"([a-z_][a-z0-9_]*)\"$".r
   private val quotedColumnNamePattern = "^\"(.+)\"$".r
 
-  private def quote(stringToQuote: String): String = s""""$stringToQuote""""
-  private def escapeQuote(stringToEscape: String): String = stringToEscape.replace("\"", "\"\"")
+  private[core] def quote(stringToQuote: String): String = s""""$stringToQuote""""
+  private[core] def escapeQuote(stringToEscape: String): String = stringToEscape.replace("\"", "\"\"")
+  private[core] def hasUnescapedQuotes(name: String): Boolean = {
+    val reduced = name.replace("\"\"", "")
+    reduced.contains('"')
+  }
 
   def apply(name: String): ColumnName = {
     val trimmedName = name.trim
     trimmedName match {
-      case regularColumnNamePattern(columnName) => ColumnNameSimple(columnName) // column name per SQL standard, no quoting needed
-      case quotedRegularColumnNamePattern(columnName) => ColumnNameExact(trimmedName, columnName) // quoted but regular name, remove quotes
-      case quotedColumnNamePattern(_)  => ColumnNameSimple(trimmedName) // quoted name, use as is
-      case _ => ColumnNameExact(trimmedName, quote(escapeQuote(trimmedName))) // needs quoting and perhaps escaping
+      case regularColumnNamePattern(columnName) =>
+        ColumnName(columnName, columnName, columnName) // column name per SQL standard, no quoting needed
+      case mixedCaseColumnNamePattern() =>
+        val loweredColumnName = trimmedName.toLowerCase
+        ColumnName(trimmedName, loweredColumnName, loweredColumnName) // mixed case name, turn to lower case for sql entry (per standard)
+      case quotedRegularColumnNamePattern(columnName) =>
+        ColumnName(trimmedName, columnName, columnName) // quoted but regular name, remove quotes
+      case quotedColumnNamePattern(actualColumnName)  =>
+        if (hasUnescapedQuotes(actualColumnName)) {
+          throw new IllegalArgumentException(s"Column name '$actualColumnName' has unescaped quotes. Use double quotes as escape sequence.")
+        }
+        val unescapedColumnName = actualColumnName.replace("\"\"", "\"")
+        ColumnName(trimmedName, trimmedName, unescapedColumnName) // quoted name, use as is
+      case _ =>
+        ColumnName(trimmedName, quote(escapeQuote(trimmedName)), trimmedName) // needs quoting and perhaps escaping
     }
   }
 
   def apply(index: Int): ColumnReference = {
     ColumnIndex(index)
   }
-
-  def unapply(columnName: ColumnName): String = columnName.enteredName
-
-  final case class ColumnNameSimple private(enteredName: String) extends ColumnName {
-    override def sqlEntry: String = enteredName
-  }
-
-  final case class ColumnNameExact private(enteredName: String, sqlEntry: String) extends ColumnName
 
   final case class ColumnIndex private(index: Int) extends ColumnReference {
     val sqlEntry: String = index.toString
@@ -67,5 +76,5 @@ object ColumnReference {
 
 object ColumnName {
   def apply(name: String): ColumnName = ColumnReference(name)
-  def unapply(columnName: ColumnName): String = columnName.enteredName
+  def unapply(columnName: ColumnName): Option[String] = Option(columnName.enteredName)
 }
