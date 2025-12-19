@@ -137,11 +137,6 @@ class ColumnReferenceUnitTests extends AnyFunSuiteLike{
     assert(n1 != n2, "Expected inequality for different sqlEntry")
   }
 
-  test("unapply returns enteredName") {
-    val n1 = ColumnReference("ab")             // ColumnNameSimple with sqlEntry "ab"
-    assert(ColumnName.unapply(n1).contains(n1.enteredName))
-  }
-
   test("ColumnReference.quote works correctly") {
     assert(ColumnReference.quote("abc") == "\"abc\"")
     assert(ColumnReference.quote("a\"bc") == "\"a\"bc\"")

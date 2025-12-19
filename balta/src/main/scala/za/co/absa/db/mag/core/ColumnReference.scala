@@ -18,10 +18,10 @@ package za.co.absa.db.mag.core
 
 trait ColumnReference extends SqlItem
 
-case class ColumnName private(enteredName: String,
-                              sqlEntry: String,
-                              quoteLess: String
-                             ) extends ColumnReference{
+case class ColumnName (enteredName: String,
+                       sqlEntry: String,
+                       quoteLess: String
+                      ) extends ColumnReference{
   override def equals(obj: Any): Boolean = {
     obj match {
       case that: ColumnName => this.sqlEntry == that.sqlEntry
@@ -76,5 +76,4 @@ object ColumnReference {
 
 object ColumnName {
   def apply(name: String): ColumnName = ColumnReference(name)
-  def unapply(columnName: ColumnName): Option[String] = Option(columnName.enteredName)
 }
