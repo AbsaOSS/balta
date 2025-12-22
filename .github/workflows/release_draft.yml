@@ -92,6 +92,9 @@ jobs:
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd
         env:
           TAG_NAME: ${{ github.event.inputs.tag-name }}
+
+      - name: Create and push tag
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd
         with:
           script: |
             const tag = process.env.TAG_NAME
@@ -114,6 +117,31 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           name: ${{ github.event.inputs.tag-name }}
+          tag-name: ${{ github.event.inputs.tagName }}
+          chapters: |
+            - { title: No entry 🚫, label: duplicate }
+            - { title: Breaking Changes 💥, label: breaking-change }
+            - { title: New Features 🎉, label: enhancement }
+            - { title: Bugfixes 🛠, label: bug }
+            - { title: Infrastructure ⚙️, label: infrastructure }
+            - { title: Silent-live 🤫, label: silent-live }
+            - { title: Documentation 📜, label: documentation }
+            - { title: Closed Epics 📚, label: epic }
+          duplicity-scope: 'service'
+          duplicity-icon: '🔁'
+          warnings: true
+          skip-release-notes-labels: "no RN"
+          print-empty-chapters: false
+          row-format-issue: '_{title}_ {developed-by} {co-authored-by} in #{number}'
+          row-format-pr: '_{title}_ {developed-by} {co-authored-by} in #{number}'
+          row-format-link-pr: true
+
+      - name: Create draft release
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          name: ${{ github.event.inputs.tagName }}
           body: ${{ steps.generate_release_notes.outputs.release-notes }}
           tag_name: ${{ github.event.inputs.tag-name }}
           draft: true
