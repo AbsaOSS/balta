@@ -21,8 +21,9 @@ object SqlEntryComposition {
   }
 
   sealed class QueryInsertIntoFragment private[SqlEntryComposition](sqlEntry: SqlEntry) {
-    def VALUES(firstValue: SqlEntry, otherValues: SqlEntry*): QueryInsert = {
-      VALUES(firstValue +: otherValues)
+    def VALUES(firstValue: String, otherValues: String*): QueryInsert = {
+      val values = firstValue +: otherValues
+      VALUES(values.map(SqlEntry(_)))
     }
     def VALUES(values: Seq[SqlEntry]): QueryInsert = {
       val valuesEntry = values.mkSqlEntry("VALUES(", ", ", ")")
@@ -108,7 +109,7 @@ object SqlEntryComposition {
   def BY(columns: ColumnReference*): OrderByFragment = new OrderByFragment(columnsToSqlEntry(columns))
 
   implicit def QueryToSqlEntry(query: Query): SqlEntry = query.sqlEntry
-  implicit def StringToSqlEntry(string: String): SqlEntry = SqlEntry(string)
+  //TODO --- implicit def StringToSqlEntry(string: String): SqlEntry = SqlEntry(string)
 
   private val select = SqlEntry("SELECT")
   private val insertInto = SqlEntry("INSERT INTO")

@@ -88,6 +88,8 @@ object SqlEntry {
     }
   }
 
+  implicit def sqlEntryToString(sqlEntry: SqlEntry): String = sqlEntry.entry
+
   private def concat(first: Option[SqlEntry], second: Option[SqlEntry]): Option[SqlEntry] = {
     (first, second) match {
       case (None, None) => None

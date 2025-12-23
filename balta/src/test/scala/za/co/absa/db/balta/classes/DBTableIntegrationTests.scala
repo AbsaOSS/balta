@@ -180,7 +180,7 @@ class DBTableIntegrationTests extends AnyFunSuiteLike with DBTestingConnection{
     strangeTable.insert(Params
       .add("id_strange_columns", 2)
       .add("col1", "a1")
-      .add("Col1", "bb1")
+      .add("\"Col1\"", "bb1")
       .add("col 1", "ccc1")
       .add("col-1", "ddddd1")
       .add("colá", "eeeee1")
@@ -189,7 +189,7 @@ class DBTableIntegrationTests extends AnyFunSuiteLike with DBTestingConnection{
 
     strangeTable.insert(Params
       .add("id_strange_columns", 3)
-      .add("\"col1\"", "a2")
+      .add("Col1", "a2")
       .add("\"Col1\"", "bb2")
       .add("\"col 1\"", "ccc2")
       .add("\"col-1\"", "ddddd2")
@@ -197,41 +197,39 @@ class DBTableIntegrationTests extends AnyFunSuiteLike with DBTestingConnection{
       .add("\"1col\"", "ffffff2")
     )
 
-     strangeTable.where(Params.add("Col1", "bb")) { queryResult =>
-       val row = queryResult.next()
-       assert(row.getLong("id_strange_columns") @= 1L)
-       assert(row.getString("col1") @= "a")
-       assert(row.getString("Col1") @= "bb")
-       assert(row.getString("col 1") @= "ccc")
-       assert(row.getString("col-1") @= "ddddd")
-       assert(row.getString("colá") @= "eeeee")
-       assert(row.getString("1col") @= "ffffff")
-       assert(queryResult.noMore)
-     }
-
-     strangeTable.where(Params.add("\"Col1\"", "bb1")) { queryResult =>
-       val row = queryResult.next()
-       assert(row.getLong("id_strange_columns") @= 2L)
-       assert(row.getString("col1") @= "a1")
-       assert(row.getString("Col1") @= "bb1")
-       assert(row.getString("col 1") @= "ccc1")
-       assert(row.getString("col-1") @= "ddddd1")
-       assert(row.getString("colá") @= "eeeee1")
-       assert(row.getString("1col") @= "ffffff1")
-       assert(queryResult.noMore)
-     }
-
-     strangeTable.where(Params.add("col 1", "ccc2")) { queryResult =>
-       val row = queryResult.next()
-       assert(row.getLong("id_strange_columns") @= 3L)
-       assert(row.getString("col1") @= "a2")
-       assert(row.getString("Col1") @= "bb2")
-       assert(row.getString("col 1") @= "ccc2")
-       assert(row.getString("col-1") @= "ddddd2")
-       assert(row.getString("colá") @= "eeeee2")
-       assert(row.getString("1col") @= "ffffff2")
-       assert(queryResult.noMore)
-     }
+    strangeTable.where(Params.add("\"Col1\"", "bb")) { queryResult =>
+      val row = queryResult.next()
+      assert(row.getLong("id_strange_columns") @= 1L)
+      assert(row.getString("col1") @= "a")
+      assert(row.getString("\"Col1\"") @= "bb")
+      assert(row.getString("col 1") @= "ccc")
+      assert(row.getString("col-1") @= "ddddd")
+      assert(row.getString("colá") @= "eeeee")
+      assert(row.getString("1col") @= "ffffff")
+      assert(queryResult.noMore)
+    }
+    strangeTable.where(Params.add("\"Col1\"", "bb1")) { queryResult =>
+      val row = queryResult.next()
+      assert(row.getLong("id_strange_columns") @= 2L)
+      assert(row.getString("col1") @= "a1")
+      assert(row.getString("\"Col1\"") @= "bb1")
+      assert(row.getString("col 1") @= "ccc1")
+      assert(row.getString("col-1") @= "ddddd1")
+      assert(row.getString("colá") @= "eeeee1")
+      assert(row.getString("1col") @= "ffffff1")
+      assert(queryResult.noMore)
+    }
+    strangeTable.where(Params.add("col 1", "ccc2")) { queryResult =>
+      val row = queryResult.next()
+      assert(row.getLong("id_strange_columns") @= 3L)
+      assert(row.getString("col1") @= "a2")
+      assert(row.getString("\"Col1\"") @= "bb2")
+      assert(row.getString("col 1") @= "ccc2")
+      assert(row.getString("col-1") @= "ddddd2")
+      assert(row.getString("colá") @= "eeeee2")
+      assert(row.getString("1col") @= "ffffff2")
+      assert(queryResult.noMore)
+    }
 
     strangeTable.delete()
     assert(strangeTable.count() == 0)

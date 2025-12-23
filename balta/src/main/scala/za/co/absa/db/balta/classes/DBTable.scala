@@ -55,18 +55,18 @@ case class DBTable(tableName: String) extends DBQuerySupport{
    *
    * @param keyName     - the name of the key column
    * @param keyValue    - the value of the key column
-   * @param fieldName   - the name of the field to be returned
+   * @param columnName  - the name of the field to be returned
    * @param connection  - a database connection used for the SELECT operation.
    * @tparam K          - the type of the key value
    * @tparam T          - the type of the returned field value
    * @return            - the value of the field, if the value is NULL, then `Some(None)` is returned; if no row is found,
    *                    then `None` is returned.
    */
-  def fieldValue[K: QueryParamType, T](keyName: String, keyValue: K, fieldName: String)
+  def fieldValue[K: QueryParamType, T](keyName: String, keyValue: K, columnName: String)
                                          (implicit connection: DBConnection): Option[Option[T]] = {
     where(Params.add(keyName, keyValue)){resultSet =>
       if (resultSet.hasNext) {
-        Some(resultSet.next().getAs[T](fieldName))
+        Some(resultSet.next().getAs[T](columnName))
       } else {
         None
       }

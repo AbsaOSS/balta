@@ -27,7 +27,7 @@ class SqlEntryCompositionUnitTests extends AnyFunSuiteLike {
   private val tableName = SqlEntry("my_table")
   private val condition = SqlEntry("field1 = 100")
   private val functionName = SqlEntry("my_function")
-  private val param = "42"
+  private val param = SqlEntry("42")
 
   test("Composition of `SELECT ... FROM`") {
     val query  = SELECT(field1, field2) FROM tableName
