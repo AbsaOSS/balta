@@ -59,7 +59,7 @@ object Params {
    * @param paramName - the name of the parameter
    * @return          - a list parameters to be used in an SQL prepared statement
    */
-  @deprecated("Use add(paramName, NULL)", "balta 0.3.0")
+  @deprecated("Use add(QueryParamType.NULL) or import QueryParamType.NULL", "balta 0.3.0")
   def addNull(paramName: String): NamedParams = {
     new NamedParams().add(paramName, QueryParamType.NULL)
   }
@@ -83,7 +83,7 @@ object Params {
    * @tparam T - the type of the parameter value
    * @return   - a list parameters to be used in an SQL prepared statement
    */
-  @deprecated("Use add(NULL)", "balta 0.3.0")
+  @deprecated("Use add(QueryParamType.NULL) or import QueryParamType.NULL", "balta 0.3.0")
   def addNull[T: QueryParamType](): OrderedParams = {
     new OrderedParams().add(QueryParamType.NULL)
   }

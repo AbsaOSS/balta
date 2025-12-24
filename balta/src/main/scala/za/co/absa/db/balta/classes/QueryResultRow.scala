@@ -39,7 +39,7 @@ class QueryResultRow private[classes](val rowNumber: Int,
   def columnCount: Int = fields.length
   def columnNumber(columnName: String): Int = {
     val columnNameQuoteless = ColumnName(columnName).quoteLess
-    columnNames.getOrThrow(columnNameQuoteless, new NoSuchElementException(s"Column '$columnNameQuoteless' not found"))
+    columnNames.getOrThrow(columnNameQuoteless, new NoSuchElementException(s"Column '$columnName' not found"))
   }
 
   /**

@@ -39,12 +39,12 @@ class SqlEntry(val entry: String) extends AnyVal {
 
   /** Translates a sequence of SqlEntry entries into a single SqlEntry formatted as a parameter list
     *
-    * @param params - A sequence of SqlEntry to be included as parameters.
-    * @param foo    - A bogus parameter do differentiate this method from the `apply(params: String*)` method, as their
-   *                  signatures would be same otherwise after type erasure.
-    * @return         A new SqlEntry that combines the input as a list of parameters/columns for a function or table.
+    * @param params         - A sequence of SqlEntry to be included as parameters.
+    * @param disambiguator  - Unused parameter to differentiate this method from `apply(params: String*)`
+   *                          after JVM type erasure (both would have signature `apply(Seq)`)
+    * @return               - A new SqlEntry that combines the input as a list of parameters/columns for a function or table.
     */
-  def apply(params: Seq[SqlEntry], foo: String = ""): SqlEntry = {
+  def apply(params: Seq[SqlEntry], disambiguator: String = ""): SqlEntry = {
     val paramsEntry = params.mkSqlEntry("(", ",", ")")
     this + paramsEntry
   }

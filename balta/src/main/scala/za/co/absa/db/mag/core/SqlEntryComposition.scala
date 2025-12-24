@@ -109,7 +109,6 @@ object SqlEntryComposition {
   def BY(columns: ColumnReference*): OrderByFragment = new OrderByFragment(columnsToSqlEntry(columns))
 
   implicit def QueryToSqlEntry(query: Query): SqlEntry = query.sqlEntry
-  //TODO --- implicit def StringToSqlEntry(string: String): SqlEntry = SqlEntry(string)
 
   private val select = SqlEntry("SELECT")
   private val insertInto = SqlEntry("INSERT INTO")
