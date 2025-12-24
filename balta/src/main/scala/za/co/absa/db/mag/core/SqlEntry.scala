@@ -103,7 +103,7 @@ object SqlEntry {
         val noSpaceStartChars = Set(',', '(', ')', '.')
         val noSpaceEndChars = Set('(')
         if (noSpaceStartChars.contains(e2Start) || noSpaceEndChars.contains(e1End)) {
-          // It looks better to have so space before characters like , ( )
+          // It looks better to have no space before characters like , ( )
           Some(SqlEntry(s"$first$second"))
         } else {
           Some(SqlEntry(s"$first $second"))
