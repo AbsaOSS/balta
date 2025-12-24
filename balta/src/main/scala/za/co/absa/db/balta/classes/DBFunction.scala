@@ -16,10 +16,11 @@
 
 package za.co.absa.db.balta.classes
 
-import DBFunction.{DBFunctionWithNamedParamsToo, DBFunctionWithPositionedParamsOnly, ParamsMap}
-
-import scala.collection.immutable.ListMap
-import za.co.absa.db.balta.typeclasses.{QueryParamValue, QueryParamType}
+import za.co.absa.db.balta.classes.DBFunction.{DBFunctionWithNamedParamsToo, DBFunctionWithPositionedParamsOnly}
+import za.co.absa.db.balta.typeclasses.QueryParamType
+import za.co.absa.db.balta.classes.inner.Params.{NamedParams, OrderedParams}
+import za.co.absa.db.mag.core.SqlEntry
+import za.co.absa.db.mag.core.SqlEntryComposition._
 
 /**
  * A class that represents a database function call. It can be used to execute a function and verify the result.
@@ -29,20 +30,21 @@ import za.co.absa.db.balta.typeclasses.{QueryParamValue, QueryParamType}
  * name; note that the position defined parameters can be added only at the beginning of the parameter list
  *
  * @param functionName  - the name of the function
- * @param params        - the list of parameters
+ * @param orderedParams - the list of parameters identified by their position (preceding the named parameters)
+ * @param namedParams   - the list of parameters identified by their name (following the positioned parameters)
+ *
  */
-sealed abstract class DBFunction private(functionName: String,
-                                         params: ParamsMap) extends DBQuerySupport {
+sealed abstract class DBFunction private(functionName: SqlEntry,
+                                         orderedParams: OrderedParams,
+                                         namedParams: NamedParams) extends DBQuerySupport {
 
-  private def sql(orderBy: String): String = {
-    val paramEntries = params.map{case(key, setterFnc) =>
-      key match {
-        case Left(_) => setterFnc.sqlEntry
-        case Right(name) => s"$name := ${setterFnc.sqlEntry}" // TODO https://github.com/AbsaOSS/balta/issues/2
-      }
+  private def sql(orderBy: Option[SqlEntry]): SqlEntry = {
+    val positionedParamEntries = orderedParams.values.map(_.sqlEntry)
+    val namedParamEntries = namedParams.items.map{ case (columnName, queryParamValue) =>
+      columnName.sqlEntry := queryParamValue.sqlEntry
     }
-    val paramsLine = paramEntries.mkString(",")
-    s"SELECT * FROM $functionName($paramsLine) $orderBy"
+    val paramEntries = positionedParamEntries ++ namedParamEntries
+    SELECT(ALL) FROM functionName(paramEntries) ORDER BY (orderBy)
   }
 
   /**
@@ -91,8 +93,8 @@ sealed abstract class DBFunction private(functionName: String,
    * @return            - the result of the verify function
    */
   def execute[R](orderBy: String)(verify: QueryResult => R /* Assertion */)(implicit connection: DBConnection): R = {
-    val orderByPart = if (orderBy.nonEmpty) {s"ORDER BY $orderBy"} else ""
-    runQuery(sql(orderByPart), params.values.toList)(verify)
+    val orderByPart = SqlEntry(orderBy).toOption
+    runQuery(sql(orderByPart), orderedParams.values ++ namedParams.values)(verify)
   }
 
   /**
@@ -104,9 +106,7 @@ sealed abstract class DBFunction private(functionName: String,
     * @return           - a new instance of the DBFunction class with the new parameter
     */
   def setParam[T: QueryParamType](paramName: String, value: T): DBFunctionWithNamedParamsToo = {
-    val key = Right(paramName) // TODO normalization TODO https://github.com/AbsaOSS/balta/issues/1
-    val queryValue = implicitly[QueryParamType[T]].toQueryParamValue(value)
-    DBFunctionWithNamedParamsToo(functionName, params + (key -> queryValue))
+    DBFunctionWithNamedParamsToo(functionName, orderedParams, namedParams.add(paramName, value))
   }
 
   /**
@@ -127,14 +127,12 @@ sealed abstract class DBFunction private(functionName: String,
    * @return - a new instance of the DBFunction class without any parameters set
    */
   def clear(): DBFunctionWithPositionedParamsOnly = {
-    DBFunctionWithPositionedParamsOnly(functionName)
+    DBFunctionWithPositionedParamsOnly(functionName, OrderedParams(), NamedParams())
   }
 }
 
 
 object DBFunction {
-
-  type ParamsMap = ListMap[Either[Int, String], QueryParamValue]
 
   /**
    * Creates a new instance of the DBFunction class with the given function name without any parameters set.
@@ -143,7 +141,15 @@ object DBFunction {
    * @return              - a new instance of the DBFunction class
    */
   def apply(functionName: String): DBFunctionWithPositionedParamsOnly = {
-    DBFunctionWithPositionedParamsOnly(functionName)
+    DBFunctionWithPositionedParamsOnly(SqlEntry(functionName))
+  }
+
+  def apply(functionName: String, params: NamedParams): DBFunctionWithNamedParamsToo = {
+    DBFunctionWithNamedParamsToo(SqlEntry(functionName), OrderedParams(), params)
+  }
+
+  def apply(functionName: String, params: OrderedParams): DBFunctionWithPositionedParamsOnly = {
+    DBFunctionWithPositionedParamsOnly(SqlEntry(functionName), params, NamedParams())
   }
 
   /**
@@ -151,11 +157,13 @@ object DBFunction {
    * class when creating a new instance of the DBFunction class without any parameters set.
    *
    * @param functionName  - the name of the function
-   * @param params        - the list of parameters
+   * @param orderedParams - the list of parameters identified by their position (preceding the named parameters)
+   * @param namedParams   - the list of parameters identified by their name (following the positioned parameters)
    */
-  sealed case class DBFunctionWithPositionedParamsOnly private(functionName: String,
-                                                               params: ParamsMap = ListMap.empty
-                                                              ) extends DBFunction(functionName, params) {
+  sealed case class DBFunctionWithPositionedParamsOnly private(functionName: SqlEntry,
+                                                               orderedParams: OrderedParams = OrderedParams(),
+                                                               namedParams: NamedParams = NamedParams()
+                                                              ) extends DBFunction(functionName, orderedParams, namedParams) {
     /**
      * Sets a parameter for the function call. It actually creates a new instance of the DBFunction class with the new
      * parameter. The new parameter is the last in the parameter list.
@@ -164,9 +172,7 @@ object DBFunction {
      * @return       - a new instance of the DBFunction class with the new parameter
      */
     def setParam[T: QueryParamType](value: T): DBFunctionWithPositionedParamsOnly = {
-      val key = Left(params.size + 1)
-      val queryValue = implicitly[QueryParamType[T]].toQueryParamValue(value)
-      DBFunctionWithPositionedParamsOnly(functionName, params + (key -> queryValue))
+      DBFunctionWithPositionedParamsOnly(functionName, orderedParams.add(value), namedParams)
     }
 
     /**
@@ -187,9 +193,11 @@ object DBFunction {
    * position (at the beginning of the list) and by their name (for the rest of the list).
    *
    * @param functionName  - the name of the function
-   * @param params        - the list of parameters
+   * @param orderedParams - the list of parameters identified by their position (preceding the named parameters)
+   * @param namedParams   - the list of parameters identified by their name (following the positioned parameters)
    */
-  sealed case class DBFunctionWithNamedParamsToo private(functionName: String,
-                                                         params: ParamsMap = ListMap.empty
-                                                        ) extends DBFunction(functionName, params)
+  sealed case class DBFunctionWithNamedParamsToo private(functionName: SqlEntry,
+                                                         orderedParams: OrderedParams = OrderedParams(),
+                                                         namedParams: NamedParams = NamedParams()
+                                                        ) extends DBFunction(functionName, orderedParams, namedParams)
 }
