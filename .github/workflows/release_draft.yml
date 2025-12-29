@@ -24,10 +24,6 @@ on:
       from-tag-name:
         description: 'Name of the git tag from which to detect changes from. Default value: latest tag. Syntax: "v[0-9]+.[0-9]+.[0-9]+".'
         required: false
-      infra-repo-ref:
-        description: 'Reference (usually branch or commit) of the infrastructure repository for which this pipeline will create a desired tag, given in `tag-name` parameter.'
-        required: false
-        default: refs/heads/master
 
 jobs:
   release-draft:
