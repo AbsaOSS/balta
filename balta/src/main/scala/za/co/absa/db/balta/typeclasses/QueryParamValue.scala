@@ -16,16 +16,21 @@
 
 package za.co.absa.db.balta.typeclasses
 
-import QueryParamValue.AssignFunc
+import QueryParamValue.{AssignFunc, sqlEquals, sqlQuestionMark}
+import za.co.absa.db.mag.core.SqlEntry
+
 import java.sql.PreparedStatement
 
 trait QueryParamValue {
   def assign: Option[AssignFunc]
-  def sqlEntry: String = "?"
-  def equalityOperator: String = "="
+  def sqlEntry: SqlEntry = sqlQuestionMark
+  def equalityOperator: SqlEntry = sqlEquals
 }
 
 object QueryParamValue {
+  private val sqlQuestionMark = SqlEntry("?")
+  private val sqlEquals = SqlEntry("=")
+
   type AssignFunc = (PreparedStatement, Int) => Unit
 
   class ObjectQueryParamValue(obj: Object) extends QueryParamValue {
@@ -41,8 +46,8 @@ object QueryParamValue {
 
   object NullParamValue extends QueryParamValue {
     override val assign: Option[AssignFunc] = None
-    override val sqlEntry: String = "NULL"
-    override val equalityOperator: String = "IS"
+    override val sqlEntry: SqlEntry = SqlEntry("NULL")
+    override val equalityOperator: SqlEntry = SqlEntry("IS")
   }
 
 }

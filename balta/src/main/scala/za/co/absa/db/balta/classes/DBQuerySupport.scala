@@ -17,16 +17,17 @@
 package za.co.absa.db.balta.classes
 
 import za.co.absa.db.balta.typeclasses.QueryParamValue
+import za.co.absa.db.mag.core.SqlEntry
 
 /**
  * This is a based trait providing the ability to run an SQL query and verify the result via a provided function.
  */
 trait DBQuerySupport {
 
-  protected def runQuery[R](sql: String, queryValues: List[QueryParamValue])
+  protected def runQuery[R](sql: SqlEntry, queryValues: Vector[QueryParamValue])
                  (verify: QueryResult => R /* Assertion */)
                  (implicit connection: DBConnection): R = {
-    val preparedStatement = connection.connection.prepareStatement(sql)
+    val preparedStatement = connection.connection.prepareStatement(sql.entry)
 
     queryValues.foldLeft(1) { case (parameterIndex, queryValue) =>
       queryValue.assign match { // this is better readable-wise than map + getOrElse

@@ -18,6 +18,7 @@ package za.co.absa.db.balta.classes
 
 import QueryResultRow._
 import za.co.absa.db.balta.implicits.MapImplicits.MapEnhancements
+import za.co.absa.db.mag.core.ColumnName
 
 import java.sql
 import java.sql.{Date, ResultSet, ResultSetMetaData, Time, Types}
@@ -29,18 +30,16 @@ import java.util.UUID
  *
  * @param rowNumber     - the number of the row in the result set
  * @param fields        - the values of the row
- * @param columnLabels  - the names of the columns; class uses `columnLabel(s)` to refer to the column names in accordance
- *                      to `java.sql.ResultSet`, which is is build around and that despite that aliases are not expected
- *                      to appear here
+ * @param columnNames   - the names of the columns
  */
 class QueryResultRow private[classes](val rowNumber: Int,
                                       private val fields: Vector[Option[Object]],
-                                      private val columnLabels: FieldNames) {
+                                      private val columnNames: ColumnNames) {
 
   def columnCount: Int = fields.length
-  def columnNumber(columnLabel: String): Int = {
-    val actualLabel = columnLabel.toLowerCase
-    columnLabels.getOrThrow(actualLabel, new NoSuchElementException(s"Column '$actualLabel' not found"))
+  def columnNumber(columnName: String): Int = {
+    val columnNameQuoteless = ColumnName(columnName).quoteLess
+    columnNames.getOrThrow(columnNameQuoteless, new NoSuchElementException(s"Column '$columnName' not found"))
   }
 
   /**
@@ -51,22 +50,22 @@ class QueryResultRow private[classes](val rowNumber: Int,
   def apply(column: Int): Option[Any] = getObject(column - 1)
   /**
    * Extracts a value from the row by column name.
-   * @param columnLabel - the name of the column
+   * @param columnName - the name of the column
    * @return            - the value stored in the column, type `Any` is for warningless comparison with any type
    */
-  def apply(columnLabel: String): Option[Any] = getObject(columnNumber(columnLabel))
+  def apply(columnName: String): Option[Any] = getObject(columnNumber(columnName))
 
   def getAs[T](column: Int, transformer: TransformerFnc[T]): Option[T] = getObject(column).map(transformer)
   def getAs[T](column: Int): Option[T] = getObject(column)map(_.asInstanceOf[T])
 
-  def getAs[T](columnLabel: String, transformer: TransformerFnc[T]): Option[T] = getAs(columnNumber(columnLabel), transformer)
-  def getAs[T](columnLabel: String): Option[T] = getObject(columnNumber(columnLabel)).map(_.asInstanceOf[T])
+  def getAs[T](columnName: String, transformer: TransformerFnc[T]): Option[T] = getAs(columnNumber(columnName), transformer)
+  def getAs[T](columnName: String): Option[T] = getObject(columnNumber(columnName)).map(_.asInstanceOf[T])
 
   def getObject(column: Int): Option[Object] = fields(column - 1)
-  def getObject(columnLabel: String): Option[Object] = getObject(columnNumber(columnLabel))
+  def getObject(columnName: String): Option[Object] = getObject(columnNumber(columnName))
 
   def getBoolean(column: Int): Option[Boolean] = getAs(column: Int, {item: Object => item.asInstanceOf[Boolean]})
-  def getBoolean(columnLabel: String): Option[Boolean] = getBoolean(columnNumber(columnLabel))
+  def getBoolean(columnName: String): Option[Boolean] = getBoolean(columnNumber(columnName))
 
   def getChar(column: Int): Option[Char] = {
     getString(column) match {
@@ -76,45 +75,45 @@ class QueryResultRow private[classes](val rowNumber: Int,
         None
     }
   }
-  def getChar(columnLabel: String): Option[Char] = getChar(columnNumber(columnLabel))
+  def getChar(columnName: String): Option[Char] = getChar(columnNumber(columnName))
 
   def getString(column: Int): Option[String] = getAs(column: Int, {item: Object => item.asInstanceOf[String]})
-  def getString(columnLabel: String): Option[String] = getString(columnNumber(columnLabel))
+  def getString(columnName: String): Option[String] = getString(columnNumber(columnName))
 
   def getInt(column: Int): Option[Int] = getAs(column: Int, {item: Object => item.asInstanceOf[Int]})
-  def getInt(columnLabel: String): Option[Int] = getInt(columnNumber(columnLabel))
+  def getInt(columnName: String): Option[Int] = getInt(columnNumber(columnName))
 
   def getLong(column: Int): Option[Long] = getAs(column: Int, {item: Object => item.asInstanceOf[Long]})
-  def getLong(columnLabel: String): Option[Long] = getLong(columnNumber(columnLabel))
+  def getLong(columnName: String): Option[Long] = getLong(columnNumber(columnName))
 
   def getDouble(column: Int): Option[Double] = getAs(column: Int, {item: Object => item.asInstanceOf[Double]})
-  def getDouble(columnLabel: String): Option[Double] = getDouble(columnNumber(columnLabel))
+  def getDouble(columnName: String): Option[Double] = getDouble(columnNumber(columnName))
 
   def getFloat(column: Int): Option[Float] = getAs(column: Int, {item: Object => item.asInstanceOf[Float]})
-  def getFloat(columnLabel: String): Option[Float] = getFloat(columnNumber(columnLabel))
+  def getFloat(columnName: String): Option[Float] = getFloat(columnNumber(columnName))
 
   def getBigDecimal(column: Int): Option[BigDecimal] =
     getAs(column: Int, {item: Object => item.asInstanceOf[java.math.BigDecimal]})
       .map(scala.math.BigDecimal(_))
-  def getBigDecimal(columnLabel: String): Option[BigDecimal] = getBigDecimal(columnNumber(columnLabel))
+  def getBigDecimal(columnName: String): Option[BigDecimal] = getBigDecimal(columnNumber(columnName))
 
   def getTime(column: Int): Option[Time] = getAs(column: Int, {item: Object => item.asInstanceOf[Time]})
-  def getTime(columnLabel: String): Option[Time] = getTime(columnNumber(columnLabel))
+  def getTime(columnName: String): Option[Time] = getTime(columnNumber(columnName))
 
   def getDate(column: Int): Option[Date] = getAs(column: Int, {item: Object => item.asInstanceOf[Date]})
-  def getDate(columnLabel: String): Option[Date] = getDate(columnNumber(columnLabel))
+  def getDate(columnName: String): Option[Date] = getDate(columnNumber(columnName))
 
   def getLocalDateTime(column: Int): Option[LocalDateTime] = getAs(column: Int, {item: Object => item.asInstanceOf[LocalDateTime]})
-  def getLocalDateTime(columnLabel: String): Option[LocalDateTime] = getLocalDateTime(columnNumber(columnLabel))
+  def getLocalDateTime(columnName: String): Option[LocalDateTime] = getLocalDateTime(columnNumber(columnName))
 
   def getOffsetDateTime(column: Int): Option[OffsetDateTime] = getAs(column: Int, {item: Object => item.asInstanceOf[OffsetDateTime]})
-  def getOffsetDateTime(columnLabel: String): Option[OffsetDateTime] = getOffsetDateTime(columnNumber(columnLabel))
+  def getOffsetDateTime(columnName: String): Option[OffsetDateTime] = getOffsetDateTime(columnNumber(columnName))
 
   def getInstant(column: Int): Option[Instant] = getOffsetDateTime(column).map(_.toInstant)
-  def getInstant(columnLabel: String): Option[Instant] = getOffsetDateTime(columnLabel).map(_.toInstant)
+  def getInstant(columnName: String): Option[Instant] = getOffsetDateTime(columnName).map(_.toInstant)
 
   def getUUID(column: Int): Option[UUID] = getAs(column: Int, {item: Object => item.asInstanceOf[UUID]})
-  def getUUID(columnLabel: String): Option[UUID] = getUUID(columnNumber(columnLabel))
+  def getUUID(columnName: String): Option[UUID] = getUUID(columnNumber(columnName))
 
   def getArray[T](column: Int): Option[Vector[T]] = {
     def transformerFnc(obj: Object): Vector[T] = {
@@ -123,7 +122,7 @@ class QueryResultRow private[classes](val rowNumber: Int,
     getAs(column: Int, transformerFnc _)
   }
 
-  def getArray[T](columnLabel: String): Option[Vector[T]] = getArray[T](columnNumber(columnLabel))
+  def getArray[T](columnName: String): Option[Vector[T]] = getArray[T](columnNumber(columnName))
 
   def getArray[T](column: Int, itemTransformerFnc: TransformerFnc[T]): Option[Vector[T]] = {
     def transformerFnc(obj: Object): Vector[T] = {
@@ -141,17 +140,17 @@ class QueryResultRow private[classes](val rowNumber: Int,
 
 object QueryResultRow {
 
-  type FieldNames = Map[String, Int]
+  type ColumnNames = Map[String, Int]
   type TransformerFnc[T] = Object => T
   type Extractor = ResultSet => Option[Object]
   type Extractors = Vector[Extractor]
 
-  def apply(resultSet: ResultSet)(implicit fieldNames: FieldNames, extractors: Extractors): QueryResultRow = {
+  def apply(resultSet: ResultSet)(implicit columnNames: ColumnNames, extractors: Extractors): QueryResultRow = {
     val fields = extractors.map(_(resultSet))
-    new QueryResultRow(resultSet.getRow, fields, fieldNames)
+    new QueryResultRow(resultSet.getRow, fields, columnNames)
   }
 
-  def fieldNamesFromMetadata(metaData: ResultSetMetaData): FieldNames = {
+  def columnNamesFromMetadata(metaData: ResultSetMetaData): ColumnNames = {
     Range.inclusive(1, metaData.getColumnCount).map(i => metaData.getColumnName(i) -> i).toMap
   }
 

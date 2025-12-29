@@ -65,9 +65,9 @@ class DBTableIntegrationTests extends AnyFunSuiteLike with DBTestingConnection{
       queryResult.next().assertTo(1, "textA", booleanField = true)
       queryResult.next().assertTo(4, "textA", booleanField = false)
       assert(queryResult.noMore)
-      "Hello world"
+      "Some returned value"
     }
-    assert(returnedValue == "Hello world")
+    assert(returnedValue == "Some returned value")
 
     table.where(Params.add("text_field", "textB").add("boolean_field", false)) { queryResult =>
       queryResult.next().assertTo(2, "textB", booleanField = false)
@@ -92,7 +92,7 @@ class DBTableIntegrationTests extends AnyFunSuiteLike with DBTestingConnection{
       assert(queryResult.noMore)
     }
 
-    table.delete(Params.addNull("text_field"))
+    table.delete(Params.add("text_field", NULL))
     assert(table.count() == 2)
     table.delete()
     assert(table.count() == 0)
@@ -173,6 +173,67 @@ class DBTableIntegrationTests extends AnyFunSuiteLike with DBTestingConnection{
     assert(table.count() == 0)
   }
 
+  test("Table with strange column names") {
+    val strangeTable = DBTable("testing.strange_columns")
+    assert(strangeTable.count() == 1)
+
+    strangeTable.insert(Params
+      .add("id_strange_columns", 2)
+      .add("col1", "a1")
+      .add("\"Col1\"", "bb1")
+      .add("col 1", "ccc1")
+      .add("col-1", "ddddd1")
+      .add("colá", "eeeee1")
+      .add("1col", "ffffff1")
+    )
+
+    strangeTable.insert(Params
+      .add("id_strange_columns", 3)
+      .add("Col1", "a2")
+      .add("\"Col1\"", "bb2")
+      .add("\"col 1\"", "ccc2")
+      .add("\"col-1\"", "ddddd2")
+      .add("\"colá\"", "eeeee2")
+      .add("\"1col\"", "ffffff2")
+    )
+
+    strangeTable.where(Params.add("\"Col1\"", "bb")) { queryResult =>
+      val row = queryResult.next()
+      assert(row.getLong("id_strange_columns") @= 1L)
+      assert(row.getString("col1") @= "a")
+      assert(row.getString("\"Col1\"") @= "bb")
+      assert(row.getString("col 1") @= "ccc")
+      assert(row.getString("col-1") @= "ddddd")
+      assert(row.getString("colá") @= "eeeee")
+      assert(row.getString("1col") @= "ffffff")
+      assert(queryResult.noMore)
+    }
+    strangeTable.where(Params.add("\"Col1\"", "bb1")) { queryResult =>
+      val row = queryResult.next()
+      assert(row.getLong("id_strange_columns") @= 2L)
+      assert(row.getString("col1") @= "a1")
+      assert(row.getString("\"Col1\"") @= "bb1")
+      assert(row.getString("col 1") @= "ccc1")
+      assert(row.getString("col-1") @= "ddddd1")
+      assert(row.getString("colá") @= "eeeee1")
+      assert(row.getString("1col") @= "ffffff1")
+      assert(queryResult.noMore)
+    }
+    strangeTable.where(Params.add("col 1", "ccc2")) { queryResult =>
+      val row = queryResult.next()
+      assert(row.getLong("id_strange_columns") @= 3L)
+      assert(row.getString("col1") @= "a2")
+      assert(row.getString("\"Col1\"") @= "bb2")
+      assert(row.getString("col 1") @= "ccc2")
+      assert(row.getString("col-1") @= "ddddd2")
+      assert(row.getString("colá") @= "eeeee2")
+      assert(row.getString("1col") @= "ffffff2")
+      assert(queryResult.noMore)
+    }
+
+    strangeTable.delete()
+    assert(strangeTable.count() == 0)
+  }
 }
 
 object DBTableIntegrationTests {
