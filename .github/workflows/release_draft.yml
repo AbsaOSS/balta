@@ -88,60 +88,46 @@ jobs:
           row-format-link-pr: true
           hierarchy: true
 
-      - name: Create and Push Tag
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd
-        env:
-          TAG_NAME: ${{ github.event.inputs.tag-name }}
-
-      - name: Create and push tag
+      - name: Create and Push Tag (standalone)
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd
         with:
           script: |
-            const tag = process.env.TAG_NAME
+            const tag = core.getInput('tag-name')
             const ref = `refs/tags/${tag}`;
             const sha = context.sha; // The SHA of the commit to tag
+            const tagMessage = `${tag} released by GitHub Action`;
+
+            const tagObject = await github.rest.git.createTag({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              tag: tag,
+              message: tagMessage,
+              object: sha,
+              type: 'commit',
+              tagger: {
+                name: context.actor,
+                email: `${context.actor}@users.noreply.github.com`,
+                date: new Date().toISOString()
+              }
+            });
 
             await github.rest.git.createRef({
               owner: context.repo.owner,
               repo: context.repo.repo,
               ref: ref,
-              sha: sha
+              sha: tagObject.data.sha
             });
 
             console.log(`Tag created: ${tag}`);
           github-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Create Draft Release
-        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          name: ${{ github.event.inputs.tag-name }}
-          tag-name: ${{ github.event.inputs.tagName }}
-          chapters: |
-            - { title: No entry 🚫, label: duplicate }
-            - { title: Breaking Changes 💥, label: breaking-change }
-            - { title: New Features 🎉, label: enhancement }
-            - { title: Bugfixes 🛠, label: bug }
-            - { title: Infrastructure ⚙️, label: infrastructure }
-            - { title: Silent-live 🤫, label: silent-live }
-            - { title: Documentation 📜, label: documentation }
-            - { title: Closed Epics 📚, label: epic }
-          duplicity-scope: 'service'
-          duplicity-icon: '🔁'
-          warnings: true
-          skip-release-notes-labels: "no RN"
-          print-empty-chapters: false
-          row-format-issue: '_{title}_ {developed-by} {co-authored-by} in #{number}'
-          row-format-pr: '_{title}_ {developed-by} {co-authored-by} in #{number}'
-          row-format-link-pr: true
+          tag-name: ${{ github.event.inputs.tag-name }}
 
       - name: Create draft release
         uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          name: ${{ github.event.inputs.tagName }}
+          name: ${{ github.event.inputs.tag-name }}
           body: ${{ steps.generate_release_notes.outputs.release-notes }}
           tag_name: ${{ github.event.inputs.tag-name }}
           draft: true
