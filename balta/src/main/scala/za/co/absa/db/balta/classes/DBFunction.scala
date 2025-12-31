@@ -159,7 +159,7 @@ object DBFunction {
    * @param orderedParams - the list of parameters identified by their position (preceding the named parameters)
    */
   sealed case class DBFunctionWithPositionedParamsOnly private(functionName: String,
-                                                               orderedParams: OrderedParams = OrderedParams(),
+                                                               orderedParams: OrderedParams = OrderedParams()
                                                               ) extends DBFunction(functionName, orderedParams, namedParams = NamedParams()) {
     /**
      * Sets a parameter for the function call. It actually creates a new instance of the DBFunction class with the new

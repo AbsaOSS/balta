@@ -32,7 +32,7 @@ case class ColumnName (enteredName: String,
 }
 
 object ColumnReference {
-  private val regularColumnNamePattern = "^([a-z_][a-z0-9_]*)$".r
+  private val standardColumnNamePattern = "^[a-z_][a-z0-9_]*$".r
   private val mixedCaseColumnNamePattern = "^[a-zA-Z_][a-zA-Z0-9_]*$".r
   private val quotedRegularColumnNamePattern = "^\"([a-z_][a-z0-9_]*)\"$".r
   private val quotedColumnNamePattern = "^\"(.+)\"$".r
@@ -47,8 +47,8 @@ object ColumnReference {
   def apply(name: String): ColumnName = {
     val trimmedName = name.trim
     trimmedName match {
-      case regularColumnNamePattern(columnName) =>
-        ColumnName(columnName, columnName, columnName) // column name per SQL standard, no quoting needed
+      case standardColumnNamePattern() =>
+        ColumnName(trimmedName, trimmedName, trimmedName) // column name per SQL standard, no quoting needed
       case mixedCaseColumnNamePattern() =>
         val loweredColumnName = trimmedName.toLowerCase
         ColumnName(trimmedName, loweredColumnName, loweredColumnName) // mixed case name, turn to lower case for sql entry (per standard)
