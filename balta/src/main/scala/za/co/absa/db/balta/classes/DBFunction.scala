@@ -126,7 +126,7 @@ sealed abstract class DBFunction private(functionName: String,
    * @return - a new instance of the DBFunction class without any parameters set
    */
   def clear(): DBFunctionWithPositionedParamsOnly = {
-    DBFunctionWithPositionedParamsOnly(functionName, OrderedParams(), NamedParams())
+    DBFunctionWithPositionedParamsOnly(functionName, OrderedParams())
   }
 }
 
@@ -148,7 +148,7 @@ object DBFunction {
   }
 
   def apply(functionName: String, params: OrderedParams): DBFunctionWithPositionedParamsOnly = {
-    DBFunctionWithPositionedParamsOnly(functionName, params, NamedParams())
+    DBFunctionWithPositionedParamsOnly(functionName, params)
   }
 
   /**
@@ -157,12 +157,10 @@ object DBFunction {
    *
    * @param functionName  - the name of the function
    * @param orderedParams - the list of parameters identified by their position (preceding the named parameters)
-   * @param namedParams   - the list of parameters identified by their name (following the positioned parameters)
    */
   sealed case class DBFunctionWithPositionedParamsOnly private(functionName: String,
                                                                orderedParams: OrderedParams = OrderedParams(),
-                                                               namedParams: NamedParams = NamedParams()
-                                                              ) extends DBFunction(functionName, orderedParams, namedParams) {
+                                                              ) extends DBFunction(functionName, orderedParams, namedParams = NamedParams()) {
     /**
      * Sets a parameter for the function call. It actually creates a new instance of the DBFunction class with the new
      * parameter. The new parameter is the last in the parameter list.
@@ -171,7 +169,7 @@ object DBFunction {
      * @return       - a new instance of the DBFunction class with the new parameter
      */
     def setParam[T: QueryParamType](value: T): DBFunctionWithPositionedParamsOnly = {
-      DBFunctionWithPositionedParamsOnly(functionName, orderedParams.add(value), namedParams)
+      DBFunctionWithPositionedParamsOnly(functionName, orderedParams.add(value))
     }
 
     /**
