@@ -29,8 +29,8 @@ class PostgresRowIntegrationTests extends AnyFunSuiteLike with DBTestingConnecti
     (q.toList, q.resultSetMetaData)
   }
 
-  test("fieldNamesFromMetada") {
-    val result = QueryResultRow.fieldNamesFromMetadata(metadata)
+  test("Extract columnNamesFromMetadata") {
+    val result = QueryResultRow.columnNamesFromMetadata(metadata)
 
     val expectedResult = Seq(
       "id",
