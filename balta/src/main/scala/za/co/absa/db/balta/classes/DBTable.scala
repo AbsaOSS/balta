@@ -15,6 +15,7 @@
  */
 
 package za.co.absa.db.balta.classes
+// jacoco-touch: simulate change
 
 import za.co.absa.db.balta.classes.inner.Params
 import za.co.absa.db.balta.classes.inner.Params.NamedParams

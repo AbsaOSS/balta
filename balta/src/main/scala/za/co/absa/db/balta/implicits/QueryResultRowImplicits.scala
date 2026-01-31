@@ -15,6 +15,7 @@
  */
 
 package za.co.absa.db.balta.implicits
+// jacoco-touch: simulate change
 
 import za.co.absa.db.balta.classes.QueryResultRow
 import za.co.absa.db.balta.implicits.OptionImplicits.OptionEnhancements

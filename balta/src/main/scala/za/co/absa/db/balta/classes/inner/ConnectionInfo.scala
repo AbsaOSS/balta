@@ -15,6 +15,7 @@
  */
 
 package za.co.absa.db.balta.classes.inner
+// jacoco-touch: simulate change
 
 /**
  * This is a function that sets a parameter of a prepared statement.

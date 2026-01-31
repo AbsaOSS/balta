@@ -15,6 +15,7 @@
  */
 
 package za.co.absa.db.balta.postgres.implicits
+// jacoco-touch: simulate change
 
 import org.postgresql.util.PGobject
 import za.co.absa.db.balta.classes.QueryResultRow

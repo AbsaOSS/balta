@@ -15,6 +15,7 @@
  */
 
 package za.co.absa.db.mag.naming.implementations
+// jacoco-touch: simulate change
 
 import za.co.absa.db.balta.implicits.MapImplicits.MapEnhancements
 import za.co.absa.db.mag.exceptions.NamingException

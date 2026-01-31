@@ -15,6 +15,7 @@
  */
 
 package za.co.absa.db.balta.typeclasses
+// jacoco-touch: simulate change
 
 import java.sql.{Date, PreparedStatement, Time}
 import java.util.UUID

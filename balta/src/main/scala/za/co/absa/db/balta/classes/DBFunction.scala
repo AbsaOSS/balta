@@ -15,6 +15,7 @@
  */
 
 package za.co.absa.db.balta.classes
+// jacoco-touch: simulate change
 
 import DBFunction.{DBFunctionWithNamedParamsToo, DBFunctionWithPositionedParamsOnly, ParamsMap}
 

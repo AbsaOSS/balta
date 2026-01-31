@@ -15,6 +15,7 @@
  */
 
 package za.co.absa.db.balta.implicits
+// jacoco-touch: simulate change
 
 object MapImplicits {
   implicit class MapEnhancements[K, V](val map: Map[K, V]) extends AnyVal {

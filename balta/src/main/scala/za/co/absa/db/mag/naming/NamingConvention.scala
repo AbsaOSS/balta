@@ -15,6 +15,7 @@
  */
 
 package za.co.absa.db.mag.naming
+// jacoco-touch: simulate change
 
 /**
  *  `NamingConvention` is a base trait that defines the interface for different naming conventions.
