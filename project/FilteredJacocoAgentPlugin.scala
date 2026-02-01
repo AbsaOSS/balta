@@ -133,8 +133,8 @@ object FilteredJacocoAgentPlugin extends AutoPlugin {
     jacocoPluginEnabled := false,
 
     // ---- coordinates
-    jacocoVersion := "0.8.12",
-    jmfCoreVersion := "1.0.0",
+    jacocoVersion := "0.8.14",
+    jmfCoreVersion := "1.1.0",
     libraryDependencies ++= Seq(
       // pull the agent with the runtime classifier (this is the actual -javaagent jar)
       ("org.jacoco" % "org.jacoco.agent" % jacocoVersion.value % Test).classifier("runtime"),
