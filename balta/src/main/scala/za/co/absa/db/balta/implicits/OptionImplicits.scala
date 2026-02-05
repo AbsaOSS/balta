@@ -15,7 +15,6 @@
  */
 
 package za.co.absa.db.balta.implicits
-// jacoco-touch: simulate change
 
 object OptionImplicits {
   implicit class OptionEnhancements[T](val option: Option[T]) extends AnyVal {

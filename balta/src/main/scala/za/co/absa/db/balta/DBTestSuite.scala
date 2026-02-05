@@ -15,7 +15,6 @@
  */
 
 package za.co.absa.db.balta
-// jacoco-touch: simulate change
 
 import org.scalactic.source
 import org.scalatest.Tag

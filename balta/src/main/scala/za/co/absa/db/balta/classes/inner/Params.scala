@@ -15,7 +15,6 @@
  */
 
 package za.co.absa.db.balta.classes.inner
-// jacoco-touch: simulate change
 
 import scala.collection.immutable.ListMap
 import za.co.absa.db.balta.typeclasses.{QueryParamValue, QueryParamType}

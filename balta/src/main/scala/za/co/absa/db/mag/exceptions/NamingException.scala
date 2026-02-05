@@ -15,7 +15,6 @@
  */
 
 package za.co.absa.db.mag.exceptions
-// jacoco-touch: simulate change
 
 /**
  *  Exception thrown when a naming convention is not found for a given string

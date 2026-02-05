@@ -15,7 +15,6 @@
  */
 
 package za.co.absa.db.balta.typeclasses
-// jacoco-touch: simulate change
 
 import QueryParamValue.AssignFunc
 import java.sql.PreparedStatement

@@ -15,7 +15,6 @@
  */
 
 package za.co.absa.db.mag.naming
-// jacoco-touch: simulate change
 
 /**
  *  `LettersCase` is a sealed trait that represents different cases of letters.

@@ -15,7 +15,6 @@
  */
 
 package za.co.absa.db.mag.naming.implementations
-// jacoco-touch: simulate change
 
 import za.co.absa.db.mag.naming.LettersCase.AsIs
 import za.co.absa.db.mag.naming.{LettersCase, NamingConvention}

@@ -15,7 +15,6 @@
  */
 
 package za.co.absa.db.balta.classes
-// jacoco-touch: simulate change
 
 import QueryResultRow._
 import za.co.absa.db.balta.implicits.MapImplicits.MapEnhancements

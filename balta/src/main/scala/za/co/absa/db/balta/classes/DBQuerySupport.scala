@@ -15,7 +15,6 @@
  */
 
 package za.co.absa.db.balta.classes
-// jacoco-touch: simulate change
 
 import za.co.absa.db.balta.typeclasses.QueryParamValue
 

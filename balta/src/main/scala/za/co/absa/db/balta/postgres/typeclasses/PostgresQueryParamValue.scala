@@ -1,5 +1,4 @@
 package za.co.absa.db.balta.postgres.typeclasses
-// jacoco-touch: simulate change
 
 import org.postgresql.util.PGobject
 import java.sql.PreparedStatement
