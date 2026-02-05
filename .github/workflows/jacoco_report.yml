@@ -3,9 +3,6 @@ name: CI check JaCoCo code-coverage
 on:
   pull_request:
     branches: [ master ]
-    paths:
-      - '**/*.scala'
-      - '!project/**'
 
 env:
   scalaLong: 2.12.18
@@ -15,8 +12,47 @@ env:
   coverage-per-changed-file: 0.0
 
 jobs:
+  detect:
+    name: Scala Changes Detection
+    runs-on: ubuntu-latest
+    outputs:
+      scala_changed: ${{ steps.changes.outputs.scala_changed }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Check if Scala files changed (excluding project/)
+        id: changes
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            CHANGED_FILES=$(gh api \
+              --paginate \
+              "repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files" \
+              --jq '.[].filename
+                | select(endswith(".scala"))
+                | select(startswith("project/") | not)')
+          else
+            CHANGED_FILES=$(git diff --name-only "${{ github.sha }}~1" "${{ github.sha }}" -- '**/*.scala' | grep -v '^project/' || true)
+          fi
+
+          if [[ -n "${CHANGED_FILES}" ]]; then
+            echo "scala_changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "scala_changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
   build-test-and-measure:
     name: Build, Test and Measure
+    needs: detect
+    if: needs.detect.outputs.scala_changed == 'true'
     runs-on: ubuntu-latest
 
     services:
@@ -70,3 +106,11 @@ jobs:
           min-coverage-changed-files: ${{ env.coverage-changed-files }}
           min-coverage-per-changed-file: ${{ env.coverage-per-changed-file }}
           skip-unchanged: false
+
+  noop:
+    name: No Operation
+    needs: detect
+    if: needs.detect.outputs.scala_changed != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "No changes in the *.scala files (excluding project/) — passing."
