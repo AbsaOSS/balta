@@ -22,6 +22,7 @@ on:
     branches: [ master ]
     paths:
       - '**/*.scala'
+      - '!project/**'
 
 env:
   SKIP_LABEL: 'no RN'
