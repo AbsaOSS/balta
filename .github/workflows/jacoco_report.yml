@@ -3,6 +3,9 @@ name: CI check JaCoCo code-coverage
 on:
   pull_request:
     branches: [ master ]
+    paths:
+      - '**/*.scala'
+      - '!project/**'
 
 env:
   scalaLong: 2.12.18
