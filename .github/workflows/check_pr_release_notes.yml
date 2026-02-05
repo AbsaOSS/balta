@@ -20,6 +20,8 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, edited, labeled, unlabeled]
     branches: [ master ]
+    paths:
+      - '**/*.scala'
 
 env:
   SKIP_LABEL: 'no RN'
