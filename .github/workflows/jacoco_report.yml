@@ -7,13 +7,52 @@ on:
 env:
   scalaLong: 2.12.18
   scalaShort: "2.12"
-  coverage-overall: 0.0
-  coverage-changed-files: 0.0
-  check-overall-coverages: true
+  coverage-overall: 80.0
+  coverage-changed-files: 80.0
+  coverage-per-changed-file: 0.0
 
 jobs:
+  detect:
+    name: Scala Changes Detection
+    runs-on: ubuntu-latest
+    outputs:
+      scala_changed: ${{ steps.changes.outputs.scala_changed }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Check if Scala files changed (excluding project/)
+        id: changes
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            CHANGED_FILES=$(gh api \
+              --paginate \
+              "repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files" \
+              --jq '.[].filename
+                | select(endswith(".scala"))
+                | select(startswith("project/") | not)')
+          else
+            CHANGED_FILES=$(git diff --name-only "${{ github.sha }}~1" "${{ github.sha }}" -- '**/*.scala' | grep -v '^project/' || true)
+          fi
+
+          if [[ -n "${CHANGED_FILES}" ]]; then
+            echo "scala_changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "scala_changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
   build-test-and-measure:
     name: Build, Test and Measure
+    needs: detect
+    if: needs.detect.outputs.scala_changed == 'true'
     runs-on: ubuntu-latest
 
     services:
@@ -54,68 +93,24 @@ jobs:
         id: jacocorun
         run: sbt jacoco
 
-      - name: Add coverage to PR
-        if: steps.jacocorun.outcome == 'success'
-        id: jacoco-balta
-        uses: madrapps/jacoco-report@50d3aff4548aa991e6753342d9ba291084e63848
+      - name: Check coverage thresholds and add reports in PR comments
+        id: jacoco
+        uses: MoranaApps/jacoco-report@54bfe284d1119dc917dddba80517c54c5bcf3627
         with:
-          paths: ${{ github.workspace }}/balta/target/scala-${{ env.scalaShort }}/jacoco/report/jacoco.xml
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: '${{ secrets.GITHUB_TOKEN }}'
+          paths: |
+            balta/target/**/jacoco/report/jacoco.xml
+          sensitivity: "detail"
+          comment-mode: 'single'
           min-coverage-overall: ${{ env.coverage-overall }}
           min-coverage-changed-files: ${{ env.coverage-changed-files }}
-          title: JaCoCo 'balta' module code coverage report - scala ${{ env.scalaLong }}
-          update-comment: true
-      - name: Get the Coverage info
-        if: steps.jacocorun.outcome == 'success'
-        run: |
-          echo "Total 'balta' module coverage ${{ steps.jacoco-balta.outputs.coverage-overall }}"
-          echo "Changed Files coverage ${{ steps.jacoco-balta.outputs.coverage-changed-files }}"
-      - name: Fail PR if changed files coverage is less than ${{ env.coverage-changed-files }}%
-        if: steps.jacocorun.outcome == 'success'
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd
-        with:
-          script: |
-            const coverageCheckFailed =
-              Number('${{ steps.jacoco-balta.outputs.coverage-changed-files }}') < Number('${{ env.coverage-changed-files }}')
-            if (coverageCheckFailed) {
-              core.setFailed('Changed files coverage is less than ${{ env.coverage-changed-files }}%!');
-            }
-      - name: Fail PR if overall files coverage is less than ${{ env.coverage-overall }}%
-        if: ${{ (steps.jacocorun.outcome == 'success') && (env.check-overall-coverages == 'true') }}
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd
-        with:
-          script: |
-            const coverageCheckFailed =
-              Number('${{ steps.jacoco-balta.outputs.coverage-overall }}') < Number('${{ env.coverage-overall }}');
-            if (coverageCheckFailed) {
-              core.setFailed('Overall coverage is less than ${{ env.coverage-overall }}%!');
-            }
-      - name: Edit JaCoCo comments on build failure
-        if: steps.jacocorun.outcome != 'success'
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd
-        with:
-          script: |
-            const issue_number = context.issue.number;
-            const owner = context.repo.owner;
-            const repo = context.repo.repo;
-            const jacocoReportRegExp = /^### JaCoCo .* code coverage report .*/;
+          min-coverage-per-changed-file: ${{ env.coverage-per-changed-file }}
+          skip-unchanged: false
 
-            const comments = await github.rest.issues.listComments({
-              owner,
-              repo,
-              issue_number,
-            });
-
-            for (const comment of comments.data) {
-              const lines = comment.body.split('\n');
-              if (lines.length > 0 && jacocoReportRegExp.test(lines[0])) {
-                await github.rest.issues.updateComment({
-                  owner,
-                  repo,
-                  comment_id: comment.id,
-                  body: lines[0] + "\n\n### Build Failed",
-                });
-              }
-            }
-
-            core.setFailed('JaCoCo test coverage report generation failed, and related PR comments were updated.');
+  noop:
+    name: No Operation
+    needs: detect
+    if: needs.detect.outputs.scala_changed != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "No changes in the *.scala files (excluding project/) — passing."
