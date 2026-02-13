@@ -62,3 +62,4 @@ class QueryResult(resultSet: ResultSet) extends Iterator[QueryResultRow] {
    */
   def noMore: Boolean = !hasNext
 }
+

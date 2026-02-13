@@ -52,3 +52,4 @@ trait NamingConvention {
    */
   def stringPerConvention(original: String): String
 }
+
