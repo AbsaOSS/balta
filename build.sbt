@@ -29,6 +29,7 @@ ThisBuild / scalaVersion := scala212
 ThisBuild / versionScheme := Some("early-semver")
 
 lazy val balta = (project in file("balta"))
+  .enablePlugins(JacocoPlugin)
   .settings(
     name := "balta",
     scalacOptions ++= Seq(
@@ -37,5 +38,8 @@ lazy val balta = (project in file("balta"))
     ),
     crossScalaVersions := supportedScalaVersions,
     libraryDependencies ++= libDependencies,
+    jacocoReportSettings := JacocoReportSettings(
+      title = "Balta Coverage Report",
+      formats = Seq(JacocoReportFormats.HTML, JacocoReportFormats.XML)
+    ),
   )
-  .enablePlugins(FilteredJacocoAgentPlugin)
