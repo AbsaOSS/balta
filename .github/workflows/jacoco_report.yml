@@ -99,7 +99,7 @@ jobs:
         with:
           token: '${{ secrets.GITHUB_TOKEN }}'
           paths: |
-            balta/target/**/jacoco/report/jacoco.xml
+            balta/target/**/jacoco-report/jacoco.xml
           sensitivity: "detail"
           comment-mode: 'single'
           min-coverage-overall: ${{ env.coverage-overall }}
