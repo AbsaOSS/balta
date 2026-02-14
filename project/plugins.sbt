@@ -1,3 +1,3 @@
 lazy val sbtCiReleaseVersion = "1.11.2"
 
-addSbtPlugin("com.github.sbt" % "sbt-jacoco" % "3.6.0")
+addSbtPlugin("io.github.moranaapps" % "jacoco-method-filter-sbt" % "2.0.0")
