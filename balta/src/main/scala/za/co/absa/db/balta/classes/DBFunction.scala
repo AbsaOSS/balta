@@ -193,3 +193,4 @@ object DBFunction {
                                                          params: ParamsMap = ListMap.empty
                                                         ) extends DBFunction(functionName, params)
 }
+
