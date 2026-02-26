@@ -90,3 +90,4 @@ object QueryParamType {
   }
 
 }
+

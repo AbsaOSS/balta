@@ -254,3 +254,4 @@ case class DBTable(tableName: String) extends DBQuerySupport{
     }.mkString(" AND ")
   }
 }
+

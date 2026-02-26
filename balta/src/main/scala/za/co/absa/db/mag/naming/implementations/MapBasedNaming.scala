@@ -50,3 +50,4 @@ object MapBasedNaming {
     new MapBasedNaming(actualNames, keysLettersCase)
   }
 }
+

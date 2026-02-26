@@ -29,6 +29,7 @@ ThisBuild / scalaVersion := scala212
 ThisBuild / versionScheme := Some("early-semver")
 
 lazy val balta = (project in file("balta"))
+  .enablePlugins(JacocoFilterPlugin)
   .settings(
     name := "balta",
     scalacOptions ++= Seq(
@@ -38,4 +39,3 @@ lazy val balta = (project in file("balta"))
     crossScalaVersions := supportedScalaVersions,
     libraryDependencies ++= libDependencies,
   )
-  .enablePlugins(FilteredJacocoAgentPlugin)
