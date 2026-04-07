@@ -50,8 +50,8 @@ Testing
 - Integration test files: name ends with `IntegrationTests`; must extend `DBTestSuite` or mix in `DBTestingConnection`.
 - Must not access private members of the class under test.
 - Prefer `AnyFunSuite`/`AnyFunSuiteLike`; use `AnyWordSpec` only when given/when/then adds clarity.
-- Must place shared test helpers and fixtures in a dedicated `testing` sub-package and reuse them across tests.
-- Must not add top-level comments in `*Tests.scala` outside test methods; use nested `describe`/`"..."` blocks to separate groups.
+- Must place shared test helpers and fixtures in the root test package (`za.co.absa.db.balta`) and reuse them across tests; shared files are excluded from the filename-inspector check.
+- Must not add top-level comments in `*Tests.scala` outside test methods; use nested `"..."` / `should` / `when` blocks (idiomatic to the chosen suite style) to separate groups.
 - Prefer TDD workflow:
   - Must create or update `SPEC.md` before writing any code, listing scenarios, inputs, and expected outputs.
   - Must propose the full test case set (name + intent + input + expected output) and wait for user confirmation before coding.

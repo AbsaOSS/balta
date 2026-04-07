@@ -36,6 +36,6 @@ jobs:
           name-patterns: '*UnitTests.*,*IntegrationTests.*'
           paths: '**/src/test/scala/**'
           report-format: 'console'
-          excludes: 'balta/src/test/scala/za/co/absa/db/balta/testing/*'
+          excludes: 'balta/src/test/scala/za/co/absa/db/balta/DBTestingConnection.scala,balta/src/test/scala/za/co/absa/db/balta/MockResultSets.scala'
           verbose-logging: 'false'
           fail-on-violation: 'true'
