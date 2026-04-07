@@ -71,3 +71,12 @@ DBConnection$#dbConnectionToJdbcConnection(*)           id:balta-implicit-dbconn
 QueryResultRow#get*(java.lang.String)                   id:balta-colname-getter
 QueryResultRow#getAs(java.lang.String,*)                id:balta-colname-getas-transformer
 QueryResultRow#apply(java.lang.String)                  id:balta-colname-apply
+
+# QueryResult#noMore — trivial negation of hasNext
+# Body is exactly `!hasNext`; testing it adds no assurance beyond the hasNext unit tests.
+QueryResult#noMore()                                    id:balta-nomore
+
+# QueryResult#resultSetMetaData — implicit field accessor (public val)
+# Scala compiles a public val to a 0-arg getter that returns the backing field.
+# No logic; a test would only assert identity of what was passed to the constructor.
+QueryResult#resultSetMetaData()                         id:balta-resultsetmetadata-accessor

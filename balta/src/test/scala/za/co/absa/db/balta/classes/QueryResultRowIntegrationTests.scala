@@ -17,7 +17,7 @@
 package za.co.absa.db.balta.classes
 
 import org.scalatest.funsuite.AnyFunSuiteLike
-import za.co.absa.db.balta.testing.classes.DBTestingConnection
+import za.co.absa.db.balta.DBTestingConnection
 
 import java.sql.{Date, ResultSetMetaData, Time}
 import java.text.SimpleDateFormat

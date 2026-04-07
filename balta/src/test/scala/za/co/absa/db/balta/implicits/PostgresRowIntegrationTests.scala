@@ -20,7 +20,7 @@ import org.scalatest.funsuite.AnyFunSuiteLike
 import za.co.absa.db.balta.classes.{DBTable, QueryResultRow}
 import za.co.absa.db.balta.postgres.implicits.Postgres.PostgresRow
 import za.co.absa.db.balta.postgres.classes.SimpleJsonString
-import za.co.absa.db.balta.testing.classes.DBTestingConnection
+import za.co.absa.db.balta.DBTestingConnection
 
 import java.sql.ResultSetMetaData
 
