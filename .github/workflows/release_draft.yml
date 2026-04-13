@@ -89,7 +89,7 @@ jobs:
           hierarchy: true
 
       - name: Create and Push Tag (standalone)
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         with:
           script: |
             const tag = core.getInput('tag-name')
@@ -123,7 +123,7 @@ jobs:
           tag-name: ${{ github.event.inputs.tag-name }}
 
       - name: Create draft release
-        uses: softprops/action-gh-release@26e8ad27a09a225049a7075d7ec1caa2df6ff332
+        uses: softprops/action-gh-release@b4309332981a82ec1c5618f44dd2e27cc8bfbfda
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
