@@ -29,6 +29,14 @@ class SnakeCaseNamingUnitTests extends AnyWordSpec with Matchers {
       val nm = new SnakeCaseNaming(AsIs)
       nm.stringPerConvention("") should be("")
     }
+    "handle string starting with uppercase" in {
+      val nm = new SnakeCaseNaming(AsIs)
+      nm.stringPerConvention("Name") should be("Name")
+    }
+    "handle single lowercase word" in {
+      val nm = new SnakeCaseNaming(LowerCase)
+      nm.stringPerConvention("hello") should be("hello")
+    }
   }
 
   "fromClassNamePerConvention" should {
@@ -48,6 +56,11 @@ class SnakeCaseNamingUnitTests extends AnyWordSpec with Matchers {
         val result = nm.fromClassNamePerConvention(testInstance)
         result should be("THIS_IS_A_TEST_CLASS")
       }
+    }
+    "strip trailing $ from companion object class names" in {
+      val nm = new SnakeCaseNaming(LowerCase)
+      val result = nm.fromClassNamePerConvention(SnakeCaseNaming)
+      result should include("snake")
     }
   }
 }

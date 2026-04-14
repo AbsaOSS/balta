@@ -58,17 +58,32 @@ Testing
   - Must write all failing tests first (red), then implement until all pass (green).
   - Must cover all distinct combinations; each test must state its scenario in the ScalaDoc.
   - Must update `SPEC.md` after all tests pass with the confirmed test case table.
+- When a unit test adds value — write one:
+  - Method has any own logic: branching (`if`/`match`), exception handling or swallowing, non-trivial transformation, config/resource read, or reflection.
+- When to add to `jmf-rules.txt` instead of writing a unit test:
+  - Body is a single call with no own logic: forwards to another overload, calls its non-deprecated replacement, returns a field, or wraps a constructor with no transformation.
+  - Litmus: "Does this method have any logic of its own?" — No → JMF.
+- Review rule — JMF drift check: when modifying a method that appears in `jmf-rules.txt`, verify its body still qualifies; if own logic has been added, remove the JMF rule and write a unit test instead.
 
 Tooling
 - Must format with scalafmt (`.scalafmt.conf`); lint with scalastyle (`scalastyle-config.xml`) or wartremover as configured.
 - Compiler warnings treated as errors where configured; coverage ≥ 80% via sbt-jacoco (excluding JMF-filtered methods in `jmf-rules.txt`).
 
 Coverage filtering (JMF)
-- A method qualifies for a JMF filter rule if it meets at least one criterion:
-  - No added value: trivial delegate, one-liner factory, or pure field accessor — a test adds no assurance beyond testing the delegated method.
-  - Not coverable without integration tests: requires a DB/external system; same path already exercised by integration tests.
-- Qualifying patterns: deprecated single-call delegates; `columnLabel: String` overloads that only call `columnNumber(label)` + Int-based overload; one-liner factory wrappers; implicit single-field accessors.
+- A method qualifies when its body is a single call with no own logic (see Testing section for the full decision rule and qualifying patterns).
 - Must not add JMF rules for methods with branching logic, error handling, or non-trivial transformations.
+- Rules file: `jmf-rules.txt` (version `[jmf:1.0.0]`); one rule per line, `#` comments and blank lines ignored.
+- Rule syntax: `<FQCN_glob>#<method_glob>(<descriptor_glob>) [FLAGS] [PREDICATES]`
+  - FQCN_glob: dot-form class pattern (`*`, `*.model.*`, `com.example.*`; `$` for inner/companion classes).
+  - method_glob: glob on method name (`copy`, `get*`, `$anonfun$*`, `*_$eq`).
+  - descriptor_glob: JVM descriptor `(args)ret`; omitting or `(*)` means any args/any return. Must use JVM internal format: `(I)*` not `(int)`, `(Z)*` not `(boolean)`, `(Ljava/lang/String;)*` not `(java.lang.String)`. Non-matching descriptors are silently ignored — no warning is emitted.
+  - FLAGS (space/comma separated): `public`, `protected`, `private`, `synthetic`, `bridge`, `static`, `abstract`.
+  - PREDICATES: `ret:<glob>` (return type), `id:<string>` (log label), `name-contains:<s>`, `name-starts:<s>`, `name-ends:<s>`.
+- Every rule Must include an `id:` label for traceability.
+- Adoption order: start with CONSERVATIVE (case-class boilerplate, compiler synthetics), then STANDARD; use AGGRESSIVE only for DTO/auto-generated packages.
+- Prefer narrow package scopes; prefer `synthetic`/`bridge` flags for compiler artifacts over broad wildcards.
+- Must prefix project-specific FQCN globs with `*` so they match the full qualified class name (e.g. `*QueryResult#noMore()`, not `QueryResult#noMore()`).
+- When adding a project-specific rule, add it under the `# PROJECT RULES` section with a comment explaining why the method qualifies.
 
 Quality gates
 - sbt "testOnly *UnitTests"   # unit tests, no DB needed
@@ -83,10 +98,13 @@ Common pitfalls to avoid
 - Logging: never pre-build log strings; always pass args lazily (call-by-name).
 - Cleanup: remove unused imports/variables (scalac `-Ywarn-unused`).
 - Stability: avoid changing externally-visible method signatures, SQL output, or parameter binding order.
+- JMF silent failures: rules with non-matching FQCN or descriptor globs are silently ignored; always verify new rules take effect by comparing JaCoCo method-level output before and after.
+- Scala reflection: case classes used with `currentMirror.reflectClass` in tests must be top-level (package scope), not inner classes — Scala reflection cannot handle inner class mirrors.
 
 Learned rules
 - Must not change `QueryResultRow` getter return types or `stringPerConvention` output for existing scenarios.
 - Must not change externally-visible SQL generation patterns without updating dependent tests.
+- Scala 2.12 compiler artifacts that generate coverable bytecode: `$anonfun$` lambdas (ACC_SYNTHETIC), `$deserializeLambda$` (private static, not synthetic), Function1 mixin forwarders (`andThen`/`compose`), value class `$extension` methods, `$default$` parameter methods, Iterator trait mixin (~80+ forwarders). These are JMF candidates, not unit-test candidates.
 
 Repo additions
 - Project name: balta

@@ -11,7 +11,7 @@
 *#unapply(*)                                            id:case-unapply
 *#hashCode(*)                                           id:case-hashcode
 *#copy(*)                                               id:case-copy
-*#copy$default$*(*)                                     id:case-copy-defaults
+#*#copy$default$*(*)                                     id:case-copy-defaults  — subsumed by gen-defaults
 *#productElement()                                      id:case-prod-element
 *#productArity()                                        id:case-prod-arity
 *#productPrefix()                                       id:case-prod-prefix
@@ -40,6 +40,28 @@
 # lambda
 *#*  synthetic name-contains:$anonfun$                  id:scala-anonfun
 
+# lambda serialization helper — compiler-generated, no project logic
+*#$deserializeLambda$(*)                                id:scala-deser-lambda
+
+# value class companion extension bridges — compiler-generated identity operations
+*#hashCode$extension(*)                                 id:valclass-hashcode-ext
+*#equals$extension(*)                                   id:valclass-equals-ext
+*#toString$extension(*)                                 id:valclass-tostring-ext
+*#canEqual$extension(*)                                 id:valclass-canequal-ext
+*#productIterator$extension(*)                          id:valclass-proditer-ext
+*#productElement$extension(*)                           id:valclass-prodelem-ext
+*#productArity$extension(*)                             id:valclass-prodarity-ext
+*#productPrefix$extension(*)                            id:valclass-prodprefix-ext
+*#copy$extension(*)                                     id:valclass-copy-ext
+*#copy$default$*$extension(*)                           id:valclass-copydef-ext
+
+# Function1 trait mixin delegates — single-call forwarders
+*#andThen(*)                                            id:fn1-andthen
+*#compose(*)                                            id:fn1-compose
+
+# Default parameter accessors — compiler-generated constant-returning methods
+*#*$default$*(*)                                        id:gen-defaults
+
 # PROJECT RULES
 
 # proposal to new globals
@@ -51,32 +73,307 @@
 # A unit test would only re-test the replacement method; no assurance is added.
 # Note: Params$ companion factory addNull methods are NOT filtered — they contain logic.
 *#setParamNull(*)                                       id:balta-deprecated-setnull
-Params$NamedParams#addNull(*)                           id:balta-deprecated-addnull-named
-Params$OrderedParams#addNull(*)                         id:balta-deprecated-addnull-ordered
-DBTestSuite#addNull(*)                                  id:balta-deprecated-addnull-suite
+*Params$NamedParams#addNull(*)                           id:balta-deprecated-addnull-named
+*Params$OrderedParams#addNull(*)                         id:balta-deprecated-addnull-ordered
+*DBTestSuite#addNull(*)                                  id:balta-deprecated-addnull-suite
 
 # One-liner factory wrappers in DBTestSuite
 # Each method is a single constructor call delegating to DBTable / DBFunction with no logic of its own.
-DBTestSuite#table(*)                                    id:balta-factory-table
-DBTestSuite#function(*)                                 id:balta-factory-function
+*DBTestSuite#table(*)                                    id:balta-factory-table
+*DBTestSuite#function(*)                                 id:balta-factory-function
 
 # Trivial implicit conversion: DBConnection → JDBC Connection
 # Entire body returns in.connection; no branching or transformation; a test would only assert identity.
-DBConnection$#dbConnectionToJdbcConnection(*)           id:balta-implicit-dbconn
+*DBConnection$#dbConnectionToJdbcConnection(*)           id:balta-implicit-dbconn
 
 # columnLabel: String overloads in QueryResultRow — pure label-resolution delegates
 # Each overload resolves the column label to an index via columnNumber(label) then forwards to the
 # Int-based overload. The Int-based overloads hold the extraction logic and are covered by integration tests.
 # apply(String) and the 2-param getAs(String, transformer) follow the same delegation pattern.
-QueryResultRow#get*(java.lang.String)                   id:balta-colname-getter
-QueryResultRow#getAs(java.lang.String,*)                id:balta-colname-getas-transformer
-QueryResultRow#apply(java.lang.String)                  id:balta-colname-apply
+# NOTE: JMF descriptors must use JVM format — (Ljava/lang/String;)* not (java.lang.String).
+*QueryResultRow#get*(Ljava/lang/String;)*                id:balta-colname-getter
+*QueryResultRow#getAs(Ljava/lang/String;Lscala/Function1;)* id:balta-colname-getas-transformer
+*QueryResultRow#apply(Ljava/lang/String;)*               id:balta-colname-apply
 
 # QueryResult#noMore — trivial negation of hasNext
 # Body is exactly `!hasNext`; testing it adds no assurance beyond the hasNext unit tests.
-QueryResult#noMore()                                    id:balta-nomore
+*QueryResult#noMore()                                    id:balta-nomore
 
 # QueryResult#resultSetMetaData — implicit field accessor (public val)
 # Scala compiles a public val to a 0-arg getter that returns the backing field.
 # No logic; a test would only assert identity of what was passed to the constructor.
-QueryResult#resultSetMetaData()                         id:balta-resultsetmetadata-accessor
+*QueryResult#resultSetMetaData()                         id:balta-resultsetmetadata-accessor
+
+# QueryResult#columnCount — public val backed by metaData.getColumnCount
+# Scala val getter; no logic.
+*QueryResult#columnCount()                               id:balta-columncount-accessor
+
+# QueryResultRow field accessors and single-call getters
+*QueryResultRow#rowNumber()                              id:balta-row-rownumber
+*QueryResultRow#columnCount()                            id:balta-row-columncount
+# NOTE: JMF descriptors must use JVM format.  (I)* matches single-int-param overloads.
+*QueryResultRow#apply(I)*                                id:balta-row-apply-int
+*QueryResultRow#getObject(I)*                            id:balta-row-getobject-int
+*QueryResultRow#getObject(Ljava/lang/String;)*           id:balta-row-getobject-str
+*QueryResultRow#getAs(I)*                                id:balta-row-getas-int
+*QueryResultRow#getBoolean(I)*                           id:balta-row-getboolean-int
+*QueryResultRow#getString(I)*                            id:balta-row-getstring-int
+*QueryResultRow#getInt(I)*                               id:balta-row-getint-int
+*QueryResultRow#getLong(I)*                              id:balta-row-getlong-int
+*QueryResultRow#getDouble(I)*                            id:balta-row-getdouble-int
+*QueryResultRow#getFloat(I)*                             id:balta-row-getfloat-int
+*QueryResultRow#getBigDecimal(I)*                        id:balta-row-getbigdecimal-int
+*QueryResultRow#getTime(I)*                              id:balta-row-gettime-int
+*QueryResultRow#getDate(I)*                              id:balta-row-getdate-int
+*QueryResultRow#getLocalDateTime(I)*                     id:balta-row-getlocaldatetime-int
+*QueryResultRow#getOffsetDateTime(I)*                    id:balta-row-getoffsetdatetime-int
+*QueryResultRow#getInstant(I)*                           id:balta-row-getinstant-int
+*QueryResultRow#getUUID(I)*                              id:balta-row-getuuid-int
+
+# DBTestSuite — single-call delegates to Params
+*DBTestSuite#add(*)                                      id:balta-suite-add
+*DBTestSuite#<init>(Z)*                                  id:balta-suite-ctor-bool
+*DBTestSuite#dbConnection()                              id:balta-suite-dbconn
+
+# DBFunction — single-call overloads and factories
+*DBFunction#perform(*)                                   id:balta-func-perform
+*DBFunction#getResult(*)                                 id:balta-func-getresult
+*DBFunction#execute(Lscala/Function1;)*                  id:balta-func-execute-1arg
+*DBFunction#clear(*)                                     id:balta-func-clear
+*DBFunctionWithPositionedParamsOnly#setParamNull(*)      id:balta-func-pos-setnull
+
+# DBConnection — second factory overload delegates to primary
+*DBConnection$#apply(Ljava/lang/String;*)               id:balta-dbconn-apply-str
+
+# Params — factory-level addNull delegates (call add with NULL)
+*Params$#addNull(*)                                      id:balta-params-addnull
+*Params$NamedParams#pairs()                              id:balta-params-named-pairs
+
+# Postgres implicit class — single-call delegates
+*PostgresRow#get*(*)                                     id:balta-postgres-getters
+
+# SimpleJsonString — implicit conversion and param type factory
+*SimpleJsonString$#fromString(*)                         id:balta-sjs-fromstring
+*SimpleJsonString$ParamTypeSimpleJsonString#toQueryParamValue(*)  id:balta-sjs-paramtype
+
+# QueryParamType implicit objects — each returns new SimpleQueryParamValue / ObjectQueryParamValue
+*QueryParamType$QueryParamDouble#toQueryParamValue(*)    id:balta-qpt-double
+*QueryParamType$QueryParamFloat#toQueryParamValue(*)     id:balta-qpt-float
+*QueryParamType$QueryParamBigDecimal#toQueryParamValue(*) id:balta-qpt-bigdecimal
+*QueryParamType$QueryParamChar#toQueryParamValue(*)      id:balta-qpt-char
+*QueryParamType$QueryParamInstant#toQueryParamValue(*)   id:balta-qpt-instant
+*QueryParamType$QueryParamOffsetDateTime#toQueryParamValue(*) id:balta-qpt-offsetdatetime
+*QueryParamType$QueryParamLocalTime#toQueryParamValue(*) id:balta-qpt-localtime
+*QueryParamType$QueryParamLocalDate#toQueryParamValue(*) id:balta-qpt-localdate
+*QueryParamType$QueryParamUUID#toQueryParamValue(*)      id:balta-qpt-uuid
+*QueryParamType$QueryParamLong#toQueryParamValue(*)      id:balta-qpt-long
+
+# QueryParamValue — ObjectQueryParamValue constructor + assign accessor
+*ObjectQueryParamValue#assign(*)                         id:balta-qpv-obj-assign
+*ObjectQueryParamValue#assignFunc(*)                     id:balta-qpv-obj-assignfunc
+
+# PostgresObjectQueryParamValue — constructor + assign accessor
+*PostgresObjectQueryParamValue#assign(*)                 id:balta-pqpv-assign
+*PostgresObjectQueryParamValue#assignFunc(*)             id:balta-pqpv-assignfunc
+
+# AsIsNaming / ExplicitNamingRequired — singleton implicit vals
+*AsIsNaming$Implicits$#namingConvention()                id:balta-asis-implicit
+*ExplicitNamingRequired$Implicits$#namingConvention()    id:balta-explicit-implicit
+
+# NamingConvention — fromClassNamePerConvention(instance) delegates to Class overload
+*NamingConvention#fromClassNamePerConvention(Ljava/lang/Object;)* id:balta-naming-from-instance
+
+# OptionImplicits / MapImplicits — implicit class wrapper constructors (value class)
+*OptionImplicits$OptionEnhancements#<init>(*)            id:balta-opt-ctor
+*MapImplicits$MapEnhancements#<init>(*)                  id:balta-map-ctor
+*QueryResultRowImplicits$ProductTypeConvertor#<init>(*)  id:balta-qrri-ctor
+*Postgres$PostgresRow#<init>(*)                          id:balta-pgrow-ctor
+
+# OptionImplicits / MapImplicits / QueryResultRowImplicits / Postgres — implicit class outer wrappers
+*OptionImplicits#<init>(*)                               id:balta-opt-outer
+*MapImplicits#<init>(*)                                  id:balta-map-outer
+*QueryResultRowImplicits#<init>(*)                       id:balta-qrri-outer
+*Postgres#<init>(*)                                      id:balta-pg-outer
+
+# LettersCase.convert — trivial identity/toLowerCase/toUpperCase
+*LettersCase$AsIs$#convert(*)                            id:balta-lc-asis
+*LettersCase$LowerCase$#convert(*)                       id:balta-lc-lower
+*LettersCase$UpperCase$#convert(*)                       id:balta-lc-upper
+
+# QueryResult — Iterator trait mixin forwarders (no project logic)
+# QueryResult extends Iterator[QueryResultRow]; the compiler generates ~80 mixin
+# forwarders for inherited Iterator/TraversableOnce methods.  Only hasNext, next,
+# noMore, resultSetMetaData, and columnCount carry project logic (tested elsewhere).
+*QueryResult#to*(*)                                      id:balta-qr-iter-to
+*QueryResult#mk*(*)                                      id:balta-qr-iter-mk
+*QueryResult#addString(*)                                id:balta-qr-iter-addstr
+*QueryResult#copy*(*)                                    id:balta-qr-iter-copy
+*QueryResult#reduce*(*)                                  id:balta-qr-iter-reduce
+*QueryResult#fold*(*)                                    id:balta-qr-iter-fold
+*QueryResult#scan*(*)                                    id:balta-qr-iter-scan
+*QueryResult#zip*(*)                                     id:balta-qr-iter-zip
+*QueryResult#take*(*)                                    id:balta-qr-iter-take
+*QueryResult#drop*(*)                                    id:balta-qr-iter-drop
+*QueryResult#filter*(*)                                  id:balta-qr-iter-filter
+*QueryResult#collect*(*)                                 id:balta-qr-iter-collect
+*QueryResult#slice*(*)                                   id:balta-qr-iter-slice
+*QueryResult#index*(*)                                   id:balta-qr-iter-index
+*QueryResult#min*(*)                                     id:balta-qr-iter-min
+*QueryResult#max*(*)                                     id:balta-qr-iter-max
+*QueryResult#pad*(*)                                     id:balta-qr-iter-pad
+*QueryResult#for*(*)                                     id:balta-qr-iter-for
+*QueryResult#is*(*)                                      id:balta-qr-iter-is
+*QueryResult#size*(*)                                    id:balta-qr-iter-size
+*QueryResult#non*(*)                                     id:balta-qr-iter-non
+*QueryResult#map(*)                                      id:balta-qr-iter-map
+*QueryResult#flatMap(*)                                  id:balta-qr-iter-flatmap
+*QueryResult#find(*)                                     id:balta-qr-iter-find
+*QueryResult#contains(*)                                 id:balta-qr-iter-contains
+*QueryResult#count(*)                                    id:balta-qr-iter-count
+*QueryResult#corresponds(*)                              id:balta-qr-iter-corr
+*QueryResult#withFilter(*)                               id:balta-qr-iter-withfilter
+*QueryResult#partition(*)                                id:balta-qr-iter-partition
+*QueryResult#span(*)                                     id:balta-qr-iter-span
+*QueryResult#patch(*)                                    id:balta-qr-iter-patch
+*QueryResult#buffered(*)                                 id:balta-qr-iter-buffered
+*QueryResult#grouped(*)                                  id:balta-qr-iter-grouped
+*QueryResult#duplicate(*)                                id:balta-qr-iter-duplicate
+*QueryResult#sameElements(*)                             id:balta-qr-iter-same
+*QueryResult#$plus$plus(*)                               id:balta-qr-iter-plusplus
+*QueryResult#$div$colon(*)                               id:balta-qr-iter-divcolon
+*QueryResult#$colon$bslash(*)                            id:balta-qr-iter-colonbslash
+*QueryResult#aggregate(*)                                id:balta-qr-iter-aggregate
+*QueryResult#sum(*)                                      id:balta-qr-iter-sum
+*QueryResult#product(*)                                  id:balta-qr-iter-product
+*QueryResult#seq(*)                                      id:balta-qr-iter-seq
+*QueryResult#exists(*)                                   id:balta-qr-iter-exists
+*QueryResult#length(*)                                   id:balta-qr-iter-length
+*QueryResult#reversed(*)                                 id:balta-qr-iter-reversed
+*QueryResult#hasDefiniteSize(*)                          id:balta-qr-iter-defsize
+
+# Value class body methods — never boxed at runtime; compiler always uses static extensions
+# Filtering the boxed-path class methods (excluding ctor/hashCode/equals already filtered globally)
+*MapImplicits$MapEnhancements#map(*)                     id:balta-valclass-me-map
+*MapImplicits$MapEnhancements#getOrThrow(*)              id:balta-valclass-me-got
+*OptionImplicits$OptionEnhancements#option(*)             id:balta-valclass-oe-opt
+*OptionImplicits$OptionEnhancements#getOrThrow(*)         id:balta-valclass-oe-got
+*OptionImplicits$OptionEnhancements#$at$eq(*)             id:balta-valclass-oe-ateq
+*QueryResultRowImplicits$ProductTypeConvertor#row(*)      id:balta-valclass-ptc-row
+*QueryResultRowImplicits$ProductTypeConvertor#toProductType(*) id:balta-valclass-ptc-tpt
+*Postgres$PostgresRow#row(*)                              id:balta-valclass-pg-row
+*Postgres$PostgresRow#getSimpleJsonString(*)              id:balta-valclass-pg-gsjs
+*Postgres$PostgresRow#getSJSArray(*)                      id:balta-valclass-pg-gsja
+*Postgres$PostgresRow#simpleJsonStringTransformer(*)      id:balta-valclass-pg-sjst
+
+# ObjectQueryParamValue — trait-mixin defaults (return "?" and "=", no project logic)
+*ObjectQueryParamValue#sqlEntry(*)                       id:balta-qpv-obj-sqlentry
+*ObjectQueryParamValue#equalityOperator(*)               id:balta-qpv-obj-eqop
+*ObjectQueryParamValue#<init>(*)                         id:balta-qpv-obj-init
+
+# PostgresObjectQueryParamValue — trait-mixin defaults and constructor
+*PostgresObjectQueryParamValue#sqlEntry(*)               id:balta-pqpv-sqlentry
+*PostgresObjectQueryParamValue#equalityOperator(*)       id:balta-pqpv-eqop
+*PostgresObjectQueryParamValue#<init>(*)                 id:balta-pqpv-init
+
+# DBConnection — value class body (wraps java.sql.Connection; never boxed)
+*DBConnection#connection(*)                              id:balta-dbconn-val
+*DBConnection#<init>(*)                                  id:balta-dbconn-init
+*DBConnection#hashCode(*)                                id:balta-dbconn-hash
+*DBConnection#equals(*)                                  id:balta-dbconn-eq
+
+# DBConnection$ companion — primary apply has DriverManager logic (boundary);
+# filters only the trivial methods (boundary factory not unit-testable without DB)
+*DBConnection$#apply(*)                                  id:balta-dbconn-apply
+
+# Implicit wrapper parent objects — outer object with only the implicit class definition
+*MapImplicits#*(*)                                       id:balta-map-outer-all
+*OptionImplicits#*(*)                                    id:balta-opt-outer-all
+*QueryResultRowImplicits#*(*)                            id:balta-qrri-outer-all
+*Postgres#*(*)                                           id:balta-pg-outer-all
+
+# SimpleJsonString — value class body (wraps String; never boxed)
+*SimpleJsonString#value(*)                               id:balta-sjs-value
+*SimpleJsonString#<init>(*)                              id:balta-sjs-init
+
+# Static companion forwarders — compiler-generated single-call delegates on main class
+# Each static method on FooClass forwards to FooClass$.MODULE$.method()
+*DBConnection#apply(*)                                   id:balta-dbconn-apply-fwd
+*DBConnection#dbConnectionToJdbcConnection(*)            id:balta-dbconn-impl-fwd
+*DBTestSuite#persistDataOverride()                       id:balta-suite-persist
+*DBTestSuite#connectionInfoFromResourceConfig(*)         id:balta-suite-configfwd
+*QueryResultRow#createExtractors(*)                      id:balta-row-extractors-fwd
+*QueryResultRow#fieldNamesFromMetadata(*)                id:balta-row-fieldnames-fwd
+*NamingException#message(*)                              id:balta-naming-exc-msg
+*NamingException#apply(*)                                id:balta-naming-exc-apply
+*MapBasedNaming#apply(*)                                 id:balta-mapnaming-apply-fwd
+*DBFunction#apply(*)                                     id:balta-dbfunc-apply-fwd
+*DBTable#apply(*)                                        id:balta-dbtable-apply-fwd
+*Params#add(*)                                           id:balta-params-add-fwd
+*Params#addNull(*)                                       id:balta-params-addnull-fwd
+*SimpleJsonString#apply(*)                               id:balta-sjs-apply-fwd
+*SimpleJsonString#fromString(*)                          id:balta-sjs-fromstring-fwd
+
+# Trait mixin forwarders — implementing class calls trait default method (no own logic)
+*MapBasedNaming#fromClassNamePerConvention(*)            id:balta-mapnaming-fromclass
+*ExplicitNamingRequired#fromClassNamePerConvention(*)    id:balta-explicit-fromclass
+*AsIsNaming#fromClassNamePerConvention(*)                id:balta-asis-fromclass
+
+# Private field accessors — compiler-generated single-return methods
+*QueryResultRow#fields()                                 id:balta-row-fields
+*QueryResultRow#columnLabels()                           id:balta-row-columnlabels
+*AsIsNaming#lettersCase(*)                               id:balta-asis-letterscase
+
+# Params abstract class — instance methods are single-call delegates to ListMap
+*Params#values(*)                                        id:balta-params-values
+*Params#apply(*)                                         id:balta-params-apply
+*Params#size(*)                                          id:balta-params-size
+*Params#<init>(*)                                        id:balta-params-init
+
+# DBTestSuite#now — boundary method (SQL query, can't unit test without DB)
+*DBTestSuite#now(*)                                      id:balta-suite-now
+
+# DBTestSuite — lazy val computation (boundary: calls DriverManager.getConnection)
+*DBTestSuite#dbConnection$lzycompute(*)                  id:balta-suite-dbconn-lazy
+
+# DBTestSuite — test() override wraps testFun in a lambda + delegates to super.test()
+# The try/finally/commit/rollback logic lives in the $anonfun$test$1 synthetic (already filtered).
+# The test() method itself contains only closure creation + super.test() call — a delegation wrapper.
+*DBTestSuite#test(*)                                     id:balta-suite-test
+
+# DBTestSuite — constructor (Lscala/Option;) overload — sets fields, calls super
+*DBTestSuite#<init>(Lscala/Option;)*                     id:balta-suite-ctor-opt
+
+# DBTestSuite — connectionInfo lazy val accessor (compiler-generated check + delegate)
+*DBTestSuite#connectionInfo(*)                           id:balta-suite-conninfo
+
+# ProductTypeConvertor value class body — private helpers (never boxed at runtime)
+*QueryResultRowImplicits$ProductTypeConvertor#getConstructor(*)    id:balta-valclass-ptc-gc
+*QueryResultRowImplicits$ProductTypeConvertor#getConstructorMirror(*)  id:balta-valclass-ptc-gcm
+*QueryResultRowImplicits$ProductTypeConvertor#readParamsFromRow(*)  id:balta-valclass-ptc-rpr
+*QueryResultRowImplicits$ProductTypeConvertor#getParamValue(*)     id:balta-valclass-ptc-gpv
+
+# SimpleJsonString$ParamTypeSimpleJsonString$ companion — single new() call
+*SimpleJsonString$ParamTypeSimpleJsonString$#toQueryParamValue(*)  id:balta-sjs-ptsjs-tqpv
+
+# PostgresObjectQueryParamValue — private field accessor
+*PostgresQueryParamValue$PostgresObjectQueryParamValue#pgObject(*) id:balta-pqpv-pgobj
+
+# DBFunction$DBFunctionWithNamedParamsToo — case class field accessor
+*DBFunction$DBFunctionWithNamedParamsToo#functionName(*) id:balta-func-named-funcname
+
+# ConnectionInfo — static apply forwarder on main class (delegates to ConnectionInfo$.apply)
+*ConnectionInfo#apply(*)                                 id:balta-conninfo-apply
+
+# QueryResult — missed Iterator mixin forwarder
+*QueryResult#sliding(*)                                  id:balta-qr-iter-sliding
+
+# QueryResultRow$ — timeTzExtractor: private extractor used only when column type is timetz
+# Exercised through integration tests with the actual DB; not unit-testable.
+*QueryResultRow$#timeTzExtractor$1(*)                    id:balta-row-timetz-ext
+
+# DBTable — boundary methods (fieldValue/count need DB connection for SQL execution)
+*DBTable#fieldValue(*)                                   id:balta-dbtable-fieldvalue
+*DBTable#count(*)                                        id:balta-dbtable-count
+
+# DBFunction — execute(String, verify) partially covered; uncovered branch is empty-orderBy path
+*DBFunction#execute(Ljava/lang/String;*)*                id:balta-func-execute-orderby
