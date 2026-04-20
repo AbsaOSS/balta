@@ -90,4 +90,15 @@ class QueryResultUnitTests extends AnyFunSuiteLike with MockResultSets {
     assert(qr.columnCount == 3)
   }
 
+  test("noMore returns false when rows are still available") {
+    val qr = new QueryResult(singleRowMockResultSet)
+    assert(!qr.noMore)
+  }
+
+  test("noMore returns true after rows are consumed") {
+    val qr = new QueryResult(singleRowMockResultSet)
+    qr.next()
+    assert(qr.noMore)
+  }
+
 }

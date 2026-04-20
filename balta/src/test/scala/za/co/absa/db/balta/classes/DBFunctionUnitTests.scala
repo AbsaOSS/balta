@@ -68,4 +68,20 @@ class DBFunctionUnitTests extends AnyFunSuiteLike {
     val fn = DBFunction("fn").setParam("p", "v").clear()
     assert(fn.isInstanceOf[DBFunctionWithPositionedParamsOnly])
   }
+
+  test("setParamNull by name adds NULL param with named key") {
+    val fn = DBFunction("fn").setParamNull("p_null")
+    assert(fn.params.size == 1)
+    assert(fn.params.keys.head == Right("p_null"))
+    assert(fn.params.values.head.sqlEntry == "NULL")
+    assert(fn.params.values.head.equalityOperator == "IS")
+  }
+
+  test("setParamNull by position appends NULL as next index") {
+    val fn = DBFunction("fn").setParam(10).setParamNull()
+    assert(fn.params.size == 2)
+    assert(fn.params.keys.toList == List(Left(1), Left(2)))
+    assert(fn.params.values.toList.last.sqlEntry == "NULL")
+    assert(fn.params.values.toList.last.equalityOperator == "IS")
+  }
 }

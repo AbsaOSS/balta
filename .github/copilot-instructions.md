@@ -63,6 +63,12 @@ Testing
 - When to add to `jmf-rules.txt` instead of writing a unit test:
   - Body is a single call with no own logic: forwards to another overload, calls its non-deprecated replacement, returns a field, or wraps a constructor with no transformation.
   - Litmus: "Does this method have any logic of its own?" — No → JMF.
+- Global rule collision check (CRITICAL):
+  - When adding any new method, check if it matches a pattern in the `# GLOBALS RULES` section of `jmf-rules.txt` (line ~22+).
+  - If method name matches a global rule AND the method has domain logic: immediately create an INCLUDE rescue rule (`+FQCN#method(*)`) in the `# INCLUDE RULES` section of `jmf-rules.txt`.
+  - High-risk method names: refer to `jmf-rules.txt` GLOBALS RULES section for complete list; most common collisions: `apply()`, `toString()`, `equals()`, `copy()`, `name()`, `groups()`, `optionalAttributes()`.
+  - Rationale: Broad global rules designed for compiler-generated boilerplate can silently hide coverage for domain methods. INCLUDE rules rescue specific methods from broad exclusions.
+  - Example: If adding `def apply(id: String): Record`, add `+*Record$#apply(*)  id:keep-record-factory` to rescue from the `*$*#apply(*)` global rule in GLOBALS RULES section.
 - Review rule — JMF drift check: when modifying a method that appears in `jmf-rules.txt`, verify its body still qualifies; if own logic has been added, remove the JMF rule and write a unit test instead.
 
 Tooling
