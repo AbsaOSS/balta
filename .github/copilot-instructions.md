@@ -78,7 +78,7 @@ Tooling
 Coverage filtering (JMF)
 - A method qualifies when its body is a single call with no own logic (see Testing section for the full decision rule and qualifying patterns).
 - Must not add JMF rules for methods with branching logic, error handling, or non-trivial transformations.
-- Rules file: `jmf-rules.txt` (version `[jmf:1.0.0]`); one rule per line, `#` comments and blank lines ignored.
+- Rules file: `jmf-rules.txt`; one rule per line, `#` comments and blank lines ignored.
 - Rule syntax: `<FQCN_glob>#<method_glob>(<descriptor_glob>) [FLAGS] [PREDICATES]`
   - FQCN_glob: dot-form class pattern (`*`, `*.model.*`, `com.example.*`; `$` for inner/companion classes).
   - method_glob: glob on method name (`copy`, `get*`, `$anonfun$*`, `*_$eq`).

@@ -16,7 +16,7 @@
 # 4) Use --verify mode to confirm rules match before committing.
 #
 # ─────────────────────────────────────────────────────────────────────────────
-# GLOBALS RULES
+# GLOBAL RULES
 # ─────────────────────────────────────────────────────────────────────────────
 # Global rules match ALL packages. Verify they do not suppress real logic.
 # See docs/rules-reference.md#global-rule-safety-warning for details.
@@ -82,7 +82,7 @@
 # trivial constant, a boundary call not unit-testable, or an already-tested computation.
 # Rescue any lazy vals with real logic via + include rules.
 # DISABLED — enable with + include rules to rescue lazy vals whose initializer has real logic
-*#*$lzycompute(*)                                      id:scala-lzycompute
+# *#*$lzycompute(*)                                      id:scala-lzycompute
 
 # Lambda serialization helper — compiler-generated private static method
 # Emitted by scalac/javac to support SerializedLambda deserialization.
@@ -126,10 +126,10 @@
 #
 # RESCUE: Domain factory/accessor methods that collide with broad *#apply(*) rule
 # These are real domain methods with business logic, not case-class helpers.
-+*Params#apply(*)                                        id:keep-params-apply
++*Params#apply(*)                                       id:keep-params-apply
 +*QueryResultRow#apply(*)                               id:keep-queryresult-accessors
 +*QueryResultRow$#apply(*)                              id:keep-queryresult-factory
-+*DBConnection$#apply(*)                                id:keep-dbconn-apply
++*DBConnection$#apply(Lscala/Function0;)*               id:keep-dbconn-apply
 +*DBFunction$#apply(*)                                  id:keep-dbfunction-apply
 +*MapBasedNaming$#apply(*)                              id:keep-naming-transform
 
@@ -137,88 +137,86 @@
 # PROJECT RULES
 # ─────────────────────────────────────────────────────────────────────────────
 
-*DBFunction#perform(*)                                   id:balta-func-perform
-*DBFunction#getResult(*)                                 id:balta-func-getresult
-*DBFunction#execute(Ljava/lang/String;*)*                id:balta-func-execute-orderby
+*DBFunction#perform(*)                                  id:balta-func-perform
+*DBFunction#getResult(*)                                id:balta-func-getresult
+*DBFunction#execute(Ljava/lang/String;*)*               id:balta-func-execute-orderby
 
 *DBConnection$#apply(Ljava/lang/String;*)               id:balta-dbconn-apply-str
-*DBConnection#connection(*)                              id:balta-dbconn-val
-*DBConnection#<init>(*)                                  id:balta-dbconn-init
-*DBConnection#dbConnectionToJdbcConnection(*)            id:balta-dbconn-impl-fwd
+*DBConnection#connection(*)                             id:balta-dbconn-val
+*DBConnection#<init>(*)                                 id:balta-dbconn-init
+*DBConnection#dbConnectionToJdbcConnection(*)           id:balta-dbconn-impl-fwd
 
-*QueryResult#mk*(*)                                      id:balta-qr-iter-mk
-*QueryResult#addString(*)                                id:balta-qr-iter-addstr
-*QueryResult#copy*(*)                                    id:balta-qr-iter-copy
-*QueryResult#reduce*(*)                                  id:balta-qr-iter-reduce
-*QueryResult#fold*(*)                                    id:balta-qr-iter-fold
-*QueryResult#scan*(*)                                    id:balta-qr-iter-scan
-*QueryResult#zip*(*)                                     id:balta-qr-iter-zip
-*QueryResult#take*(*)                                    id:balta-qr-iter-take
-*QueryResult#drop*(*)                                    id:balta-qr-iter-drop
-*QueryResult#filter*(*)                                  id:balta-qr-iter-filter
-*QueryResult#collect*(*)                                 id:balta-qr-iter-collect
-*QueryResult#slice*(*)                                   id:balta-qr-iter-slice
-*QueryResult#index*(*)                                   id:balta-qr-iter-index
-*QueryResult#min*(*)                                     id:balta-qr-iter-min
-*QueryResult#max*(*)                                     id:balta-qr-iter-max
-*QueryResult#pad*(*)                                     id:balta-qr-iter-pad
-*QueryResult#for*(*)                                     id:balta-qr-iter-for
-*QueryResult#is*(*)                                      id:balta-qr-iter-is
-*QueryResult#size*(*)                                    id:balta-qr-iter-size
-*QueryResult#non*(*)                                     id:balta-qr-iter-non
-*QueryResult#map(*)                                      id:balta-qr-iter-map
-*QueryResult#flatMap(*)                                  id:balta-qr-iter-flatmap
-*QueryResult#find(*)                                     id:balta-qr-iter-find
-*QueryResult#contains(*)                                 id:balta-qr-iter-contains
-*QueryResult#count(*)                                    id:balta-qr-iter-count
-*QueryResult#corresponds(*)                              id:balta-qr-iter-corr
-*QueryResult#withFilter(*)                               id:balta-qr-iter-withfilter
-*QueryResult#partition(*)                                id:balta-qr-iter-partition
-*QueryResult#span(*)                                     id:balta-qr-iter-span
-*QueryResult#patch(*)                                    id:balta-qr-iter-patch
-*QueryResult#buffered(*)                                 id:balta-qr-iter-buffered
-*QueryResult#grouped(*)                                  id:balta-qr-iter-grouped
-*QueryResult#duplicate(*)                                id:balta-qr-iter-duplicate
-*QueryResult#sameElements(*)                             id:balta-qr-iter-same
-*QueryResult#$plus$plus(*)                               id:balta-qr-iter-plusplus
-*QueryResult#$div$colon(*)                               id:balta-qr-iter-divcolon
-*QueryResult#$colon$bslash(*)                            id:balta-qr-iter-colonbslash
-*QueryResult#aggregate(*)                                id:balta-qr-iter-aggregate
-*QueryResult#sum(*)                                      id:balta-qr-iter-sum
-*QueryResult#product(*)                                  id:balta-qr-iter-product
-*QueryResult#exists(*)                                   id:balta-qr-iter-exists
-*QueryResult#length(*)                                   id:balta-qr-iter-length
-*QueryResult#reversed(*)                                 id:balta-qr-iter-reversed
-*QueryResult#hasDefiniteSize(*)                          id:balta-qr-iter-defsize
-*QueryResult#toArray(*)                                  id:balta-qr-iter-toarray
-*QueryResult#toMap(*)                                    id:balta-qr-iter-tomap
-*QueryResult#toTraversable(*)                            id:balta-qr-iter-totraversable
-*QueryResult#toIterator(*)                               id:balta-qr-iter-toiterator
-*QueryResult#toStream(*)                                 id:balta-qr-iter-tostream
-*QueryResult#toIterable(*)                               id:balta-qr-iter-toiterable
-*QueryResult#toSeq(*)                                    id:balta-qr-iter-toseq
-*QueryResult#toIndexedSeq(*)                             id:balta-qr-iter-toindexedseq
-*QueryResult#toBuffer(*)                                 id:balta-qr-iter-tobuffer
-*QueryResult#toSet(*)                                    id:balta-qr-iter-toset
-*QueryResult#toVector(*)                                 id:balta-qr-iter-tovector
-*QueryResult#sliding(*)                                  id:balta-qr-iter-sliding
+*QueryResult#mk*(*)                                     id:balta-qr-iter-mk
+*QueryResult#addString(*)                               id:balta-qr-iter-addstr
+*QueryResult#copy*(*)                                   id:balta-qr-iter-copy
+*QueryResult#reduce*(*)                                 id:balta-qr-iter-reduce
+*QueryResult#fold*(*)                                   id:balta-qr-iter-fold
+*QueryResult#scan*(*)                                   id:balta-qr-iter-scan
+*QueryResult#zip*(*)                                    id:balta-qr-iter-zip
+*QueryResult#take*(*)                                   id:balta-qr-iter-take
+*QueryResult#drop*(*)                                   id:balta-qr-iter-drop
+*QueryResult#filter*(*)                                 id:balta-qr-iter-filter
+*QueryResult#collect*(*)                                id:balta-qr-iter-collect
+*QueryResult#slice*(*)                                  id:balta-qr-iter-slice
+*QueryResult#index*(*)                                  id:balta-qr-iter-index
+*QueryResult#min*(*)                                    id:balta-qr-iter-min
+*QueryResult#max*(*)                                    id:balta-qr-iter-max
+*QueryResult#pad*(*)                                    id:balta-qr-iter-pad
+*QueryResult#for*(*)                                    id:balta-qr-iter-for
+*QueryResult#is*(*)                                     id:balta-qr-iter-is
+*QueryResult#size*(*)                                   id:balta-qr-iter-size
+*QueryResult#non*(*)                                    id:balta-qr-iter-non
+*QueryResult#map(*)                                     id:balta-qr-iter-map
+*QueryResult#flatMap(*)                                 id:balta-qr-iter-flatmap
+*QueryResult#find(*)                                    id:balta-qr-iter-find
+*QueryResult#contains(*)                                id:balta-qr-iter-contains
+*QueryResult#count(*)                                   id:balta-qr-iter-count
+*QueryResult#corresponds(*)                             id:balta-qr-iter-corr
+*QueryResult#withFilter(*)                              id:balta-qr-iter-withfilter
+*QueryResult#partition(*)                               id:balta-qr-iter-partition
+*QueryResult#span(*)                                    id:balta-qr-iter-span
+*QueryResult#patch(*)                                   id:balta-qr-iter-patch
+*QueryResult#buffered(*)                                id:balta-qr-iter-buffered
+*QueryResult#grouped(*)                                 id:balta-qr-iter-grouped
+*QueryResult#duplicate(*)                               id:balta-qr-iter-duplicate
+*QueryResult#sameElements(*)                            id:balta-qr-iter-same
+*QueryResult#$plus$plus(*)                              id:balta-qr-iter-plusplus
+*QueryResult#$div$colon(*)                              id:balta-qr-iter-divcolon
+*QueryResult#$colon$bslash(*)                           id:balta-qr-iter-colonbslash
+*QueryResult#aggregate(*)                               id:balta-qr-iter-aggregate
+*QueryResult#sum(*)                                     id:balta-qr-iter-sum
+*QueryResult#product(*)                                 id:balta-qr-iter-product
+*QueryResult#exists(*)                                  id:balta-qr-iter-exists
+*QueryResult#length(*)                                  id:balta-qr-iter-length
+*QueryResult#reversed(*)                                id:balta-qr-iter-reversed
+*QueryResult#hasDefiniteSize(*)                         id:balta-qr-iter-defsize
+*QueryResult#toArray(*)                                 id:balta-qr-iter-toarray
+*QueryResult#toMap(*)                                   id:balta-qr-iter-tomap
+*QueryResult#toTraversable(*)                           id:balta-qr-iter-totraversable
+*QueryResult#toIterator(*)                              id:balta-qr-iter-toiterator
+*QueryResult#toStream(*)                                id:balta-qr-iter-tostream
+*QueryResult#toIterable(*)                              id:balta-qr-iter-toiterable
+*QueryResult#toSeq(*)                                   id:balta-qr-iter-toseq
+*QueryResult#toIndexedSeq(*)                            id:balta-qr-iter-toindexedseq
+*QueryResult#toBuffer(*)                                id:balta-qr-iter-tobuffer
+*QueryResult#toSet(*)                                   id:balta-qr-iter-toset
+*QueryResult#toVector(*)                                id:balta-qr-iter-tovector
+*QueryResult#sliding(*)                                 id:balta-qr-iter-sliding
 
-*QueryResultRowImplicits$ProductTypeConvertor#row(*)        id:balta-valclass-ptc-row
-*QueryResultRowImplicits$ProductTypeConvertor#toProductType(*) id:balta-valclass-ptc-tpt
+*QueryResultRowImplicits$ProductTypeConvertor#row(*)    id:balta-valclass-ptc-row
+*QueryResultRowImplicits$ProductTypeConvertor#toProductType(*)  id:balta-valclass-ptc-tpt
 
-*QueryResultRow#createExtractors(*)                        id:balta-row-extractors-fwd
-*QueryResultRow#fieldNamesFromMetadata(*)                  id:balta-row-fieldnames-fwd
-*QueryResultRow#getChar(*)*                                 id:balta-colname-get-char
-*QueryResultRow#getObject(*)*                               id:balta-colname-get-char
-*QueryResultRow#getAs(Ljava/lang/String;Lscala/Function1;)* id:balta-colname-getas-transformer
+*QueryResultRow#getChar(Ljava/lang/String;)*            id:balta-colname-get-char
+*QueryResultRow#getObject(Ljava/lang/String;)*          id:balta-colname-get-object
+*QueryResultRow#getAs(Ljava/lang/String;Lscala/Function1;)*  id:balta-colname-getas-transformer
 
-*QueryResultRowImplicits$ProductTypeConvertor#<init>(*)    id:balta-qrri-ctor
-*QueryResultRowImplicits$ProductTypeConvertor#getConstructor(*)      id:balta-valclass-ptc-gc
-*QueryResultRowImplicits$ProductTypeConvertor#getConstructorMirror(*) id:balta-valclass-ptc-gcm
-*QueryResultRowImplicits$ProductTypeConvertor#readParamsFromRow(*)    id:balta-valclass-ptc-rpr
-*QueryResultRowImplicits$ProductTypeConvertor#getParamValue(*)        id:balta-valclass-ptc-gpv
+*QueryResultRowImplicits$ProductTypeConvertor#<init>(*)  id:balta-qrri-ctor
+*QueryResultRowImplicits$ProductTypeConvertor#getConstructor(*)  id:balta-valclass-ptc-gc
+*QueryResultRowImplicits$ProductTypeConvertor#getConstructorMirror(*)  id:balta-valclass-ptc-gcm
+*QueryResultRowImplicits$ProductTypeConvertor#readParamsFromRow(*)  id:balta-valclass-ptc-rpr
+*QueryResultRowImplicits$ProductTypeConvertor#getParamValue(*)  id:balta-valclass-ptc-gpv
 
-*DBTable#fieldValue(*)                                   id:balta-dbtable-fieldvalue
-*DBTable#count(Lza/co/absa/db/balta/classes/inner/Params$NamedParams;Ljava/sql/Connection;)* id:balta-dbtable-count-named
+*DBTable#fieldValue(*)                                  id:balta-dbtable-fieldvalue
+*DBTable#count(Lza/co/absa/db/balta/classes/inner/Params$NamedParams;Ljava/sql/Connection;)*  id:balta-dbtable-count-named
 *DBTable#count(Ljava/lang/String;Ljava/sql/Connection;)*  id:balta-dbtable-count-str
 

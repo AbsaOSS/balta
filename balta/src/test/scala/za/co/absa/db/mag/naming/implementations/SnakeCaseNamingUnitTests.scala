@@ -60,7 +60,7 @@ class SnakeCaseNamingUnitTests extends AnyWordSpec with Matchers {
     "strip trailing $ from companion object class names" in {
       val nm = new SnakeCaseNaming(LowerCase)
       val result = nm.fromClassNamePerConvention(SnakeCaseNaming)
-      result should include("snake")
+      result should be("snake_case_naming")
     }
   }
 }

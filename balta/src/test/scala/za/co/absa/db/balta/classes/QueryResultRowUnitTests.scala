@@ -24,11 +24,9 @@ import za.co.absa.db.mag.naming.implementations.AsIsNaming
 
 import java.sql.{ResultSetMetaData, Types}
 
-/** Case classes for toProductType tests — must be top-level for Scala reflection. */
 case class SimpleRecord(name: String, age: Int)
 case class OptionalRecord(label: String, value: Option[Int])
 
-/** Case class with auxiliary constructor — tests the multi-constructor branch in getConstructor. */
 case class MultiCtorRecord(x: Int, y: String) {
   def this(x: Int) = this(x, "default")
 }

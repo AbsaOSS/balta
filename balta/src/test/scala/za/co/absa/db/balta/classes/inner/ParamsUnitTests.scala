@@ -49,7 +49,7 @@ class ParamsUnitTests extends AnyFunSuiteLike {
   }
 
   test("NamedParams instance addNull appends NULL parameter") {
-    val params = Params.add("id", 42).addNull("missing")
+    val params = Params.add("id", 42).add("missing", QueryParamType.NULL)
     assert(params.size == 2)
     assert(params("missing").sqlEntry == "NULL")
     assert(params("missing").equalityOperator == "IS")
@@ -95,7 +95,7 @@ class ParamsUnitTests extends AnyFunSuiteLike {
   }
 
   test("OrderedParams instance addNull appends NULL parameter") {
-    val params = Params.add(1).addNull[QueryParamType.NULL.type]()
+    val params = Params.add(1).add(QueryParamType.NULL)
     assert(params.size == 2)
     assert(params.values.last.sqlEntry == "NULL")
     assert(params.values.last.equalityOperator == "IS")
