@@ -38,4 +38,6 @@ lazy val balta = (project in file("balta"))
     ),
     crossScalaVersions := supportedScalaVersions,
     libraryDependencies ++= libDependencies,
+    jmfReportFile   := Some(target.value / "jmf-report.json"),
+    jmfReportFormat := "json",
   )
