@@ -16,13 +16,16 @@
 
 package za.co.absa.db.balta.classes
 
+import java.sql.{ResultSetMetaData, Types}
+import java.time.{OffsetDateTime, OffsetTime}
+
 import org.scalatest.funsuite.AnyFunSuiteLike
+
+import za.co.absa.db.balta.MockResultSets
 import za.co.absa.db.balta.classes.QueryResultRow.FieldNames
 import za.co.absa.db.balta.implicits.QueryResultRowImplicits.ProductTypeConvertor
 import za.co.absa.db.mag.naming.LettersCase.AsIs
 import za.co.absa.db.mag.naming.implementations.AsIsNaming
-
-import java.sql.{ResultSetMetaData, Types}
 
 case class SimpleRecord(name: String, age: Int)
 case class OptionalRecord(label: String, value: Option[Int])
@@ -135,27 +138,37 @@ class QueryResultRowUnitTests extends AnyFunSuiteLike {
   }
 
   test("createExtractors dispatches timestamptz to OffsetDateTime extractor") {
-    val metaData = new StubMetaData(
-      List(("ts", Types.TIMESTAMP, "timestamptz"))
-    )
+    val expected = OffsetDateTime.parse("2024-01-15T10:30:00+02:00")
+    val metaData = new StubMetaData(List(("ts", Types.TIMESTAMP, "timestamptz")))
+    val rs = new MockResultSets.MockResultSet(1) {
+      override def getObject[T](columnIndex: Int, `type`: Class[T]): T = expected.asInstanceOf[T]
+    }
     val extractors = QueryResultRow.createExtractors(metaData)
     assert(extractors.size == 1)
+    assert(extractors.head(rs).contains(expected))
   }
 
   test("createExtractors dispatches timetz to OffsetTime extractor") {
-    val metaData = new StubMetaData(
-      List(("t", Types.TIME, "timetz"))
-    )
+    val expected = OffsetTime.parse("10:30:00+02:00")
+    val metaData = new StubMetaData(List(("t", Types.TIME, "timetz")))
+    val rs = new MockResultSets.MockResultSet(1) {
+      override def getObject[T](columnIndex: Int, `type`: Class[T]): T = expected.asInstanceOf[T]
+    }
     val extractors = QueryResultRow.createExtractors(metaData)
     assert(extractors.size == 1)
+    assert(extractors.head(rs).contains(expected))
   }
 
   test("createExtractors dispatches ARRAY type") {
-    val metaData = new StubMetaData(
-      List(("arr", Types.ARRAY, "_int4"))
-    )
+    val arr: Array[Object] = Array(java.lang.Integer.valueOf(1))
+    val sqlArr = new StubSqlArray(arr)
+    val metaData = new StubMetaData(List(("arr", Types.ARRAY, "_int4")))
+    val rs = new MockResultSets.MockResultSet(1) {
+      override def getArray(columnIndex: Int): java.sql.Array = sqlArr
+    }
     val extractors = QueryResultRow.createExtractors(metaData)
     assert(extractors.size == 1)
+    assert(extractors.head(rs).contains(sqlArr))
   }
 
   test("getArray returns Vector from sql.Array column") {
