@@ -1,7 +1,7 @@
 # jacoco-method-filter — Rules Template (Scala / sbt)
 # [jmf:2.1.0]
 #
-# Syntax reference, pitfalls, examples, and workflows: docs/rules-reference.md
+# Syntax reference, pitfalls, examples, and workflows: https://github.com/MoranaApps/jacoco-method-filter/blob/main/docs/rules-reference.md
 #
 # ─────────────────────────────────────────────────────────────────────────────
 # HOW TO USE

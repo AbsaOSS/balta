@@ -64,6 +64,28 @@ class QueryResultRowUnitTests extends AnyFunSuiteLike {
     assert(row.columnNumber("age") == 2)
   }
 
+  test("apply(Int) returns correct value by 1-based column index") {
+    val row = mkRow()
+    assert(row(1).contains("hello"))
+    assert(row(2).contains(java.lang.Integer.valueOf(42)))
+  }
+
+  test("apply(Int) returns None for null column") {
+    val row = mkRow()
+    assert(row(3).isEmpty)
+  }
+
+  test("apply(String) returns correct value by column label") {
+    val row = mkRow()
+    assert(row("name").contains("hello"))
+    assert(row("age").contains(java.lang.Integer.valueOf(42)))
+  }
+
+  test("apply(String) returns None for null column") {
+    val row = mkRow()
+    assert(row("nullable").isEmpty)
+  }
+
   test("columnNumber is case-insensitive") {
     val row = mkRow()
     assert(row.columnNumber("NAME") == 1)

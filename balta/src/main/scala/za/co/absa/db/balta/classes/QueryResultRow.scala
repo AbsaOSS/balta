@@ -48,7 +48,7 @@ class QueryResultRow private[classes](val rowNumber: Int,
    * @param column  - the number of the column, 1 based
    * @return        - the value stored in the column, type `Any` is for warningless comparison with any type
    */
-  def apply(column: Int): Option[Any] = getObject(column - 1)
+  def apply(column: Int): Option[Any] = getObject(column)
   /**
    * Extracts a value from the row by column name.
    * @param columnLabel - the name of the column
