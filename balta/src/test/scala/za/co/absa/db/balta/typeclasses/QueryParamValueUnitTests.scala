@@ -17,7 +17,7 @@
 package za.co.absa.db.balta.typeclasses
 
 import org.scalatest.funsuite.AnyFunSuiteLike
-import za.co.absa.db.balta.testing.RecordingPreparedStatement
+import za.co.absa.db.balta.testing.classes.RecordingPreparedStatement
 import za.co.absa.db.balta.typeclasses.QueryParamValue._
 
 class QueryParamValueUnitTests extends AnyFunSuiteLike {

@@ -20,7 +20,7 @@ import java.time.{Instant, LocalDate, LocalTime, OffsetDateTime, ZoneOffset}
 import java.util.UUID
 
 import org.scalatest.funsuite.AnyFunSuiteLike
-import za.co.absa.db.balta.testing.RecordingPreparedStatement
+import za.co.absa.db.balta.testing.classes.RecordingPreparedStatement
 
 class QueryParamTypeUnitTests extends AnyFunSuiteLike {
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package za.co.absa.db.balta.testing
+package za.co.absa.db.balta.testing.classes
 
 import java.io.{InputStream, Reader}
 import java.net.URL
