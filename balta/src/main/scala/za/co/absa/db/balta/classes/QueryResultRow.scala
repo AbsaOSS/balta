@@ -45,10 +45,12 @@ class QueryResultRow private[classes](val rowNumber: Int,
 
   /**
    * Extracts a value from the row by column number.
-   * @param column  - the number of the column, 1 based
+   * @param column  - the 1-based column number (JDBC convention); note: prior to this fix the parameter was
+   *                  incorrectly treated as 0-based (direct vector index), causing column 1 to silently return
+   *                  the value of the second column
    * @return        - the value stored in the column, type `Any` is for warningless comparison with any type
    */
-  def apply(column: Int): Option[Any] = getObject(column - 1)
+  def apply(column: Int): Option[Any] = getObject(column)
   /**
    * Extracts a value from the row by column name.
    * @param columnLabel - the name of the column
