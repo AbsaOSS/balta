@@ -17,9 +17,10 @@
 name: Check PR Release Notes
 
 on:
-  pull_request:
-    types: [opened, synchronize, reopened, edited, labeled, unlabeled]
-    branches: [ master ]
+  # pull_request:
+  #   types: [opened, synchronize, reopened, edited, labeled, unlabeled]
+  #   branches: [ master ]
+  workflow_dispatch:
 
 env:
   SKIP_LABEL: 'no RN'

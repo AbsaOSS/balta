@@ -41,3 +41,39 @@ lazy val balta = (project in file("balta"))
     jmfReportFile   := Some(target.value / "jmf-report.json"),
     jmfReportFormat := "json",
   )
+
+lazy val calculator = (project in file("calculator"))
+  .enablePlugins(JacocoFilterPlugin)
+  .settings(
+    name := "balta-calculator",
+    scalacOptions ++= Seq(
+      "-deprecation",
+      "-feature",
+    ),
+    crossScalaVersions := supportedScalaVersions,
+    libraryDependencies += "org.scalatest" %% "scalatest" % Versions.scalatest % Test,
+  )
+
+lazy val validator = (project in file("validator"))
+  .enablePlugins(JacocoFilterPlugin)
+  .settings(
+    name := "balta-validator",
+    scalacOptions ++= Seq(
+      "-deprecation",
+      "-feature",
+    ),
+    crossScalaVersions := supportedScalaVersions,
+    libraryDependencies += "org.scalatest" %% "scalatest" % Versions.scalatest % Test,
+  )
+
+lazy val formatter = (project in file("formatter"))
+  .enablePlugins(JacocoFilterPlugin)
+  .settings(
+    name := "balta-formatter",
+    scalacOptions ++= Seq(
+      "-deprecation",
+      "-feature",
+    ),
+    crossScalaVersions := supportedScalaVersions,
+    libraryDependencies += "org.scalatest" %% "scalatest" % Versions.scalatest % Test,
+  )

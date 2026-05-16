@@ -17,10 +17,11 @@
 name: Build
 
 on:
-  pull_request:
-    branches:
-      - '**'
-    types: [ opened, synchronize, reopened ]
+  # pull_request:
+  #   branches:
+  #     - '**'
+  #   types: [ opened, synchronize, reopened ]
+  workflow_dispatch: 
 
 jobs:
   test:
