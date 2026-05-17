@@ -77,6 +77,11 @@ jobs:
         with:
           java-version: "adopt@1.8"
 
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.14"
+
       - name: Setup database
         run: |
           psql postgresql://postgres:postgres@localhost:5432/mag_db -f balta/src/test/resources/db/postgres/02_users.ddl
