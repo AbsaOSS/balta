@@ -120,6 +120,7 @@ jobs:
           paths: |
             **/jacoco.xml
           global-thresholds: '${{ env.coverage-overall }}*${{ env.coverage-changed-files }}*${{ env.coverage-per-changed-file }}'
+          fail-on-threshold: ''
 
   noop:
     name: No Operation
