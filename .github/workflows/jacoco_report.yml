@@ -93,19 +93,28 @@ jobs:
         id: jacocorun
         run: sbt jacoco
 
+      # - name: Check coverage thresholds and add reports in PR comments
+      #   id: jacoco
+      #   uses: MoranaApps/jacoco-report@master
+      #   with:
+      #     token: '${{ secrets.GITHUB_TOKEN }}'
+      #     paths: |
+      #       balta/target/**/jacoco-report/jacoco.xml
+      #     sensitivity: "detail"
+      #     comment-mode: 'single'
+      #     min-coverage-overall: ${{ env.coverage-overall }}
+      #     min-coverage-changed-files: ${{ env.coverage-changed-files }}
+      #     min-coverage-per-changed-file: ${{ env.coverage-per-changed-file }}
+      #     skip-unchanged: false
+
       - name: Check coverage thresholds and add reports in PR comments
         id: jacoco
         uses: MoranaApps/jacoco-report@master
         with:
           token: '${{ secrets.GITHUB_TOKEN }}'
           paths: |
-            balta/target/**/jacoco-report/jacoco.xml
-          sensitivity: "detail"
-          comment-mode: 'single'
-          min-coverage-overall: ${{ env.coverage-overall }}
-          min-coverage-changed-files: ${{ env.coverage-changed-files }}
-          min-coverage-per-changed-file: ${{ env.coverage-per-changed-file }}
-          skip-unchanged: false
+            **/jacoco.xml
+          global-thresholds: '${{ env.coverage-overall }}*${{ env.coverage-changed-files }}*${{ env.coverage-per-changed-file }}'
 
   noop:
     name: No Operation
