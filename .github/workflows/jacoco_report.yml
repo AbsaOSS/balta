@@ -1,0 +1,131 @@
+name: CI check JaCoCo code-coverage
+
+on:
+  pull_request:
+    branches: [ master ]
+
+env:
+  scalaLong: 2.12.18
+  scalaShort: "2.12"
+  coverage-overall: 80.0
+  coverage-changed-files: 80.0
+  coverage-per-changed-file: 0.0
+
+jobs:
+  detect:
+    name: Scala Changes Detection
+    runs-on: ubuntu-latest
+    outputs:
+      scala_changed: ${{ steps.changes.outputs.scala_changed }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+
+      - name: Check if Scala files changed (excluding project/)
+        id: changes
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            CHANGED_FILES=$(gh api \
+              --paginate \
+              "repos/${{ github.repository }}/pulls/${{ github.event.pull_request.number }}/files" \
+              --jq '.[].filename
+                | select(endswith(".scala"))
+                | select(startswith("project/") | not)')
+          else
+            CHANGED_FILES=$(git diff --name-only "${{ github.sha }}~1" "${{ github.sha }}" -- '**/*.scala' | grep -v '^project/' || true)
+          fi
+
+          if [[ -n "${CHANGED_FILES}" ]]; then
+            echo "scala_changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "scala_changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  build-test-and-measure:
+    name: Build, Test and Measure
+    needs: detect
+    if: needs.detect.outputs.scala_changed == 'true'
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: mag_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+      - name: Setup Scala
+        uses: olafurpg/setup-scala@32ffa16635ff8f19cc21ea253a987f0fdf29844c
+        with:
+          java-version: "adopt@1.8"
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.14"
+
+      - name: Setup database
+        run: |
+          psql postgresql://postgres:postgres@localhost:5432/mag_db -f balta/src/test/resources/db/postgres/02_users.ddl
+          psql postgresql://postgres:postgres@localhost:5432/mag_db -f balta/src/test/resources/db/postgres/03_schema_testing.ddl
+          psql postgresql://postgres:postgres@localhost:5432/mag_db -f balta/src/test/resources/db/postgres/04_testing.base_types.ddl
+          psql postgresql://postgres:postgres@localhost:5432/mag_db -f balta/src/test/resources/db/postgres/05_testing._base_types_data.sql
+          psql postgresql://postgres:postgres@localhost:5432/mag_db -f balta/src/test/resources/db/postgres/06_testing.pg_types.ddl
+          psql postgresql://postgres:postgres@localhost:5432/mag_db -f balta/src/test/resources/db/postgres/07_testing_pg_types_data.sql
+          psql postgresql://postgres:postgres@localhost:5432/mag_db -f balta/src/test/resources/db/postgres/08_testing.simple_function.sql
+          psql postgresql://postgres:postgres@localhost:5432/mag_db -f balta/src/test/resources/db/postgres/09_testing.table_lifecycle.ddl
+
+      - name: Build and run tests
+        continue-on-error: true
+        id: jacocorun
+        run: sbt jacoco
+
+      # - name: Check coverage thresholds and add reports in PR comments
+      #   id: jacoco
+      #   uses: MoranaApps/jacoco-report@master
+      #   with:
+      #     token: '${{ secrets.GITHUB_TOKEN }}'
+      #     paths: |
+      #       balta/target/**/jacoco-report/jacoco.xml
+      #     sensitivity: "detail"
+      #     comment-mode: 'single'
+      #     min-coverage-overall: ${{ env.coverage-overall }}
+      #     min-coverage-changed-files: ${{ env.coverage-changed-files }}
+      #     min-coverage-per-changed-file: ${{ env.coverage-per-changed-file }}
+      #     skip-unchanged: false
+
+      - name: Check coverage thresholds and add reports in PR comments
+        id: jacoco
+        uses: MoranaApps/jacoco-report@master
+        with:
+          token: '${{ secrets.GITHUB_TOKEN }}'
+          paths: |
+            **/jacoco.xml
+          global-thresholds: '${{ env.coverage-overall }}*${{ env.coverage-changed-files }}*${{ env.coverage-per-changed-file }}'
+          fail-on-threshold: ''
+
+  noop:
+    name: No Operation
+    needs: detect
+    if: needs.detect.outputs.scala_changed != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "No changes in the *.scala files (excluding project/) — passing."
