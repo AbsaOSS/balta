@@ -78,7 +78,7 @@ jobs:
           java-version: "adopt@1.8"
 
       - name: Setup Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
         with:
           python-version: "3.14"
 
@@ -100,7 +100,7 @@ jobs:
 
       - name: Check coverage thresholds and add reports in PR comments
         id: jacoco
-        uses: MoranaApps/jacoco-report@master
+        uses: MoranaApps/jacoco-report@52a5f9c278aaf61700c9975e61a0853875c9d156
         with:
           token: '${{ secrets.GITHUB_TOKEN }}'
           paths: |
