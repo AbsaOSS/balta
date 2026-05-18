@@ -156,6 +156,7 @@ abstract class DBTestSuite(val persistDataOverride: Option[Boolean] = None) exte
     Params.addNull()
   }
 
+
   // private functions
   private def readConnectionInfoFromConfig: ConnectionInfo = {
     DBTestSuite.connectionInfoFromResourceConfig("/database.properties")
