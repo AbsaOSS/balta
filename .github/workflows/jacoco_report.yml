@@ -9,7 +9,7 @@ env:
   scalaShort: "2.12"
   coverage-overall: 80.0
   coverage-changed-files: 80.0
-  coverage-per-changed-file: 0.0
+  coverage-per-changed-file: 60.0
 
 jobs:
   detect:
@@ -54,6 +54,10 @@ jobs:
     needs: detect
     if: needs.detect.outputs.scala_changed == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: read
 
     services:
       postgres:
@@ -105,12 +109,10 @@ jobs:
           token: '${{ secrets.GITHUB_TOKEN }}'
           paths: |
             balta/target/**/jacoco-report/jacoco.xml
-          sensitivity: "detail"
-          comment-mode: 'single'
-          min-coverage-overall: ${{ env.coverage-overall }}
-          min-coverage-changed-files: ${{ env.coverage-changed-files }}
-          min-coverage-per-changed-file: ${{ env.coverage-per-changed-file }}
-          skip-unchanged: false
+          global-thresholds: '${{ env.coverage-overall }}*${{ env.coverage-changed-files }}'
+          report-thresholds-default: '${{ env.coverage-overall }}*${{ env.coverage-changed-files }}*${{ env.coverage-per-changed-file }}'
+          comment-level: 'full'
+          skip-unchanged: true
 
   noop:
     name: No Operation
