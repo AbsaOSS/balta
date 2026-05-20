@@ -38,6 +38,7 @@ import java.util.Properties
  */
 abstract class DBTestSuite(val persistDataOverride: Option[Boolean] = None) extends AnyFunSuite {
 
+
   def this(persistDataOverride: Boolean) {
     this(Some(persistDataOverride));
   }

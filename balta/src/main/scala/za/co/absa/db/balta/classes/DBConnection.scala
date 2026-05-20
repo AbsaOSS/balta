@@ -30,6 +30,7 @@ object DBConnection {
     new DBConnection(connection)
   }
 
+
   def apply(dbUrl: String, username: String, password: String, persistData: Boolean = false): DBConnection =
     apply(ConnectionInfo(dbUrl, username, password, persistData)
 )
