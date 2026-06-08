@@ -9,7 +9,7 @@ env:
   scalaShort: "2.12"
   coverage-overall: 80.0
   coverage-changed-files: 80.0
-  coverage-per-changed-file: 0.0
+  coverage-per-changed-file: 60.0
 
 jobs:
   detect:
@@ -54,6 +54,10 @@ jobs:
     needs: detect
     if: needs.detect.outputs.scala_changed == 'true'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      pull-requests: write
 
     services:
       postgres:
@@ -77,6 +81,11 @@ jobs:
         with:
           java-version: "adopt@1.8"
 
+      - name: Setup Python
+        uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405
+        with:
+          python-version: "3.14"
+
       - name: Setup database
         run: |
           psql postgresql://postgres:postgres@localhost:5432/mag_db -f balta/src/test/resources/db/postgres/02_users.ddl
@@ -95,17 +104,15 @@ jobs:
 
       - name: Check coverage thresholds and add reports in PR comments
         id: jacoco
-        uses: MoranaApps/jacoco-report@54bfe284d1119dc917dddba80517c54c5bcf3627
+        uses: MoranaApps/jacoco-report@f9dc5ba989ff2b987b4c2db99217b982c466cca8   # v3.0.1
         with:
           token: '${{ secrets.GITHUB_TOKEN }}'
           paths: |
             balta/target/**/jacoco-report/jacoco.xml
-          sensitivity: "detail"
-          comment-mode: 'single'
-          min-coverage-overall: ${{ env.coverage-overall }}
-          min-coverage-changed-files: ${{ env.coverage-changed-files }}
-          min-coverage-per-changed-file: ${{ env.coverage-per-changed-file }}
-          skip-unchanged: false
+          global-thresholds: '${{ env.coverage-overall }}*${{ env.coverage-changed-files }}'
+          report-thresholds-default: '${{ env.coverage-overall }}*${{ env.coverage-changed-files }}*${{ env.coverage-per-changed-file }}'
+          comment-level: 'full'
+          skip-unchanged: true
 
   noop:
     name: No Operation
