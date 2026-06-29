@@ -104,7 +104,7 @@ jobs:
 
       - name: Check coverage thresholds and add reports in PR comments
         id: jacoco
-        uses: MoranaApps/jacoco-report@69351d88d18f7697c416e1bc2020ed05606d8120   # v3.0.2
+        uses: MoranaApps/jacoco-report@3be109b40946547c5925e63d41fef1099c9e562b   # v3.1.1
         with:
           token: '${{ secrets.GITHUB_TOKEN }}'
           paths: |
