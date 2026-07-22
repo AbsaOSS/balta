@@ -16,8 +16,7 @@
 
 package za.co.absa.db.balta
 
-import org.scalactic.source
-import org.scalatest.Tag
+import org.scalatest.BeforeAndAfterEach
 import org.scalatest.funsuite.AnyFunSuite
 import za.co.absa.db.balta.classes.{DBConnection, DBFunction, DBTable, QueryResult}
 import za.co.absa.db.balta.classes.DBFunction.DBFunctionWithPositionedParamsOnly
@@ -36,7 +35,22 @@ import java.util.Properties
  * * easy access to DB tables and functions
  * * the now() function that returns the current transaction time in the DB
  */
-abstract class DBTestSuite(val persistDataOverride: Option[Boolean] = None) extends AnyFunSuite {
+abstract class DBTestSuite(val persistDataOverride: Option[Boolean] = None)
+  extends AnyFunSuite
+  with BeforeAndAfterEach {
+
+  /**
+   * This to ensure that the tests are idempotent by rolling back the transaction after each test, unless persistData is
+   * explicitly set to true in the connection info (for rare cases and debugging purposes).
+   */
+  override def afterEach(): Unit = {
+    if (connectionInfo.persistData) {
+      dbConnection.connection.commit()
+    } else {
+      dbConnection.connection.rollback()
+    }
+    super.afterEach()
+  }
 
   def this(persistDataOverride: Boolean) {
     this(Some(persistDataOverride));
@@ -53,31 +67,6 @@ abstract class DBTestSuite(val persistDataOverride: Option[Boolean] = None) exte
     val connectionInfoFromConfig = readConnectionInfoFromConfig
     persistDataOverride.map(overrideValue => connectionInfoFromConfig.copy(persistData = overrideValue))
       .getOrElse(connectionInfoFromConfig)
-  }
-
-  /**
-   * This is an enhanced test function that automatically rolls back the transaction after the test is finished
-   *
-   * @param testName – the name of the test
-   * @param testTags – the optional list of tags for this test
-   * @param testFun – the test function
-   */
-  override protected def test(testName: String, testTags: Tag*)
-                      (testFun: => Any /* Assertion */)
-                      (implicit pos: source.Position): Unit = {
-    val dbTestFun = {
-      try {
-        testFun
-      }
-      finally {
-        if (connectionInfo.persistData) {
-          dbConnection.connection.commit()
-        } else {
-          dbConnection.connection.rollback()
-        }
-      }
-    }
-    super.test(testName, testTags: _*)(dbTestFun)
   }
 
   /**
@@ -175,4 +164,3 @@ object DBTestSuite {
     )
   }
 }
-

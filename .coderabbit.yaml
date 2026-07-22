@@ -1,0 +1,45 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+
+language: "en-US"
+
+tone_instructions: >-
+  Be direct and concise. Skip praise and filler. Focus comments on
+  correctness, security, and maintainability issues.
+
+early_access: false
+enable_free_tier: true
+
+reviews:
+  profile: "chill"          # "chill" or "assertive" — start lenient, tighten later
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: true
+
+  auto_review:
+    enabled: true
+    drafts: false
+    labels:
+      - "!work in progress"   # skip PRs labeled "Work in progress"
+
+  path_filters:
+    - "!**/target/**"          # sbt build output (root + project/)
+    - "!**/*.class"
+    - "!**/*.jar"
+    - "!**/generated/**"
+    - "!**/*.lock"
+
+  tools:
+    shellcheck:
+      enabled: false
+    markdownlint:
+      enabled: true
+    github-checks:
+      enabled: true
+      timeout_ms: 90000
+    languagetool:
+      enabled: true
+
+chat:
+  auto_reply: true
