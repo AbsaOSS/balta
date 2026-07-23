@@ -29,18 +29,18 @@ jobs:
   release-draft:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
         with:
           fetch-depth: 0
           persist-credentials: false
 
-      - uses: actions/setup-python@83679a892e2d95755f2dac6acb0bfd1e9ac5d548
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
         with:
           python-version: '3.13'
 
       - name: Check Format of Received Tag
         id: check-version-tag
-        uses: AbsaOSS/version-tag-check@36496be76eab24e1f14d45d3b8292311a2aebaaa
+        uses: AbsaOSS/version-tag-check@4145e48bf3f77a5afff2ec9afdd8afb6b53bce34
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -50,7 +50,7 @@ jobs:
       - name: Check Format of Received From Tag
         if: ${{ github.event.inputs.from-tag-name }}
         id: check-version-from-tag
-        uses: AbsaOSS/version-tag-check@36496be76eab24e1f14d45d3b8292311a2aebaaa
+        uses: AbsaOSS/version-tag-check@4145e48bf3f77a5afff2ec9afdd8afb6b53bce34
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -89,7 +89,7 @@ jobs:
           hierarchy: true
 
       - name: Create and Push Tag (standalone)
-        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         with:
           script: |
             const tag = core.getInput('tag-name')
@@ -123,7 +123,7 @@ jobs:
           tag-name: ${{ github.event.inputs.tag-name }}
 
       - name: Create draft release
-        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b
+        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:

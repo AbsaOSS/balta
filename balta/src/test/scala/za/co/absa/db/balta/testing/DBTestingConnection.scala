@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package za.co.absa.db.balta.testing.classes
+package za.co.absa.db.balta
 
 import za.co.absa.db.balta.classes.{DBConnection, QueryResult}
 import za.co.absa.db.balta.classes.inner.ConnectionInfo
@@ -31,7 +31,7 @@ trait DBTestingConnection {
     val preparedStatement = connection.connection.prepareStatement("SELECT now() AS now")
     val prep = preparedStatement.executeQuery()
     val result = new QueryResult(prep).next().getOffsetDateTime("now").get
-    prep.close()
+    preparedStatement.close()
     result
   }
 

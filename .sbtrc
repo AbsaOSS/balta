@@ -27,3 +27,8 @@ alias testIT=; testOnly *IntegrationTests
 
 # Run all tests
 alias testAll=; testOnly *
+
+# Jacoco Aliases
+alias jacoco=; jacocoOn; +clean; +test; jacocoReportAll; jacocoOff
+alias jacocoOff=; set every jacocoPluginEnabled := false
+alias jacocoOn=; set every jacocoPluginEnabled := true

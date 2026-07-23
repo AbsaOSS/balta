@@ -40,3 +40,4 @@ object DBConnection {
   implicit def dbConnectionToJdbcConnection(in: DBConnection): Connection = in.connection
 
 }
+

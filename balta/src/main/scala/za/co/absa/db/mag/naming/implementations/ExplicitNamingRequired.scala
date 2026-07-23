@@ -49,3 +49,4 @@ object ExplicitNamingRequired {
     implicit val namingConvention: NamingConvention = new ExplicitNamingRequired()
   }
 }
+

@@ -198,3 +198,4 @@ object DBFunction {
                                                          namedParams: NamedParams = NamedParams()
                                                         ) extends DBFunction(functionName, orderedParams, namedParams)
 }
+

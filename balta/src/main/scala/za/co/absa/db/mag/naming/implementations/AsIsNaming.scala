@@ -48,3 +48,4 @@ object AsIsNaming {
     implicit val namingConvention: NamingConvention = new AsIsNaming(AsIs)
   }
 }
+

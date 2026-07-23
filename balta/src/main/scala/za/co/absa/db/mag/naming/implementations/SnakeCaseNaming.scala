@@ -63,3 +63,4 @@ object SnakeCaseNaming {
     implicit val namingConvention: NamingConvention = new SnakeCaseNaming(LowerCase)
   }
 }
+

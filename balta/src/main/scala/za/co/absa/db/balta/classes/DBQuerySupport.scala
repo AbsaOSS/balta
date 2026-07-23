@@ -46,3 +46,4 @@ trait DBQuerySupport {
     }
   }
 }
+

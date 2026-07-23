@@ -31,3 +31,4 @@ case class ConnectionInfo(
                            password: String,
                            persistData: Boolean
                          )
+
