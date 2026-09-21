@@ -17,11 +17,14 @@
 package za.co.absa.db.balta.typeclasses
 
 import QueryParamValue.AssignFunc
+import za.co.absa.db.mag.core.SqlItem
+
 import java.sql.PreparedStatement
 
-trait QueryParamValue {
+trait QueryParamValue extends SqlItem {
+  override def sqlEntry: String = "?"
+
   def assign: Option[AssignFunc]
-  def sqlEntry: String = "?"
   def equalityOperator: String = "="
 }
 

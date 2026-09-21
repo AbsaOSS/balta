@@ -23,7 +23,7 @@ import za.co.absa.db.balta.typeclasses.QueryParamValue
  */
 trait DBQuerySupport {
 
-  protected def runQuery[R](sql: String, queryValues: List[QueryParamValue])
+  protected def runQuery[R](sql: String, queryValues: Vector[QueryParamValue])
                  (verify: QueryResult => R /* Assertion */)
                  (implicit connection: DBConnection): R = {
     val preparedStatement = connection.connection.prepareStatement(sql)

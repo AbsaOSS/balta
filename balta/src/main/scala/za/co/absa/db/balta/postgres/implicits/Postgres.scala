@@ -25,11 +25,11 @@ object Postgres {
     private def simpleJsonStringTransformer(obj: Object): SimpleJsonString = SimpleJsonString(obj.asInstanceOf[PGobject].toString)
 
     def getSimpleJsonString(column: Int): Option[SimpleJsonString] = row.getAs[SimpleJsonString](column: Int, simpleJsonStringTransformer _)
-    def getSimpleJsonString(columnLabel: String): Option[SimpleJsonString] = getSimpleJsonString(row.columnNumber(columnLabel))
+    def getSimpleJsonString(columnName: String): Option[SimpleJsonString] = getSimpleJsonString(row.columnNumber(columnName))
 
     def getSJSArray(column: Int): Option[Vector[SimpleJsonString]] =
       row.getArray(column: Int, item => SimpleJsonString(item.asInstanceOf[String]))
-    def getSJSArray(columnLabel: String): Option[Vector[SimpleJsonString]] = getSJSArray(row.columnNumber(columnLabel))
+    def getSJSArray(columnName: String): Option[Vector[SimpleJsonString]] = getSJSArray(row.columnNumber(columnName))
 
   }
 }
