@@ -69,6 +69,14 @@ class ParamsUnitTests extends AnyFunSuiteLike {
     assert(value.sqlEntry == "?")
   }
 
+  test("NamedParams treats parameter names case-insensitively") {
+    val params = Params.add("Param1", 1).add("PARAM1", 2)
+    assert(params.size == 1)
+    assert(params.keys.contains(List("param1")))
+    assert(params("param1").sqlEntry == "?")
+    assert(params("PARAM1").sqlEntry == "?")
+  }
+
   test("NamedParams apply throws NoSuchElementException for missing key") {
     val params = Params.add("id", 42)
     assertThrows[NoSuchElementException] {

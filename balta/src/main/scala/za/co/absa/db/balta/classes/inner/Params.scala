@@ -16,6 +16,7 @@
 
 package za.co.absa.db.balta.classes.inner
 
+import java.util.Locale
 import scala.collection.immutable.ListMap
 import za.co.absa.db.balta.typeclasses.{QueryParamValue, QueryParamType}
 
@@ -30,13 +31,15 @@ sealed abstract class Params private(items: ListMap[String, QueryParamValue]) {
   def values: List[QueryParamValue] = items.values.toList
 
   def apply(paramName: String): QueryParamValue = {
-    items(paramName)
+    items(Params.normalizeName(paramName))
   }
 
   def size: Int = items.size
 
 }
 object Params {
+  private[inner] def normalizeName(name: String): String = name.toLowerCase(Locale.ROOT)
+
 
   /**
    * This is a factory method for creating a list of named parameters consisting of one parameter identified by its
@@ -101,7 +104,7 @@ object Params {
      */
     def add[T: QueryParamType](paramName: String, value: T): NamedParams = {
       val queryValue = implicitly[QueryParamType[T]].toQueryParamValue(value)
-      new NamedParams(items + (paramName -> queryValue)) // TODO https://github.com/AbsaOSS/balta/issues/1
+      new NamedParams(items + (normalizeName(paramName) -> queryValue))
     }
 
     /**
@@ -155,4 +158,3 @@ object Params {
     override val keys: Option[List[String]] = None
   }
 }
-
