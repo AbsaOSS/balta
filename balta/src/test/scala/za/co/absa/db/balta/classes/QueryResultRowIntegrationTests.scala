@@ -29,10 +29,10 @@ class QueryResultRowIntegrationTests extends AnyFunSuiteLike with DBTestingConne
     (q.toList, q.resultSetMetaData)
   }
 
-  test("fieldNamesFromMetada") {
-    val result = QueryResultRow.fieldNamesFromMetadata(metadata)
+  test("Extracting columnNamesFromMetadata") {
+    val result = QueryResultRow.columnNamesFromMetadata(metadata)
 
-    val expecedResult = Seq(
+    val expectedResult = Seq(
       "long_type",
       "boolean_type",
       "char_type",
@@ -51,7 +51,7 @@ class QueryResultRowIntegrationTests extends AnyFunSuiteLike with DBTestingConne
       .map(x => (x._1, x._2 + 1))
       .toMap
     assert(result.size == 14)
-    assert(result == expecedResult)
+    assert(result == expectedResult)
   }
 
   test("columnCount") {
@@ -192,9 +192,9 @@ class QueryResultRowIntegrationTests extends AnyFunSuiteLike with DBTestingConne
     val expectedInstant = Instant.parse("2021-04-03T10:00:00.00Z")
 
     val resultOfColumn = tableRows.head.getOffsetDateTime(12).get
-    val resultOfColumnLabel = tableRows.head.getOffsetDateTime("timestamptz_type").get
+    val resultOfColumnName = tableRows.head.getOffsetDateTime("timestamptz_type").get
     assert(resultOfColumn.isEqual(expectedOffsetDateTime))
-    assert(resultOfColumnLabel.isEqual(expectedOffsetDateTime))
+    assert(resultOfColumnName.isEqual(expectedOffsetDateTime))
     assert(tableRows.head.getInstant(12).contains(expectedInstant))
     assert(tableRows.head.getInstant("timestamptz_type").contains(expectedInstant))
     //second row
