@@ -145,6 +145,18 @@ class QueryResultRowUnitTests extends AnyFunSuiteLike {
     assert(result == Map("id" -> 1, "name" -> 2))
   }
 
+  test("fieldNamesFromMetadata normalizes column names for case-insensitive lookup") {
+    val metaData = new StubMetaData(
+      List(("ID_FIELD", Types.INTEGER, "int4"), ("Text_Field", Types.VARCHAR, "varchar"))
+    )
+    val result = QueryResultRow.fieldNamesFromMetadata(metaData)
+    assert(result == Map("id_field" -> 1, "text_field" -> 2))
+
+    val row = mkRow(labels = result)
+    assert(row.columnNumber("ID_FIELD") == 1)
+    assert(row.columnNumber("text_FIELD") == 2)
+  }
+
   test("fieldNamesFromMetadata returns empty map for zero columns") {
     val metaData = new StubMetaData(Nil)
     val result = QueryResultRow.fieldNamesFromMetadata(metaData)
