@@ -72,18 +72,19 @@ object QueryResultRowImplicits {
       constructor.paramLists.flatten.map { param =>
         val name = param.name.decodedName.toString
         val paramType = param.typeSignature
-        val columnLabel = namingConvention.stringPerConvention(name)
-        getParamValue(columnLabel, paramType)
+        val columnName = namingConvention.stringPerConvention(name)
+        getParamValue(columnName, paramType)
       }
 
     }
 
-    private def getParamValue[T: TypeTag](columnLabel: String, expectedType: Type): Any = {
-      val value = row(columnLabel)
+    private def getParamValue[T: TypeTag](columnName: String, expectedType: Type): Any = {
+      //TODO TypeTag is not used, consider removing it https://github.com/AbsaOSS/balta/issues/64
+      val value = row(columnName)
       if (isOptionType(expectedType)) {
         value
       } else {
-        value.getOrThrow(new NullPointerException(s"Column '$columnLabel' is null"))
+        value.getOrThrow(new NullPointerException(s"Column '$columnName' is null"))
       }
     }
   }
