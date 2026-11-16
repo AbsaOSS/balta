@@ -22,6 +22,7 @@ import za.co.absa.db.balta.implicits.MapImplicits.MapEnhancements
 import java.sql
 import java.sql.{Date, ResultSet, ResultSetMetaData, Time, Types}
 import java.time.{Instant, LocalDateTime, OffsetDateTime, OffsetTime}
+import java.util.Locale
 import java.util.UUID
 
 /**
@@ -39,7 +40,7 @@ class QueryResultRow private[classes](val rowNumber: Int,
 
   def columnCount: Int = fields.length
   def columnNumber(columnLabel: String): Int = {
-    val actualLabel = columnLabel.toLowerCase
+    val actualLabel = QueryResultRow.normalizeName(columnLabel)
     columnLabels.getOrThrow(actualLabel, new NoSuchElementException(s"Column '$actualLabel' not found"))
   }
 
@@ -148,13 +149,15 @@ object QueryResultRow {
   type Extractor = ResultSet => Option[Object]
   type Extractors = Vector[Extractor]
 
+  private[classes] def normalizeName(name: String): String = name.toLowerCase(Locale.ROOT)
+
   def apply(resultSet: ResultSet)(implicit fieldNames: FieldNames, extractors: Extractors): QueryResultRow = {
     val fields = extractors.map(_(resultSet))
     new QueryResultRow(resultSet.getRow, fields, fieldNames)
   }
 
   def fieldNamesFromMetadata(metaData: ResultSetMetaData): FieldNames = {
-    Range.inclusive(1, metaData.getColumnCount).map(i => metaData.getColumnName(i) -> i).toMap
+    Range.inclusive(1, metaData.getColumnCount).map(i => normalizeName(metaData.getColumnName(i)) -> i).toMap
   }
 
   def createExtractors(metaData: ResultSetMetaData): Extractors = {
@@ -186,4 +189,3 @@ object QueryResultRow {
   }
 
 }
-
